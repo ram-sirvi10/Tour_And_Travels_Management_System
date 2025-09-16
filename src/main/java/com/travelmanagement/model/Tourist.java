@@ -1,5 +1,5 @@
 package com.travelmanagement.model;
 
-public class Company {
+public class Tourist {
 
 }
