@@ -9,15 +9,15 @@ CREATE TABLE users (
     user_password VARCHAR(255) NOT NULL,
     user_role VARCHAR(10) DEFAULT 'USER',
     is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  -- ,
---  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_delete BOOLEAN DEFAULT FALSE,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- COMPANIES
-CREATE TABLE companies (
-    company_id INT AUTO_INCREMENT PRIMARY KEY,
-    company_name VARCHAR(150) NOT NULL,
+CREATE TABLE travelAgency (
+    agency_id INT AUTO_INCREMENT PRIMARY KEY,
+    agency_name VARCHAR(150) NOT NULL,
     owner_name VARCHAR(100),
     email VARCHAR(100) UNIQUE NOT NULL,
     phone VARCHAR(20),
@@ -27,27 +27,28 @@ CREATE TABLE companies (
     pincode VARCHAR(10),
     registration_number VARCHAR(50),      
     password VARCHAR(255) NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'
-    ,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  -- ,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
+     is_active BOOLEAN DEFAULT TRUE,
+     is_delete BOOLEAN DEFAULT FALSE,
+     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- TRAVEL PACKAGES
 CREATE TABLE travel_packages (
     package_id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
+    agency_id int not null,
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
     location VARCHAR(255),
     duration INT ,
     post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     image_url VARCHAR(500),
-    is_active BOOLEAN DEFAULT TRUE
-   --  ,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_active BOOLEAN DEFAULT TRUE,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (agency_id) REFERENCES travel_packages(agency_id) ON DELETE CASCADE
 );
 
 -- BOOKINGS
@@ -56,7 +57,7 @@ CREATE TABLE bookings (
     user_id INT NOT NULL,
     package_id INT NOT NULL,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Confirmed', 'Pending', 'Cancelled') DEFAULT 'Pending',
+    status ENUM('CONFIRMED', 'PENDING', 'CANCELLED') DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (package_id) REFERENCES travel_packages(package_id) ON DELETE CASCADE
 );
@@ -66,7 +67,7 @@ CREATE TABLE payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_id INT NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Successful', 'Failed') DEFAULT 'Failed',
+    status ENUM('SUCCESSFUL', 'FAILED') DEFAULT 'FAILED',
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
