@@ -1,5 +1,7 @@
 package com.travelmanagement.service;
 
-public interface IAuthService {
 
+
+public interface IAuthService {
+  
 }

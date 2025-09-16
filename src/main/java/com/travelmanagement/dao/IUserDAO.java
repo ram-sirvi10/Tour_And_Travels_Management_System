@@ -1,5 +1,20 @@
 package com.travelmanagement.dao;
 
-public interface IUserDAO {
+import com.travelmanagement.model.User;
+import java.util.List;
 
+public interface IUserDAO {
+	int createUser(User user) throws Exception;
+
+	User getUserById(int id) throws Exception;
+
+	User getUserByEmail(String email) throws Exception;
+
+	List<User> getAllUsers() throws Exception;
+
+	boolean updateUser(User user) throws Exception;
+
+	boolean deleteUser(int id) throws Exception;
+
+	User authenticate(String email, String password) throws Exception;
 }
