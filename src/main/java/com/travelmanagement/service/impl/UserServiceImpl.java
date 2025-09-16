@@ -2,7 +2,8 @@ package com.travelmanagement.service.impl;
 
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.model.User;
-public class UserServiceImpl  {
+import com.travelmanagement.service.IUserService;
+public class UserServiceImpl  implements IUserService{
 	
 	public User mapRegisterDtoToUser(RegisterRequestDTO request)
 	{

@@ -1,5 +1,7 @@
 package com.travelmanagement.dao.impl;
 
-public class PaymentDAOImpl {
+import com.travelmanagement.dao.IPaymentDAO;
+
+public class PaymentDAOImpl implements IPaymentDAO{
 
 }

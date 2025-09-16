@@ -1,5 +1,7 @@
 package com.travelmanagement.service.impl;
 
-public class AuthServiceImpl {
+import com.travelmanagement.service.IAuthService;
+
+public class AuthServiceImpl implements IAuthService{
 
 }

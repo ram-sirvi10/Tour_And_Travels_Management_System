@@ -1,5 +1,7 @@
 package com.travelmanagement.service.impl;
 
-public class BookingServiceImpl {
+import com.travelmanagement.service.IBookingService;
+
+public class BookingServiceImpl implements IBookingService{
 
 }

@@ -1,5 +1,7 @@
 package com.travelmanagement.service.impl;
 
-public class PackageServiceImpl {
+import com.travelmanagement.service.IPackageService;
+
+public class PackageServiceImpl implements IPackageService{
 
 }

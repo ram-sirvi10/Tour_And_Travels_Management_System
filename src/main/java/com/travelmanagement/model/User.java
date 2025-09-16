@@ -7,7 +7,7 @@ public class User {
 	private String userName;
 	private String userEmail;
 	private String userPassword;
-	private String userRole; // ADMIN / USER
+	private String userRole; 
 	private boolean isActive;
 	private boolean isDelete;
 	private LocalDate createdAt;

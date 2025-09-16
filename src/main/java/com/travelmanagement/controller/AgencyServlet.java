@@ -10,14 +10,14 @@ import java.io.IOException;
 /**
  * Servlet implementation class SubAdminRegisterServlet
  */
-@WebServlet("/SubAdminRegisterServlet")
-public class SubAdminRegisterServlet extends HttpServlet {
+@WebServlet("/AgencyServlet")
+public class AgencyServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public SubAdminRegisterServlet() {
+    public AgencyServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
