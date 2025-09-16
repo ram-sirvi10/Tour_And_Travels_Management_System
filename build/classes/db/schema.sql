@@ -9,8 +9,9 @@ CREATE TABLE users (
     user_password VARCHAR(255) NOT NULL,
     user_role VARCHAR(10) DEFAULT 'USER',
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  -- ,
+--  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- COMPANIES
@@ -26,9 +27,11 @@ CREATE TABLE companies (
     pincode VARCHAR(10),
     registration_number VARCHAR(50),      
     password VARCHAR(255) NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'
+    ,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  -- ,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- TRAVEL PACKAGES
@@ -41,9 +44,10 @@ CREATE TABLE travel_packages (
     duration INT ,
     post_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     image_url VARCHAR(500),
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    is_active BOOLEAN DEFAULT TRUE
+   --  ,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- BOOKINGS
@@ -59,10 +63,10 @@ CREATE TABLE bookings (
 
 -- PAYMENTS
 CREATE TABLE payments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_id INT NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payment_status ENUM('Successful', 'Failed') DEFAULT 'Failed',
+    status ENUM('Successful', 'Failed') DEFAULT 'Failed',
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
