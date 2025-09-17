@@ -22,8 +22,7 @@ public class ValidationUtil {
         return Pattern.matches(nameRegex, name);
     }
 
-
-    //  Password Validation (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)
+    // Password Validation (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)
     public static Boolean isValidPassword(String password) {
         String passRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^])[A-Za-z\\d@$!%*?&#^]{6,}$";
         return Pattern.matches(passRegex, password);
@@ -41,9 +40,15 @@ public class ValidationUtil {
         return Pattern.matches(priceRegex, price);
     }
 
-    // City/State Validation (alphabets + spaces)
+    // City/State/Country Validation (alphabets + spaces)
     public static Boolean isValidCityOrState(String name) {
         String cityRegex = "^[A-Za-z ]{2,50}$";
         return Pattern.matches(cityRegex, name);
+    }
+
+    // Registration Number Validation (alphanumeric + hyphen)
+    public static Boolean isValidRegistrationNumber(String regNo) {
+        String regRegex = "^[A-Za-z0-9\\-]+$";
+        return Pattern.matches(regRegex, regNo);
     }
 }

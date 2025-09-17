@@ -4,7 +4,7 @@ import com.travelmanagement.model.User;
 import java.util.List;
 
 public interface IUserDAO {
-	int createUser(User user) throws Exception;
+	boolean createUser(User user) throws Exception;
 
 	User getUserById(int id) throws Exception;
 
@@ -16,5 +16,5 @@ public interface IUserDAO {
 
 	boolean deleteUser(int id) throws Exception;
 
-	User authenticate(String email, String password) throws Exception;
+	boolean authenticate(String email, String password) throws Exception;
 }
