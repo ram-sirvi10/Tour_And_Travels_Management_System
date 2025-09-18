@@ -1,0 +1,144 @@
+package com.travelmanagement.filter;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+//@WebFilter({ "/AdminServlet/*", "/AgencyServlet/*", "/UserServlet/*", "/BookingServlet/*", "/PackageServlet/*" })
+//public class AuthRoleFilter implements Filter {
+//
+//    @Override
+//    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+//            throws IOException, ServletException {
+//
+//        HttpServletRequest req = (HttpServletRequest) request;
+//        HttpServletResponse res = (HttpServletResponse) response;
+//        HttpSession session = req.getSession(false);
+//
+//        // Get user/agency from session
+//        UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
+//        AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
+//
+//        // If no session or no logged-in object, redirect to login
+//        if (user == null && agency == null) {
+//            res.sendRedirect(req.getContextPath() + "/login.jsp?error=notLoggedIn");
+//            return;
+//        }
+//
+//        // Get role from object
+//        String role = null;
+//        if (user != null) {
+//            role = user.getUserRole();
+//        } else if (agency != null) {
+//            role = "SUBADMIN";
+//        }
+//
+//        String path = req.getRequestURI();
+//        
+//        System.out.println("PATH ==> "+path+" , ROLE ==> "+role);
+//
+//        boolean allowed = switch (role) {
+//            case "ADMIN" -> path.startsWith(req.getContextPath() + "/AdminServlet")
+//                    || path.startsWith(req.getContextPath() + "/AgencyServlet")
+//                    || path.startsWith(req.getContextPath() + "/UserServlet");
+//            case "SUBADMIN" -> path.startsWith(req.getContextPath() + "/AgencyServlet")
+//                    || path.startsWith(req.getContextPath() + "/BookingServlet")
+//                    || path.startsWith(req.getContextPath() + "/PackageServlet")
+//                    || path.startsWith(req.getContextPath() + "/UserServlet");
+//            case "USER" -> path.startsWith(req.getContextPath() + "/UserServlet")
+//                    || path.startsWith(req.getContextPath() + "/BookingServlet")
+//                    || path.startsWith(req.getContextPath() + "/PackageServlet");
+//            default -> false;
+//        };
+//
+//        if (allowed) {
+//            chain.doFilter(request, response);
+//        } else {
+//            res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied!");
+//        }
+//    }
+//}
+
+@WebFilter({ "/AdminServlet/*", "/AgencyServlet/*", "/UserServlet/*", "/BookingServlet/*", "/PackageServlet/*" })
+public class AuthRoleFilter implements Filter {
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+
+		HttpServletRequest req = (HttpServletRequest) request;
+		HttpServletResponse res = (HttpServletResponse) response;
+		HttpSession session = req.getSession(false);
+
+		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
+		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
+
+		if (user == null && agency == null) {
+			res.sendRedirect(req.getContextPath() + "/login.jsp?error=notLoggedIn");
+			return;
+		}
+
+		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
+		String path = req.getRequestURI();
+		String button = req.getParameter("button"); // get the button param
+		String context = req.getContextPath();
+
+		// Define allowed URLs + button combinations for each role
+		Map<String, List<String>> adminAccess = new HashMap<>();
+		adminAccess.put(context + "/AdminServlet", List.of("dashboard"));
+		adminAccess.put(context + "/AgencyServlet", List.of("dashboard"));
+		adminAccess.put(context + "/UserServlet", List.of("dashboard"));
+
+		Map<String, List<String>> subAdminAccess = new HashMap<>();
+		subAdminAccess.put(context + "/AgencyServlet", List.of("dashboard", "addPackage"));
+		subAdminAccess.put(context + "/BookingServlet", List.of("viewBookings"));
+		subAdminAccess.put(context + "/PackageServlet", List.of("viewPackages"));
+		subAdminAccess.put(context + "/UserServlet", List.of("viewUsers"));
+
+		Map<String, List<String>> userAccess = new HashMap<>();
+		userAccess.put(context + "/UserServlet", List.of("dashboard", "profile"));
+		userAccess.put(context + "/BookingServlet", List.of("book", "viewBookings"));
+		userAccess.put(context + "/PackageServlet", List.of("viewPackages"));
+
+		boolean allowed = switch (role) {
+		case "ADMIN" -> checkAccess(path, button, adminAccess);
+		case "SUBADMIN" -> checkAccess(path, button, subAdminAccess);
+		case "USER" -> checkAccess(path, button, userAccess);
+		default -> false;
+		};
+
+		if (allowed) {
+			chain.doFilter(request, response);
+		} else {
+			res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied!");
+		}
+	}
+
+	private boolean checkAccess(String path, String button, Map<String, List<String>> accessMap) {
+		for (Map.Entry<String, List<String>> entry : accessMap.entrySet()) {
+			if (path.startsWith(entry.getKey())) {
+				List<String> buttons = entry.getValue();
+				// if button param is null, allow only if list contains empty string or null
+				if (button == null) {
+					return buttons.contains(null) || buttons.contains("");
+				}
+				return buttons.contains(button);
+			}
+		}
+		return false;
+	}
+}

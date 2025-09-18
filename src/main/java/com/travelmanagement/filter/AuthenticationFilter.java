@@ -105,7 +105,7 @@ import jakarta.servlet.http.HttpSession;
 //    }
 //}
 
-@WebFilter(urlPatterns = { "/*" })
+//@WebFilter(urlPatterns = { "/*" })
 public class AuthenticationFilter implements Filter {
 
     @Override

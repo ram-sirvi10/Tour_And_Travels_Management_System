@@ -28,7 +28,7 @@
 <div class="container">
     <h2><%= heading %></h2>
 
-    <form action="AuthServlet" method="post">
+    <form action="./AuthServlet" method="post">
         <input type="hidden" name="action" value="login">
         <input type="hidden" name="role" value="<%= role %>"> 
 
