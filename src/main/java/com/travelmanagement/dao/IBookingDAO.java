@@ -1,7 +1,8 @@
 package com.travelmanagement.dao;
 
-import com.travelmanagement.model.Booking;
 import java.util.List;
+
+import com.travelmanagement.model.Booking;
 
 public interface IBookingDAO {
 	Boolean createBooking(Booking booking) throws Exception;
@@ -17,4 +18,5 @@ public interface IBookingDAO {
 	boolean updateBookingStatus(int bookingId, String status) throws Exception;
 
 	boolean cancelBooking(int bookingId) throws Exception;
+	
 }

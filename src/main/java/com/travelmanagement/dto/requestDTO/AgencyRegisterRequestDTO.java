@@ -101,4 +101,12 @@ public class AgencyRegisterRequestDTO {
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
+
+	@Override
+	public String toString() {
+		return "AgencyRegisterRequestDTO [agencyName=" + agencyName + ", ownerName=" + ownerName + ", email=" + email
+				+ ", phone=" + phone + ", city=" + city + ", state=" + state + ", country=" + country + ", pincode="
+				+ pincode + ", registrationNumber=" + registrationNumber + ", password=" + password
+				+ ", confirmPassword=" + confirmPassword + "]";
+	}
 }

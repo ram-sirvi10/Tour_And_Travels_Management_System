@@ -2,19 +2,20 @@ package com.travelmanagement.service;
 
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.User;
 import java.util.List;
 
 public interface IUserService {
-	void register(RegisterRequestDTO registerRequestDTO) throws Exception;
+	UserResponseDTO register(RegisterRequestDTO registerRequestDTO) throws Exception;
 
-	User login(LoginRequestDTO loginRequestDTO) throws Exception;
+	UserResponseDTO login(LoginRequestDTO loginRequestDTO) throws Exception;
 
-	User getById(int id) throws Exception;
+	UserResponseDTO getById(int id) throws Exception;
 
-	User getByEmail(String email) throws Exception;
+	UserResponseDTO getByEmail(String email) throws Exception;
 
-	List<User> getAll() throws Exception;
+	List<UserResponseDTO> getAll() throws Exception;
 
 	boolean update(User user) throws Exception;
 

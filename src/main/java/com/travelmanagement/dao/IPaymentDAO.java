@@ -13,4 +13,6 @@ public interface IPaymentDAO {
 	List<Payment> getAllPayments() throws Exception;
 
 	boolean updatePaymentStatus(int paymentId, String status) throws Exception;
+	
+	
 }

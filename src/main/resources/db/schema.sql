@@ -70,13 +70,16 @@ CREATE TABLE payments (
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
 -- TOURISTS
-CREATE TABLE tourist (
-    tourist_id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE travelers (
+    traveler_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     mobile VARCHAR(20) NOT NULL,
+    age int not null,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
+
+ALTER TABLE bookings
+ADD COLUMN no_of_travellers INT NOT NULL DEFAULT 1;

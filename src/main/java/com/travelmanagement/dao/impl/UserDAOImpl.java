@@ -104,13 +104,16 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public List<User> getAllUsers() throws Exception {
+	public List<User> getAllUsers(int limit , int offset) throws Exception {
 		List<User> users = new ArrayList<>();
 		try {
 			connection = DatabaseConfig.getConnection();
-			String sql = "SELECT * FROM users WHERE is_delete= ? ";
+			String sql = "SELECT * FROM users WHERE is_delete= ? limit ? offset ?";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setBoolean(1, false);
+			preparedStatement.setInt(2, limit);
+			preparedStatement.setInt(3, offset);
+			
 			resultSet = preparedStatement.executeQuery();
 
 			while (resultSet.next()) {
@@ -163,7 +166,6 @@ public class UserDAOImpl implements IUserDAO {
 
 	@Override
 	public boolean deleteUser(int id) throws Exception {
-
 		try {
 			connection = DatabaseConfig.getConnection();
 			String sql = "UPDATE users SET is_delete=? WHERE user_id=?";
@@ -183,10 +185,56 @@ public class UserDAOImpl implements IUserDAO {
 		return false;
 	}
 
-	@Override
-	public boolean authenticate(String email, String password) throws Exception {
 
-	
+
+	@Override
+	public boolean enableUser(int userId) throws Exception {
+	    try {
+	        connection = DatabaseConfig.getConnection();
+	        String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
+	        preparedStatement = connection.prepareStatement(sql);
+	        preparedStatement.setBoolean(1, true);   
+	        preparedStatement.setInt(2, userId);
+
+	        int affectedRows = preparedStatement.executeUpdate();
+	        return affectedRows > 0;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+
+	@Override
+	public boolean disableUser(int userId) throws Exception {
+	    try {
+	        connection = DatabaseConfig.getConnection();
+	        String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
+	        preparedStatement = connection.prepareStatement(sql);
+	        preparedStatement.setBoolean(1, false);  
+	        preparedStatement.setInt(2, userId);
+
+	        int affectedRows = preparedStatement.executeUpdate();
+	        return affectedRows > 0;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+
+	@Override
+	public boolean changePassword(int userId, String newPassword) throws Exception {
+		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public List<User> searchUsers(String Keyword, int limit, int offset) throws Exception {
+		
+		return null;
+	}
+
+	
+
 }

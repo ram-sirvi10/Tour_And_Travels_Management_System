@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.Map" %>
+
 <%
     String error = (String) request.getAttribute("error");
     String agencyName = request.getAttribute("agency_name") != null ? (String)request.getAttribute("agency_name") : "";
@@ -30,20 +32,69 @@
     <% if(error != null) { %>
         <div class="error"><%= error %></div>
     <% } %>
-    <form action="AuthServlet" method="post">
-        <input type="text" name="agency_name" placeholder="Agency Name" value="<%= agencyName %>">
-        <input type="text" name="owner_name" placeholder="Owner Name" value="<%= ownerName %>">
-        <input type="email" name="email" placeholder="Email" value="<%= email %>">
-        <input type="text" name="phone" placeholder="Phone" value="<%= phone %>">
-        <input type="text" name="city" placeholder="City" value="<%= city %>">
-        <input type="text" name="state" placeholder="State" value="<%= state %>">
-        <input type="text" name="country" placeholder="Country" value="<%= country %>">
-        <input type="text" name="pincode" placeholder="Pincode" value="<%= pincode %>">
-        <input type="text" name="registration_number" placeholder="Registration Number" value="<%= regNumber %>">
-        <input type="password" name="password" placeholder="Password">
-        <input type="password" name="confirm_password" placeholder="Confirm Password">
-        <button type="submit" name="button" value="registerAsAgency">Register</button>
-    </form>
+    <%
+    Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
+%>
+
+<form action="AuthServlet" method="post">
+    <input type="text" name="agency_name" placeholder="Agency Name" value="<%= agencyName %>">
+    <% if (errors != null && errors.get("agencyName") != null) { %>
+        <div class="error"><%= errors.get("agencyName") %></div>
+    <% } %>
+
+    <input type="text" name="owner_name" placeholder="Owner Name" value="<%= ownerName %>">
+    <% if (errors != null && errors.get("ownerName") != null) { %>
+        <div class="error"><%= errors.get("ownerName") %></div>
+    <% } %>
+
+    <input type="email" name="email" placeholder="Email" value="<%= email %>">
+    <% if (errors != null && errors.get("email") != null) { %>
+        <div class="error"><%= errors.get("email") %></div>
+    <% } %>
+
+    <input type="text" name="phone" placeholder="Phone" value="<%= phone %>">
+    <% if (errors != null && errors.get("phone") != null) { %>
+        <div class="error"><%= errors.get("phone") %></div>
+    <% } %>
+
+    <input type="text" name="city" placeholder="City" value="<%= city %>">
+    <% if (errors != null && errors.get("city") != null) { %>
+        <div class="error"><%= errors.get("city") %></div>
+    <% } %>
+
+    <input type="text" name="state" placeholder="State" value="<%= state %>">
+    <% if (errors != null && errors.get("state") != null) { %>
+        <div class="error"><%= errors.get("state") %></div>
+    <% } %>
+
+    <input type="text" name="country" placeholder="Country" value="<%= country %>">
+    <% if (errors != null && errors.get("country") != null) { %>
+        <div class="error"><%= errors.get("country") %></div>
+    <% } %>
+
+    <input type="text" name="pincode" placeholder="Pincode" value="<%= pincode %>">
+    <% if (errors != null && errors.get("pincode") != null) { %>
+        <div class="error"><%= errors.get("pincode") %></div>
+    <% } %>
+
+    <input type="text" name="registration_number" placeholder="Registration Number" value="<%= regNumber %>">
+    <% if (errors != null && errors.get("registrationNumber") != null) { %>
+        <div class="error"><%= errors.get("registrationNumber") %></div>
+    <% } %>
+
+    <input type="password" name="password" placeholder="Password">
+    <% if (errors != null && errors.get("password") != null) { %>
+        <div class="error"><%= errors.get("password") %></div>
+    <% } %>
+
+    <input type="password" name="confirm_password" placeholder="Confirm Password">
+    <% if (errors != null && errors.get("confirmPassword") != null) { %>
+        <div class="error"><%= errors.get("confirmPassword") %></div>
+    <% } %>
+
+    <button type="submit" name="button" value="registerAsAgency">Register</button>
+</form>
+
 </div>
 
 </body>

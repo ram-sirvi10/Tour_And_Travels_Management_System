@@ -15,4 +15,9 @@ public interface IPackageDAO {
 	boolean updatePackage(Agency p) throws Exception;
 
 	boolean deletePackage(int id) throws Exception;
+	
+	List<Agency> getAllPackagesByAgency(int agencyId) throws Exception;
+	
+	
+	
 }

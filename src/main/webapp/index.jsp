@@ -5,16 +5,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tour & Travel Management System</title>
-<!-- <link rel="stylesheet" href="./style.css">
- -->
 </head>
 <body>
 <jsp:include page="navbar.jsp" />
-
+<%
+Object obj = session.getAttribute("user");
+%>
 <header>
   <h1>Tour & Travel Management System</h1>
   <p>Book your dream destinations with ease and comfort</p>
-  <a href="#features" class="btn">Explore Features ↓</a>
+  <%if(obj==null){ %>
+  <a href="login.jsp?role=user" class="btn-started">👤 Login as User</a>
+  <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a><%} else{%>
+  <a href="login.jsp" class="btn-started">🚀 Get Started</a>
+  <%} %>
+  
 </header>
 
 <section id="features">
@@ -46,7 +51,10 @@
 <section class="cta">
   <h2>Plan Your Next Journey</h2>
   <p>Discover exciting travel packages and start your adventure today.</p>
-  <a href="login.jsp" class="btn-started">🚀 Get Started</a>
+  
+ 
+  <a href="login.jsp?role=user" class="btn-started">👤 Login as User</a>
+  <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a>
 </section>
 
 <div class="footer">

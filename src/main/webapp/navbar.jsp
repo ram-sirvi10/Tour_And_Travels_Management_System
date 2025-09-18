@@ -174,6 +174,7 @@ h2 {
 	background: linear-gradient(90deg, #ff6f61, #ff3b2e);
 	color: white;
 	padding: 16px 32px;
+	margin-bottom : 10px;
 	border-radius: 50px;
 	font-weight: bold;
 	animation: pulse 2s infinite;
@@ -192,15 +193,32 @@ keyframes pulse { 0%{
 }
 
 70
+
+
 %
 {
 box-shadow
+
+
 :
+
+
 0
+
+
 0
+
+
 0
+
+
 20px
-rgba(
+
+
+rgba
+(
+
+
 255
 ,
 111
@@ -208,18 +226,40 @@ rgba(
 97
 ,
 0
-);
+
+
+)
+;
+
+
 }
 100
+
+
 %
 {
 box-shadow
+
+
 :
+
+
 0
+
+
 0
+
+
 0
+
+
 0
-rgba(
+
+
+rgba
+(
+
+
 255
 ,
 111
@@ -227,7 +267,12 @@ rgba(
 97
 ,
 0
-);
+
+
+)
+;
+
+
 }
 }
 
@@ -333,13 +378,25 @@ button:hover, input[type=submit]:hover {
 	}
 }
 </style>
+<%
+Object obj = session.getAttribute("user");
+String label = obj != null ? "My Account" : "Login";
+%>
 <nav>
 
 	<div class="logo">TravelMate</div>
 	<ul>
 		<li><a href="index.jsp">Home</a></li>
-		<li><a href="login.jsp">Login</a></li>
+
+		<li><a href="login.jsp"> <%=label%>
+		</a></li>
+		<%
+		if (obj == null) {
+		%>
 		<li><a href="registerUser.jsp">Register</a></li>
+		<%
+		}
+		%>
 	</ul>
 
 

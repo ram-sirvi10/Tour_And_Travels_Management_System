@@ -43,4 +43,10 @@ public class PackageDAOImpl implements IPackageDAO{
 		return false;
 	}
 
+	@Override
+	public List<Agency> getAllPackagesByAgency(int agencyId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -1,11 +1,13 @@
 package com.travelmanagement.service.impl;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import com.travelmanagement.dao.IUserDAO;
 import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.exception.BadRequestException;
 import com.travelmanagement.exception.UserNotFoundException;
 import com.travelmanagement.model.User;
@@ -14,74 +16,84 @@ import com.travelmanagement.util.PasswordHashing;
 
 public class UserServiceImpl implements IUserService {
 
-	private AuthServiceImpl authService = new AuthServiceImpl();
-	private IUserDAO userDAO = new UserDAOImpl();
+    private AuthServiceImpl authService = new AuthServiceImpl();
+    private IUserDAO userDAO = new UserDAOImpl();
 
-	@Override
-	public void register(RegisterRequestDTO dto) throws Exception {
+    @Override
+    public UserResponseDTO register(RegisterRequestDTO dto) throws Exception {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BadRequestException("Passwords do not match!");
+        }
 
-		if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-			throw new BadRequestException("Passwords do not match!");
-		}
-		User user = authService.mapRegisterDtoToUser(dto);
+        User user = authService.mapRegisterDtoToUser(dto);
+        user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
 
-		user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
+        boolean created = userDAO.createUser(user);
+        if (!created) {
+            throw new BadRequestException("User registration failed!");
+        }
 
-		boolean created = userDAO.createUser(user);
-		if (!created) {
-			throw new BadRequestException("User registration failed!");
-		} else
-			return;
+      
+        return authService.mapUserToUserResponseDTO(user);
+    }
 
-	}
+    @Override
+    public UserResponseDTO login(LoginRequestDTO dto) throws Exception {
+        User loginUser = authService.mapLoginDtoToUser(dto);
 
-	@Override
-	public User login(LoginRequestDTO dto) throws Exception {
+        User dbUser = userDAO.getUserByEmail(loginUser.getUserEmail());
+        if (dbUser == null) {
+            throw new UserNotFoundException("User not found!");
+        }
 
-		User loginUser = authService.mapLoginDtoToUser(dto);
+        if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
+            throw new BadRequestException("Invalid credentials!");
+        }
 
-		User dbUser = userDAO.getUserByEmail(loginUser.getUserEmail());
-		if (dbUser == null) {
-			throw new UserNotFoundException("User not found!");
-		}
+     
+        return authService.mapUserToUserResponseDTO(dbUser);
+    }
 
-		if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
-			throw new BadRequestException("Invalid credentials!");
-		}
+    @Override
+    public UserResponseDTO getById(int id) throws Exception {
+        User user = userDAO.getUserById(id);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
 
-		return dbUser;
-	}
+        return authService.mapUserToUserResponseDTO(user);
+    }
 
-	@Override
-	public User getById(int id) throws Exception {
-		User user = userDAO.getUserById(id);
-		if (user == null) {
-			throw new UserNotFoundException("User not found with id: " + id);
-		}
-		return user;
-	}
+    @Override
+    public UserResponseDTO getByEmail(String email) throws Exception {
+        User user = userDAO.getUserByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with email: " + email);
+        }
 
-	@Override
-	public User getByEmail(String email) throws Exception {
-		User user = userDAO.getUserByEmail(email);
-		if (user == null) {
-			throw new UserNotFoundException("User not found with email: " + email);
-		}
-		return user;
-	}
+        return authService.mapUserToUserResponseDTO(user);
+    }
 
-	@Override
-	public List<User> getAll() throws Exception {
-		return userDAO.getAllUsers();
-	}
+    @Override
+    public List<UserResponseDTO> getAll() throws Exception {
+        List<User> users = userDAO.getAllUsers();
+        List<UserResponseDTO> responseList = new ArrayList<>();
 
-	@Override
-	public boolean update(User user) throws Exception {
-		return userDAO.updateUser(user);
-	}
+        for (User user : users) {
+            UserResponseDTO dto = authService.mapUserToUserResponseDTO(user);
+            responseList.add(dto);
+        }
 
-	@Override
-	public boolean delete(int id) throws Exception {
-		return userDAO.deleteUser(id);
-	}
+        return responseList;
+    }
+
+    @Override
+    public boolean update(User user) throws Exception {
+        return userDAO.updateUser(user);
+    }
+
+    @Override
+    public boolean delete(int id) throws Exception {
+        return userDAO.deleteUser(id);
+    }
 }

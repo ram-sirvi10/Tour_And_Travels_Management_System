@@ -6,6 +6,8 @@ import java.util.Map;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
+import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.User;
 import com.travelmanagement.service.IAgencyService;
@@ -29,7 +31,14 @@ public class AuthServlet extends HttpServlet {
     private IUserService userService = new UserServiceImpl();
     private AuthServiceImpl authService = new AuthServiceImpl();
     private IAgencyService agencyService = new AgencyServiceImpl();
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+    	response.sendRedirect("index.jsp");
+    	 return;
+    }
 
+   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -37,6 +46,10 @@ public class AuthServlet extends HttpServlet {
         String button = request.getParameter("button");
         System.out.println("BUTTON ==> "+button);
 
+        if(button==null) {
+        	response.sendRedirect("index.jsp");
+        	 return;
+        }
         try {
             switch (button) {
                 case "registerAsUser":
@@ -53,12 +66,14 @@ public class AuthServlet extends HttpServlet {
                     break;
                 default:
                     response.sendRedirect("index.jsp");
-                    break;
+                    return;
+                   
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
         }
     }
 
@@ -80,6 +95,7 @@ public class AuthServlet extends HttpServlet {
         userService.register(dto);
         request.setAttribute("success", "User registered successfully. Please login.");
         request.getRequestDispatcher("login.jsp").forward(request, response);
+        return;
     }
 
    
@@ -119,7 +135,7 @@ public class AuthServlet extends HttpServlet {
             agencyService.register(dto);
             request.setAttribute("success", "Agency registered successfully! Waiting for admin approval.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
-       
+            return;
          
        
     }
@@ -131,7 +147,7 @@ public class AuthServlet extends HttpServlet {
         RequestDispatcher rd = null;
         dto.setEmail(request.getParameter("email"));
         dto.setPassword(request.getParameter("password"));
-
+        dto.setRole(request.getParameter("role"));
         Map<String, String> errors = authService.validateLoginDto(dto);
 
         if (!errors.isEmpty()) {
@@ -139,36 +155,38 @@ public class AuthServlet extends HttpServlet {
             request.getRequestDispatcher("login.jsp").forward(request, response);
             return;
         }
-
-        try {
-            User loggedInUser = userService.login(dto);
-            HttpSession session = request.getSession();
-            session.setAttribute("user", loggedInUser);
-            if ("ADMIN".equalsIgnoreCase(loggedInUser.getUserRole())) {
-            	rd = request.getRequestDispatcher("template/admin/adminDashboard.jsp");
-                rd.forward(request, response);
-//                response.sendRedirect("template/admin/adminDashboard.jsp");
-            } else {
-//                response.sendRedirect("template/user/userDashboard.jsp");
-            	rd = request.getRequestDispatcher("template/user/userDashboard.jsp");
-                rd.forward(request, response);
-            }
-            return; 
-        } catch (Exception e) {
-          
-            try {
-                Agency loggedInAgency = agencyService.login(dto);
-                HttpSession session = request.getSession();
-                session.setAttribute("user", loggedInAgency);
-//                response.sendRedirect("template/agency/agencyDashboard.jsp");
-                rd = request.getRequestDispatcher("template/agency/agencyDashboard.jsp");
-                rd.forward(request, response);
-            } catch (Exception ex) {
-                errors.put("loginError", "Invalid email or password!");
-                request.setAttribute("errors", errors);
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-            }
+        if("user".equalsIgnoreCase(dto.getRole())) {
+        	 UserResponseDTO loggedInUser = userService.login(dto);
+             HttpSession session = request.getSession();
+             session.setAttribute("user", loggedInUser);
+             if ("ADMIN".equalsIgnoreCase(loggedInUser.getUserRole())) {
+             	rd = request.getRequestDispatcher("template/admin/adminDashboard.jsp");
+                 rd.forward(request, response);
+                 return;
+//                 response.sendRedirect("template/admin/adminDashboard.jsp");
+             } else {
+//                 response.sendRedirect("template/user/userDashboard.jsp");
+             	rd = request.getRequestDispatcher("template/user/userDashboard.jsp");
+                 rd.forward(request, response);
+                 return;
+             }
+        }else if("agency".equalsIgnoreCase(dto.getRole())) {
+        	 AgencyResponseDTO loggedInAgency = agencyService.login(dto);
+             HttpSession session = request.getSession();
+             session.setAttribute("user", loggedInAgency);
+//             response.sendRedirect("template/agency/agencyDashboard.jsp");
+             rd = request.getRequestDispatcher("template/agency/agencyDashboard.jsp");
+             rd.forward(request, response);
+             return;
         }
+        else {
+        	 errors.put("loginError", "Invalid credentials ");
+             request.setAttribute("errors", errors);
+             System.out.println("ERROR IN AUTH_SERVLETS => "+errors.get("loginError"));
+             request.getRequestDispatcher("login.jsp").forward(request, response);
+             return;
+        }
+
     }
 
 
@@ -179,5 +197,6 @@ public class AuthServlet extends HttpServlet {
             session.invalidate();
         }
         response.sendRedirect("login.jsp");
+        return;
     }
 }

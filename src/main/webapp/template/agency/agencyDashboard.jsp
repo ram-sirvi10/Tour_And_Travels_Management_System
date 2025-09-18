@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" session="true"%>
-<%@ page import="com.travelmanagement.model.Agency" %>
+<%@ page import="com.travelmanagement.dto.responseDTO.AgencyResponseDTO" %>
 
 <%
-    Agency user = (Agency) session.getAttribute("user");
+AgencyResponseDTO user = (AgencyResponseDTO) session.getAttribute("user");
 %>
 
 <!DOCTYPE html>

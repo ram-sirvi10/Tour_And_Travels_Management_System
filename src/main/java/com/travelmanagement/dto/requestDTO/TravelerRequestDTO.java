@@ -1,28 +1,10 @@
-package com.travelmanagement.model;
+package com.travelmanagement.dto.requestDTO;
 
-public class Tourist {
-
-	private int touristId;
-	private int bookingId;
+public class TravelerRequestDTO {
 	private String name;
+	private int age;
 	private String email;
 	private String mobile;
-
-	public int getTouristId() {
-		return touristId;
-	}
-
-	public void setTouristId(int touristId) {
-		this.touristId = touristId;
-	}
-
-	public int getBookingId() {
-		return bookingId;
-	}
-
-	public void setBookingId(int bookingId) {
-		this.bookingId = bookingId;
-	}
 
 	public String getName() {
 		return name;
@@ -30,6 +12,14 @@ public class Tourist {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
 	}
 
 	public String getEmail() {
@@ -47,4 +37,10 @@ public class Tourist {
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
+
+	@Override
+	public String toString() {
+		return "TravelerRequestDTO [name=" + name + ", age=" + age + ", email=" + email + ", mobile=" + mobile + "]";
+	}
+
 }

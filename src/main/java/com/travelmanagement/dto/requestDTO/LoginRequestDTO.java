@@ -3,7 +3,7 @@ package com.travelmanagement.dto.requestDTO;
 public class LoginRequestDTO {
     private String email;
     private String password;
-
+    private String role;
     public String getEmail() {
         return email;
     }
@@ -16,4 +16,16 @@ public class LoginRequestDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
+	}
+	@Override
+	public String toString() {
+		return "LoginRequestDTO [email=" + email + ", password=" + password + "]";
+	}
+    
+    
 }

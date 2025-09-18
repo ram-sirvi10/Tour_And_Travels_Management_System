@@ -3,9 +3,14 @@ package com.travelmanagement.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.travelmanagement.dao.IAgencyDAO;
+import com.travelmanagement.dao.IUserDAO;
+import com.travelmanagement.dao.impl.AgencyDAOImpl;
+import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
+import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.User;
@@ -14,38 +19,51 @@ import com.travelmanagement.util.ValidationUtil;
 
 public class AuthServiceImpl implements IAuthService {
 
-	// Validate registration fields and return errors map
+	@Override
 	public Map<String, String> validateRegisterDto(RegisterRequestDTO dto) {
-		Map<String, String> errors = new HashMap<>();
+	    Map<String, String> errors = new HashMap<>();
 
-		if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
-			errors.put("username", "Username cannot be empty");
-		} else if (!ValidationUtil.isValidName(dto.getUsername())) {
-			errors.put("username", "Invalid username");
-		}
+	    if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
+	        errors.put("username", "Username cannot be empty");
+	    } else if (!ValidationUtil.isValidName(dto.getUsername())) {
+	        errors.put("username", "Invalid username");
+	    }
 
-		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-			errors.put("email", "Email cannot be empty");
-		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
-			errors.put("email", "Invalid email");
-		}
+	    if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+	        errors.put("email", "Email cannot be empty");
+	    } else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
+	        errors.put("email", "Invalid email");
+	    } else {
+	        
+	        IUserDAO userDAO = new UserDAOImpl();
+	        try {
+	            User existingUser = userDAO.getUserByEmail(dto.getEmail());
+	            if (existingUser != null) {
+	                errors.put("email", "Email already exists");
+	            }
+	        } catch (Exception e) {
+	           
+	        }
+	    }
 
-		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-			errors.put("password", "Password cannot be empty");
-		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-			errors.put("password", "Invalid password");
-		}
+	    if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+	        errors.put("password", "Password cannot be empty");
+	    } else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
+	        errors.put("password", "Invalid password");
+	    }
 
-		if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
-			errors.put("confirmPassword", "Confirm Password cannot be empty");
-		} else if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-			errors.put("confirmPassword", "Passwords do not match");
-		}
+	    if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
+	        errors.put("confirmPassword", "Confirm Password cannot be empty");
+	    } else if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+	        errors.put("confirmPassword", "Passwords do not match");
+	    }
 
-		return errors;
+	    return errors;
 	}
 
+
 	// Validate login fields and return errors map
+	 @Override
 	public Map<String, String> validateLoginDto(LoginRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();
 
@@ -58,7 +76,7 @@ public class AuthServiceImpl implements IAuthService {
 		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
 			errors.put("password", "Password cannot be empty");
 		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-			errors.put("password", "Invalid password");
+			errors.put("password", "Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
 		}
 
 		return errors;
@@ -77,9 +95,8 @@ public class AuthServiceImpl implements IAuthService {
 	public UserResponseDTO mapUserToUserResponseDTO(User user) {
 		UserResponseDTO userResponseDTO = new UserResponseDTO();
 		userResponseDTO.setUserName(user.getUserName());
-		userResponseDTO.setEmail(user.getUserEmail());
-		userResponseDTO.setPassword(user.getUserPassword());
-		userResponseDTO.setRole(user.getUserRole());
+		userResponseDTO.setUserEmail(user.getUserEmail());
+		userResponseDTO.setUserRole(user.getUserRole());
 		return userResponseDTO;
 	}
 	@Override
@@ -107,10 +124,22 @@ public class AuthServiceImpl implements IAuthService {
 		}
 
 		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-			errors.put("email", "Email cannot be empty");
+		    errors.put("email", "Email cannot be empty");
 		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
-			errors.put("email", "Invalid email");
+		    errors.put("email", "Invalid email");
+		} else {
+		    
+		    IAgencyDAO agencyDAO = new AgencyDAOImpl();
+		    try {
+		        Agency existingAgency = agencyDAO.getAgencyByEmail(dto.getEmail());
+		        if (existingAgency != null) {
+		            errors.put("email", "Email already exists");
+		        }
+		    } catch (Exception e) {
+		        
+		    }
 		}
+
 
 		if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
 			errors.put("phone", "Phone number cannot be empty");
@@ -163,6 +192,7 @@ public class AuthServiceImpl implements IAuthService {
 		return errors;
 	}
 
+	 @Override
 	public Agency mapRegisterAgencyDtoToAgency(AgencyRegisterRequestDTO dto) {
 		Agency agency = new Agency();
 		agency.setAgencyName(dto.getAgencyName());
@@ -177,5 +207,28 @@ public class AuthServiceImpl implements IAuthService {
 		agency.setPassword(dto.getPassword());
 		return agency;
 	}
+	
+	 @Override
+	public AgencyResponseDTO mapAgencyToAgencyResponseDTO(Agency agency) {
+	    AgencyResponseDTO dto = new AgencyResponseDTO();
+	    dto.setAgencyId(agency.getAgencyId());
+	    dto.setAgencyName(agency.getAgencyName());
+	    dto.setOwnerName(agency.getOwnerName());
+	    dto.setEmail(agency.getEmail());
+	    dto.setPhone(agency.getPhone());
+	    dto.setCity(agency.getCity());
+	    dto.setState(agency.getState());
+	    dto.setCountry(agency.getCountry());
+	    dto.setPincode(agency.getPincode());
+	    dto.setRegistrationNumber(agency.getRegistrationNumber());
+	    dto.setStatus(agency.getStatus());
+	    dto.setActive(agency.isActive());
+	    dto.setDelete(agency.isDelete());
+	    dto.setCreatedAt(agency.getCreatedAt());
+	    dto.setUpdatedAt(agency.getUpdatedAt());
+	    return dto;
+	}
+
+
 
 }

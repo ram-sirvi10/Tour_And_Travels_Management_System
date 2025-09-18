@@ -1,10 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" session="true"%>
-<%@ page import="com.travelmanagement.model.Agency" %>
+
+
+<%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO" %>
 
 <%
-    Agency user = (Agency) session.getAttribute("user");
+UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
 %>
+
 
 <!DOCTYPE html>
 <html>
@@ -13,7 +16,7 @@
     <title>ADMIN Dashboard</title>
 </head>
 <body>
-    <h1>Welcome, <%= user.getAgencyName()%>!</h1>
+    <h1>Welcome, <%= user.getUserName()%>!</h1>
 
     <p>This is your ADMIN dashboard.</p>
 
