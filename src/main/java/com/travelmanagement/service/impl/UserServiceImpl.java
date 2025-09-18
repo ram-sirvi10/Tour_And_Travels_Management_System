@@ -75,8 +75,8 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<UserResponseDTO> getAll() throws Exception {
-        List<User> users = userDAO.getAllUsers();
+    public List<UserResponseDTO> getAll(int limit,int offset) throws Exception {
+        List<User> users = userDAO.getAllUsers(limit,offset);
         List<UserResponseDTO> responseList = new ArrayList<>();
 
         for (User user : users) {

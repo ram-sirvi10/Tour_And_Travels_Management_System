@@ -20,7 +20,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
     public boolean createAgency(Agency agency) throws Exception {
         try {
             connection = DatabaseConfig.getConnection();
-            String sql = "INSERT INTO travelAgency (agency_name, owner_name, email, phone, city, state, country, pincode, registration_number, password, is_active, is_delete) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO travelAgency (agency_name, owner_name, email, phone, city, state, country, pincode, registration_number, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, agency.getAgencyName());
             preparedStatement.setString(2, agency.getOwnerName());
@@ -32,8 +32,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
             preparedStatement.setString(8, agency.getPincode());
             preparedStatement.setString(9, agency.getRegistrationNumber());
             preparedStatement.setString(10, agency.getPassword());
-            preparedStatement.setBoolean(11, false); 
-            preparedStatement.setBoolean(12, false); 
+         
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
@@ -118,48 +117,10 @@ public class AgencyDAOImpl implements IAgencyDAO {
     }
 
     @Override
-    public List<Agency> getAllAgencies() throws Exception {
-        List<Agency> agencies = new ArrayList<>();
-        try {
-            connection = DatabaseConfig.getConnection();
-            String sql = "SELECT * FROM travelAgency WHERE is_delete=?";
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setBoolean(1, false);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Agency agency = new Agency();
-                agency.setAgencyId(resultSet.getInt("agency_id"));
-                agency.setAgencyName(resultSet.getString("agency_name"));
-                agency.setOwnerName(resultSet.getString("owner_name"));
-                agency.setEmail(resultSet.getString("email"));
-                agency.setPhone(resultSet.getString("phone"));
-                agency.setCity(resultSet.getString("city"));
-                agency.setState(resultSet.getString("state"));
-                agency.setCountry(resultSet.getString("country"));
-                agency.setPincode(resultSet.getString("pincode"));
-                agency.setRegistrationNumber(resultSet.getString("registration_number"));
-                agency.setPassword(resultSet.getString("password"));
-                agency.setActive(resultSet.getBoolean("is_active"));
-                agency.setDelete(resultSet.getBoolean("is_delete"));
-                if (resultSet.getDate("created_at") != null)
-                    agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-                if (resultSet.getDate("updated_at") != null)
-                    agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-                agencies.add(agency);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return agencies;
-    }
-
-    @Override
     public boolean updateAgency(Agency agency) throws Exception {
         try {
             connection = DatabaseConfig.getConnection();
-            String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, email=?, phone=?, city=?, state=?, country=?, pincode=?, registration_number=?, password=?, is_active=?, is_delete=? WHERE agency_id=?";
+            String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, email=?, phone=?, city=?, state=?, country=?, pincode=?, registration_number=?, password=? WHERE agency_id=?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, agency.getAgencyName());
             preparedStatement.setString(2, agency.getOwnerName());
@@ -171,9 +132,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
             preparedStatement.setString(8, agency.getPincode());
             preparedStatement.setString(9, agency.getRegistrationNumber());
             preparedStatement.setString(10, agency.getPassword());
-            preparedStatement.setBoolean(11, agency.isActive());
-            preparedStatement.setBoolean(12, agency.isDelete());
-            preparedStatement.setInt(13, agency.getAgencyId());
+            preparedStatement.setInt(11, agency.getAgencyId());
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
@@ -187,10 +146,11 @@ public class AgencyDAOImpl implements IAgencyDAO {
     public boolean deleteAgency(int id) throws Exception {
         try {
             connection = DatabaseConfig.getConnection();
-            String sql = "UPDATE travelAgency SET is_delete=? WHERE agency_id=?";
+            String sql = "UPDATE travelAgency SET is_delete=? , is_active=? WHERE agency_id=?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setBoolean(1, true);
-            preparedStatement.setInt(2, id);
+            preparedStatement.setBoolean(2, false);
+            preparedStatement.setInt(3, id);
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
@@ -204,11 +164,11 @@ public class AgencyDAOImpl implements IAgencyDAO {
     public boolean approveAgency(int agencyId) throws Exception {
         try {
             connection = DatabaseConfig.getConnection();
-            String sql = "UPDATE travelAgency SET is_active=?, is_delete=? WHERE agency_id=?";
+            String sql = "UPDATE travelAgency SET status = ? WHERE agency_id=?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setBoolean(1, true);
-            preparedStatement.setBoolean(2, false);
-            preparedStatement.setInt(3, agencyId);
+            preparedStatement.setString(1, "APPROVED");
+ 
+            preparedStatement.setInt(2, agencyId);
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
@@ -220,13 +180,12 @@ public class AgencyDAOImpl implements IAgencyDAO {
 
     @Override
     public boolean declineAgency(int agencyId) throws Exception {
-        try {
+    	try {
             connection = DatabaseConfig.getConnection();
-            String sql = "UPDATE travelAgency SET is_active=?, is_delete=? WHERE agency_id=?";
+            String sql = "UPDATE travelAgency SET status = ? WHERE agency_id=?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setBoolean(1, false);
-            preparedStatement.setBoolean(2, true);
-            preparedStatement.setInt(3, agencyId);
+            preparedStatement.setString(1, "REJECTED");
+            preparedStatement.setInt(2, agencyId);
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
@@ -236,44 +195,6 @@ public class AgencyDAOImpl implements IAgencyDAO {
         return false;
     }
 
-    @Override
-    public List<Agency> getPendingAgencies() throws Exception {
-        List<Agency> pendingList = new ArrayList<>();
-        try {
-            connection = DatabaseConfig.getConnection();
-            String sql = "SELECT * FROM travelAgency WHERE is_active=? AND is_delete=?";
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setBoolean(1, false);
-            preparedStatement.setBoolean(2, false);
-            resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                Agency agency = new Agency();
-                agency.setAgencyId(resultSet.getInt("agency_id"));
-                agency.setAgencyName(resultSet.getString("agency_name"));
-                agency.setOwnerName(resultSet.getString("owner_name"));
-                agency.setEmail(resultSet.getString("email"));
-                agency.setPhone(resultSet.getString("phone"));
-                agency.setCity(resultSet.getString("city"));
-                agency.setState(resultSet.getString("state"));
-                agency.setCountry(resultSet.getString("country"));
-                agency.setPincode(resultSet.getString("pincode"));
-                agency.setRegistrationNumber(resultSet.getString("registration_number"));
-                agency.setPassword(resultSet.getString("password"));
-                agency.setActive(resultSet.getBoolean("is_active"));
-                agency.setDelete(resultSet.getBoolean("is_delete"));
-                if (resultSet.getDate("created_at") != null)
-                    agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-                if (resultSet.getDate("updated_at") != null)
-                    agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-                pendingList.add(agency);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return pendingList;
-    }
     @Override
     public boolean enableAgency(int agencyId) throws Exception {
         try {
@@ -310,68 +231,71 @@ public class AgencyDAOImpl implements IAgencyDAO {
         return false;
     }
 
+	
+	
+
+
 	@Override
-	public List<Agency> searchAgenciesByName(String keyword) throws Exception {
+	public List<Agency> searchAgencies(String keyword, int limit, int offset) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Agency> getAgenciesByLocation(String location) throws Exception {
+	public List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
+		 List<Agency> pendingList = new ArrayList<>();
+	        try {
+	            connection = DatabaseConfig.getConnection();
+	            String sql = "SELECT * FROM travelAgency  WHERE  status = ? limit ? offset ?";
+	            preparedStatement = connection.prepareStatement(sql);
+	        
+	            preparedStatement.setString(1, status);
+	            preparedStatement.setInt(2, limit);
+	            preparedStatement.setInt(3, offset);
+	            resultSet = preparedStatement.executeQuery();
+
+	            while (resultSet.next()) {
+	                Agency agency = new Agency();
+	                agency.setAgencyId(resultSet.getInt("agency_id"));
+	                agency.setAgencyName(resultSet.getString("agency_name"));
+	                agency.setOwnerName(resultSet.getString("owner_name"));
+	                agency.setEmail(resultSet.getString("email"));
+	                agency.setPhone(resultSet.getString("phone"));
+	                agency.setCity(resultSet.getString("city"));
+	                agency.setState(resultSet.getString("state"));
+	                agency.setCountry(resultSet.getString("country"));
+	                agency.setPincode(resultSet.getString("pincode"));
+	                agency.setRegistrationNumber(resultSet.getString("registration_number"));
+	                agency.setPassword(resultSet.getString("password"));
+	                agency.setActive(resultSet.getBoolean("is_active"));
+	                agency.setDelete(resultSet.getBoolean("is_delete"));
+	                if (resultSet.getDate("created_at") != null)
+	                    agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+	                if (resultSet.getDate("updated_at") != null)
+	                    agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+
+	                pendingList.add(agency);
+	            }
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        return pendingList;
+	}
+
+	@Override
+	public List<Agency> getAgenciesByStatus(boolean key, int limit, int offset) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Agency> getAgenciesByStatus(String status) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Agency> getActiveAgencies() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Agency> getInactiveAgencies() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public long countAgencies() throws Exception {
+	public long countAgencies(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public long countPendingAgencies() throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long countApprovedAgencies() throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long countDeclinedAgencies() throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public List<Agency> getRecentlyRegisteredAgencies(int limit) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Agency> getAgenciesRegisteredBetween(String startDate, String endDate) throws Exception {
+	public List<Agency> getPendingAgencies(int limit, int offset) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

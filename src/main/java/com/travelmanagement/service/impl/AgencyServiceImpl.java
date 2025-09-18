@@ -67,8 +67,8 @@ public class AgencyServiceImpl implements IAgencyService {
     }
 
     @Override
-    public List<AgencyResponseDTO> getAllAgencies() throws Exception {
-        List<Agency> agencies = agencyDAO.getAllAgencies();
+    public List<AgencyResponseDTO> getAllAgencies(int limit,int offset) throws Exception {
+        List<Agency> agencies = agencyDAO.getAllAgencies(limit,offset);
         List<AgencyResponseDTO> responseList = new ArrayList<>();
         for (Agency a : agencies) {
             responseList.add(authService.mapAgencyToAgencyResponseDTO(a));
@@ -87,7 +87,7 @@ public class AgencyServiceImpl implements IAgencyService {
     }
 
     @Override
-    public List<AgencyResponseDTO> getPendingAgencies() throws Exception {
+    public List<AgencyResponseDTO> getPendingAgencies(int limit,int offset) throws Exception {
         List<Agency> pending = agencyDAO.getPendingAgencies();
         List<AgencyResponseDTO> responseList = new ArrayList<>();
         for (Agency a : pending) {

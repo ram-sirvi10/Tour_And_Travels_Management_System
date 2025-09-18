@@ -15,7 +15,7 @@ public interface IUserService {
 
 	UserResponseDTO getByEmail(String email) throws Exception;
 
-	List<UserResponseDTO> getAll() throws Exception;
+	List<UserResponseDTO> getAll(int limit,int offset) throws Exception;
 
 	boolean update(User user) throws Exception;
 

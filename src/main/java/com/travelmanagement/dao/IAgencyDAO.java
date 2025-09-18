@@ -10,8 +10,6 @@ public interface IAgencyDAO {
 
 	Agency getAgencyById(int id) throws Exception;
 
-	List<Agency> getAllAgencies() throws Exception;
-
 	boolean updateAgency(Agency agency) throws Exception;
 
 	boolean deleteAgency(int id) throws Exception;
@@ -20,32 +18,20 @@ public interface IAgencyDAO {
 
 	boolean declineAgency(int agencyId) throws Exception;
 
-	List<Agency> getPendingAgencies() throws Exception;
+	List<Agency> getPendingAgencies(int limit, int offset) throws Exception;
 
 	boolean enableAgency(int agencyId) throws Exception;
 
 	boolean disableAgency(int agencyId) throws Exception;
 
-	List<Agency> searchAgenciesByName(String keyword) throws Exception;
+	List<Agency> searchAgencies(String keyword,int limit, int offset) throws Exception;
 
-	List<Agency> getAgenciesByLocation(String location) throws Exception;
+	List<Agency> getAgenciesByStatus(String status,int limit, int offset) throws Exception;//approve, panding ,reject
 
-	List<Agency> getAgenciesByStatus(String status) throws Exception;
+	List<Agency> getAgenciesByStatus(boolean key,int limit, int offset) throws Exception;// Active or inactive
 
-	List<Agency> getActiveAgencies() throws Exception;
+	long countAgencies(String key) throws Exception;
 
-	List<Agency> getInactiveAgencies() throws Exception;
-
-	long countAgencies() throws Exception;
-
-	long countPendingAgencies() throws Exception;
-
-	long countApprovedAgencies() throws Exception;
-
-	long countDeclinedAgencies() throws Exception;
-
-	List<Agency> getRecentlyRegisteredAgencies(int limit) throws Exception;
-
-	List<Agency> getAgenciesRegisteredBetween(String startDate, String endDate) throws Exception;
+	
 
 }

@@ -21,13 +21,13 @@ public interface IAgencyService {
 
 	boolean disableAgency(int agencyId) throws Exception;
 
-	List<AgencyResponseDTO> getPendingAgencies() throws Exception;
+	List<AgencyResponseDTO> getPendingAgencies(int limit,int offset) throws Exception;
 
 	boolean deleteAgency(int agencyId) throws Exception;
 
 	boolean updateAgency(Agency agency) throws Exception;
 
-	List<AgencyResponseDTO> getAllAgencies() throws Exception;
+	List<AgencyResponseDTO> getAllAgencies(int limit,int offset) throws Exception;
 
 	AgencyResponseDTO getAgencyByEmail(String email) throws Exception;
 
