@@ -1,7 +1,6 @@
 package com.travelmanagement.service.impl;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import com.travelmanagement.dao.IUserDAO;
 import com.travelmanagement.dao.impl.UserDAOImpl;
@@ -75,6 +74,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+<<<<<<< HEAD
     public List<UserResponseDTO> getAll(int limit,int offset) throws Exception {
         List<User> users = userDAO.getAllUsers(limit,offset);
         List<UserResponseDTO> responseList = new ArrayList<>();
@@ -85,6 +85,19 @@ public class UserServiceImpl implements IUserService {
         }
 
         return responseList;
+=======
+    public List<UserResponseDTO> getAll() throws Exception {
+//        List<User> users = userDAO.getAllUsers();
+//        List<UserResponseDTO> responseList = new ArrayList<>();
+//
+//        for (User user : users) {
+//            UserResponseDTO dto = authService.mapUserToUserResponseDTO(user);
+//            responseList.add(dto);
+//        }
+//
+//        return responseList;
+    	return null;
+>>>>>>> eb0f9dd43fc352488619c5a15f4e911d9ff3c623
     }
 
     @Override
