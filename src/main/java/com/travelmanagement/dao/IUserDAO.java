@@ -15,14 +15,12 @@ public interface IUserDAO {
 
 	boolean deleteUser(int id) throws Exception;
 
-	boolean enableUser(int userId) throws Exception;
-
-	boolean disableUser(int userId) throws Exception;
-
 	boolean changePassword(int userId, String newPassword) throws Exception;
 
 	List<User> searchUsers(String Keyword ,int limit, int offset ) throws Exception;
 
 	List<User> getAllUsers(int limit, int offset) throws Exception;
+
+	boolean updateUserActiveState(int userId, boolean active) throws Exception;
 
 }

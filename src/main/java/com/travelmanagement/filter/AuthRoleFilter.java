@@ -73,7 +73,7 @@ import jakarta.servlet.http.HttpSession;
 //    }
 //}
 
-@WebFilter({ "/AdminServlet/*", "/AgencyServlet/*", "/UserServlet/*", "/BookingServlet/*", "/PackageServlet/*" })
+@WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
 public class AuthRoleFilter implements Filter {
 
 	@Override
@@ -99,20 +99,20 @@ public class AuthRoleFilter implements Filter {
 
 		// Define allowed URLs + button combinations for each role
 		Map<String, List<String>> adminAccess = new HashMap<>();
-		adminAccess.put(context + "/AdminServlet", List.of("dashboard"));
-		adminAccess.put(context + "/AgencyServlet", List.of("dashboard"));
-		adminAccess.put(context + "/UserServlet", List.of("dashboard"));
+		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers","manageAgencies","userAction","agencyAction","pendingAgencies"));
+		adminAccess.put(context + "/agency", List.of("dashboard"));
+		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
-		subAdminAccess.put(context + "/AgencyServlet", List.of("dashboard", "addPackage"));
-		subAdminAccess.put(context + "/BookingServlet", List.of("viewBookings"));
-		subAdminAccess.put(context + "/PackageServlet", List.of("viewPackages"));
-		subAdminAccess.put(context + "/UserServlet", List.of("viewUsers"));
+		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage"));
+		subAdminAccess.put(context + "/booking", List.of("viewBookings"));
+		subAdminAccess.put(context + "/package", List.of("viewPackages"));
+		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/UserServlet", List.of("dashboard", "profile"));
-		userAccess.put(context + "/BookingServlet", List.of("book", "viewBookings"));
-		userAccess.put(context + "/PackageServlet", List.of("viewPackages"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile"));
+		userAccess.put(context + "/booking", List.of("book", "viewBookings"));
+		userAccess.put(context + "/package", List.of("viewPackages"));
 
 		boolean allowed = switch (role) {
 		case "ADMIN" -> checkAccess(path, button, adminAccess);

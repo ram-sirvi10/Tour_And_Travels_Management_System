@@ -1,6 +1,7 @@
 package com.travelmanagement.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
@@ -22,7 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/AuthServlet")
+@WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -129,14 +130,6 @@ public class AuthServlet extends HttpServlet {
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
-			request.setAttribute("agency_name", dto.getAgencyName());
-			request.setAttribute("owner_name", dto.getOwnerName());
-			request.setAttribute("email", dto.getEmail());
-			request.setAttribute("phone", dto.getPhone());
-			request.setAttribute("city", dto.getCity());
-			request.setAttribute("state", dto.getState());
-			request.setAttribute("country", dto.getCountry());
-			request.setAttribute("pincode", dto.getPincode());
 			request.setAttribute("registration_number", dto.getRegistrationNumber());
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			return;
@@ -144,7 +137,7 @@ public class AuthServlet extends HttpServlet {
 
 		agencyService.register(dto);
 		request.setAttribute("success", "Agency registered successfully! Waiting for admin approval.");
-		request.getRequestDispatcher("login.jsp").forward(request, response);
+		request.getRequestDispatcher("login.jsp?role=agency").forward(request, response);
 		return;
 
 	}
@@ -155,7 +148,14 @@ public class AuthServlet extends HttpServlet {
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setRole(request.getParameter("role"));
-		Map<String, String> errors = authService.validateLoginDto(dto);
+		  Map<String, String> errors = new HashMap<>();
+		   if ("user".equalsIgnoreCase(dto.getRole())) {
+		        errors = authService.validateLoginDto(dto);
+		    } else if ("agency".equalsIgnoreCase(dto.getRole())) {
+		        errors = authService.validateLoginAgencyDto(dto);
+		    } else {
+		        errors.put("role", "Invalid role selected!");
+		    }
 
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
@@ -169,23 +169,24 @@ public class AuthServlet extends HttpServlet {
 			if ("ADMIN".equalsIgnoreCase(loggedInUser.getUserRole())) {
 //				rd = request.getRequestDispatcher("template/admin/adminDashboard.jsp");
 //				rd.forward(request, response);
-				response.sendRedirect("AdminServlet?button=dashboard");
+				response.sendRedirect("admin?button=dashboard");
 				return;
 //                 response.sendRedirect("template/admin/adminDashboard.jsp");
 			} else {
 //                 response.sendRedirect("template/user/userDashboard.jsp");
 //				rd = request.getRequestDispatcher("template/user/userDashboard.jsp");
-				response.sendRedirect("UserServlet?button=dashboard");
+				response.sendRedirect("user?button=dashboard");
 //				rd.forward(request, response);
 				return;
 			}
 		} else if ("agency".equalsIgnoreCase(dto.getRole())) {
 			AgencyResponseDTO loggedInAgency = agencyService.login(dto);
 			HttpSession session = request.getSession();
-			session.setAttribute("user", loggedInAgency);
+			session.setAttribute("agency", loggedInAgency);
 //             response.sendRedirect("template/agency/agencyDashboard.jsp");
-			rd = request.getRequestDispatcher("template/agency/agencyDashboard.jsp");
-			rd.forward(request, response);
+//			rd = request.getRequestDispatcher("template/agency/agencyDashboard.jsp");
+//			rd.forward(request, response);
+			response.sendRedirect("agency?button=dashboard");
 			return;
 		} else {
 			errors.put("loginError", "Invalid credentials ");

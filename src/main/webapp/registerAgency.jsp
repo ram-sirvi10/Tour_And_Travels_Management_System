@@ -3,15 +3,15 @@
 
 <%
     String error = (String) request.getAttribute("error");
-    String agencyName = request.getAttribute("agency_name") != null ? (String)request.getAttribute("agency_name") : "";
-    String ownerName = request.getAttribute("owner_name") != null ? (String)request.getAttribute("owner_name") : "";
-    String email = request.getAttribute("email") != null ? (String)request.getAttribute("email") : "";
-    String phone = request.getAttribute("phone") != null ? (String)request.getAttribute("phone") : "";
-    String city = request.getAttribute("city") != null ? (String)request.getAttribute("city") : "";
-    String state = request.getAttribute("state") != null ? (String)request.getAttribute("state") : "";
-    String country = request.getAttribute("country") != null ? (String)request.getAttribute("country") : "";
-    String pincode = request.getAttribute("pincode") != null ? (String)request.getAttribute("pincode") : "";
-    String regNumber = request.getAttribute("registration_number") != null ? (String)request.getAttribute("registration_number") : "";
+    String agencyName =  request.getParameter("agency_name") != null ? request.getParameter("agency_name") : "" ;
+    String ownerName = request.getParameter("owner_name") != null ? request.getParameter("owner_name") : "" ;
+    String email = request.getParameter("email") != null ? request.getParameter("email") : "" ;
+    String phone = request.getParameter("phone") != null ? request.getParameter("phone") : "" ;
+    String city = request.getParameter("city") != null ? request.getParameter("city") : "" ;
+    String state = request.getParameter("state") != null ? request.getParameter("state") : "" ;
+    String country = request.getParameter("country") != null ? request.getParameter("country") : "" ;
+    String pincode = request.getParameter("pincode") != null ? request.getParameter("pincode") : "" ;
+    String regNumber = request.getParameter("registration_number") != null ? request.getParameter("registration_number") : "" ;
 %>
 <!DOCTYPE html>
 <html>
@@ -36,7 +36,7 @@
     Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
 %>
 
-<form action="AuthServlet" method="post">
+<form action="./auth" method="post">
     <input type="text" name="agency_name" placeholder="Agency Name" value="<%= agencyName %>">
     <% if (errors != null && errors.get("agencyName") != null) { %>
         <div class="error"><%= errors.get("agencyName") %></div>

@@ -125,7 +125,7 @@ public class AuthenticationFilter implements Filter {
         System.out.println("FILTER URI ==> " + uri);
 
         // ✅ Always allow AuthServlet (for login & logout)
-        if (uri.contains("/AuthServlet")) {
+        if (uri.contains("/auth")) {
             chain.doFilter(request, response);
             return;
         }

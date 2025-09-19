@@ -6,46 +6,28 @@ import java.util.List;
 public interface IAgencyDAO {
 	boolean createAgency(Agency agency) throws Exception;
 
-	Agency getAgencyByEmail(String email) throws Exception;
-
 	Agency getAgencyById(int id) throws Exception;
-
-	List<Agency> getAllAgencies() throws Exception;
 
 	boolean updateAgency(Agency agency) throws Exception;
 
 	boolean deleteAgency(int id) throws Exception;
 
-	boolean approveAgency(int agencyId) throws Exception;
+	List<Agency> searchAgencies(String keyword,int limit, int offset) throws Exception;
 
-	boolean declineAgency(int agencyId) throws Exception;
+	List<Agency> getAgenciesByStatus(String status,int limit, int offset) throws Exception;
 
-	List<Agency> getPendingAgencies() throws Exception;
+	List<Agency> getAgenciesByActiveState(boolean key,int limit, int offset) throws Exception;
 
-	boolean enableAgency(int agencyId) throws Exception;
+	long countAgencies(String key) throws Exception;
 
-	boolean disableAgency(int agencyId) throws Exception;
+	List<Agency> getAllAgencies(int limit, int offset);
 
-	List<Agency> searchAgenciesByName(String keyword) throws Exception;
+	boolean updateAgencyStatus(int agencyId, String status) throws Exception;
 
-	List<Agency> getAgenciesByLocation(String location) throws Exception;
+	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
 
-	List<Agency> getAgenciesByStatus(String status) throws Exception;
+	Agency getAgencyByField(String fieldName, String value) throws Exception;
 
-	List<Agency> getActiveAgencies() throws Exception;
-
-	List<Agency> getInactiveAgencies() throws Exception;
-
-	long countAgencies() throws Exception;
-
-	long countPendingAgencies() throws Exception;
-
-	long countApprovedAgencies() throws Exception;
-
-	long countDeclinedAgencies() throws Exception;
-
-	List<Agency> getRecentlyRegisteredAgencies(int limit) throws Exception;
-
-	List<Agency> getAgenciesRegisteredBetween(String startDate, String endDate) throws Exception;
+	
 
 }

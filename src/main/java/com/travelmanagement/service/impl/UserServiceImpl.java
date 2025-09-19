@@ -1,5 +1,6 @@
 package com.travelmanagement.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.travelmanagement.dao.IUserDAO;
@@ -11,11 +12,12 @@ import com.travelmanagement.exception.BadRequestException;
 import com.travelmanagement.exception.UserNotFoundException;
 import com.travelmanagement.model.User;
 import com.travelmanagement.service.IUserService;
+import com.travelmanagement.util.Mapper;
 import com.travelmanagement.util.PasswordHashing;
 
 public class UserServiceImpl implements IUserService {
 
-    private AuthServiceImpl authService = new AuthServiceImpl();
+    
     private IUserDAO userDAO = new UserDAOImpl();
 
     @Override
@@ -24,7 +26,7 @@ public class UserServiceImpl implements IUserService {
             throw new BadRequestException("Passwords do not match!");
         }
 
-        User user = authService.mapRegisterDtoToUser(dto);
+        User user = Mapper.mapRegisterDtoToUser(dto);
         user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
 
         boolean created = userDAO.createUser(user);
@@ -33,24 +35,26 @@ public class UserServiceImpl implements IUserService {
         }
 
       
-        return authService.mapUserToUserResponseDTO(user);
+        return Mapper.mapUserToUserResponseDTO(user);
     }
 
     @Override
     public UserResponseDTO login(LoginRequestDTO dto) throws Exception {
-        User loginUser = authService.mapLoginDtoToUser(dto);
+        User loginUser = Mapper.mapLoginDtoToUser(dto);
 
         User dbUser = userDAO.getUserByEmail(loginUser.getUserEmail());
         if (dbUser == null) {
             throw new UserNotFoundException("User not found!");
         }
-
+        if (!dbUser.isActive()) {
+            throw new BadRequestException("Account is blocked! Please contact support.");
+        }
         if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
             throw new BadRequestException("Invalid credentials!");
         }
 
      
-        return authService.mapUserToUserResponseDTO(dbUser);
+        return Mapper.mapUserToUserResponseDTO(dbUser);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class UserServiceImpl implements IUserService {
             throw new UserNotFoundException("User not found with id: " + id);
         }
 
-        return authService.mapUserToUserResponseDTO(user);
+        return Mapper.mapUserToUserResponseDTO(user);
     }
 
     @Override
@@ -70,22 +74,20 @@ public class UserServiceImpl implements IUserService {
             throw new UserNotFoundException("User not found with email: " + email);
         }
 
-        return authService.mapUserToUserResponseDTO(user);
+        return Mapper.mapUserToUserResponseDTO(user);
     }
 
     @Override
-    public List<UserResponseDTO> getAll() throws Exception {
-//        List<User> users = userDAO.getAllUsers();
-//        List<UserResponseDTO> responseList = new ArrayList<>();
-//
-//        for (User user : users) {
-//            UserResponseDTO dto = authService.mapUserToUserResponseDTO(user);
-//            responseList.add(dto);
-//        }
-//
-//        return responseList;
-    	return null;
-    }
+    public List<UserResponseDTO> getAll(int limit,int offset) throws Exception {
+        List<User> users = userDAO.getAllUsers(limit,offset);
+        List<UserResponseDTO> responseList = new ArrayList<>();
+
+        for (User user : users) {
+            UserResponseDTO dto = Mapper.mapUserToUserResponseDTO(user);
+            responseList.add(dto);
+        }
+
+        return responseList;}
 
     @Override
     public boolean update(User user) throws Exception {
@@ -95,5 +97,9 @@ public class UserServiceImpl implements IUserService {
     @Override
     public boolean delete(int id) throws Exception {
         return userDAO.deleteUser(id);
+    }
+   
+    public boolean updateUserActiveState(int userId, boolean active) throws Exception {
+        return userDAO.updateUserActiveState(userId, active);
     }
 }

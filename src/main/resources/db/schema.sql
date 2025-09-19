@@ -80,6 +80,11 @@ CREATE TABLE travelers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
-
+-- add new column(no_of_travellers) in booking table 
 ALTER TABLE bookings
 ADD COLUMN no_of_travellers INT NOT NULL DEFAULT 1;
+
+
+-- drop unique constraints in tables  
+ALTER TABLE users DROP INDEX user_email;
+ALTER TABLE travelAgency DROP INDEX email;

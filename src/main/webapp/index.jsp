@@ -15,7 +15,6 @@ Object obj = session.getAttribute("user");
   <h1>Tour & Travel Management System</h1>
   <p>Book your dream destinations with ease and comfort</p>
   <%if(obj==null){ %>
-  <a href="login.jsp?role=user" class="btn-started">👤 Login as User</a>
   <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a><%} else{%>
   <a href="login.jsp" class="btn-started">🚀 Get Started</a>
   <%} %>
@@ -53,7 +52,6 @@ Object obj = session.getAttribute("user");
   <p>Discover exciting travel packages and start your adventure today.</p>
   
  
-  <a href="login.jsp?role=user" class="btn-started">👤 Login as User</a>
   <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a>
 </section>
 
