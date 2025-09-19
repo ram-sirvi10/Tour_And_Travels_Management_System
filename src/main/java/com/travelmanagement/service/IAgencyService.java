@@ -13,16 +13,6 @@ public interface IAgencyService {
 
     AgencyResponseDTO login(LoginRequestDTO dto) throws Exception;
 
-	boolean approveAgency(int agencyId) throws Exception;
-
-	boolean declineAgency(int agencyId) throws Exception;
-
-	boolean enableAgency(int agencyId) throws Exception;
-
-	boolean disableAgency(int agencyId) throws Exception;
-
-	List<AgencyResponseDTO> getPendingAgencies(int limit,int offset) throws Exception;
-
 	boolean deleteAgency(int agencyId) throws Exception;
 
 	boolean updateAgency(Agency agency) throws Exception;
@@ -32,5 +22,11 @@ public interface IAgencyService {
 	AgencyResponseDTO getAgencyByEmail(String email) throws Exception;
 
 	AgencyResponseDTO getAgencyById(int agencyId) throws Exception;
+
+	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
+
+	List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception;
+
+	boolean updateAgencyStatus(int agencyId, String status) throws Exception;
 
 }

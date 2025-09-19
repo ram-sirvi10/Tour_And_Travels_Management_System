@@ -6,31 +6,27 @@ import java.util.List;
 public interface IAgencyDAO {
 	boolean createAgency(Agency agency) throws Exception;
 
-	Agency getAgencyByEmail(String email) throws Exception;
-
 	Agency getAgencyById(int id) throws Exception;
 
 	boolean updateAgency(Agency agency) throws Exception;
 
 	boolean deleteAgency(int id) throws Exception;
 
-	boolean approveAgency(int agencyId) throws Exception;
-
-	boolean declineAgency(int agencyId) throws Exception;
-
-	List<Agency> getPendingAgencies(int limit, int offset) throws Exception;
-
-	boolean enableAgency(int agencyId) throws Exception;
-
-	boolean disableAgency(int agencyId) throws Exception;
-
 	List<Agency> searchAgencies(String keyword,int limit, int offset) throws Exception;
 
-	List<Agency> getAgenciesByStatus(String status,int limit, int offset) throws Exception;//approve, panding ,reject
+	List<Agency> getAgenciesByStatus(String status,int limit, int offset) throws Exception;
 
-	List<Agency> getAgenciesByStatus(boolean key,int limit, int offset) throws Exception;// Active or inactive
+	List<Agency> getAgenciesByActiveState(boolean key,int limit, int offset) throws Exception;
 
 	long countAgencies(String key) throws Exception;
+
+	List<Agency> getAllAgencies(int limit, int offset);
+
+	boolean updateAgencyStatus(int agencyId, String status) throws Exception;
+
+	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
+
+	Agency getAgencyByField(String fieldName, String value) throws Exception;
 
 	
 

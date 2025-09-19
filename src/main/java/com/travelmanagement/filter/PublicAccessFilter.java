@@ -8,7 +8,7 @@ import java.io.IOException;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 
-@WebFilter({ "/AuthServlet", "/login.jsp", "/register.jsp", "/forgotPassword.jsp", "/resetPassword.jsp" })
+@WebFilter({ "/auth", "/login.jsp", "/register.jsp", "/forgotPassword.jsp", "/resetPassword.jsp" })
 public class PublicAccessFilter implements Filter {
 
 	@Override
@@ -41,13 +41,13 @@ public class PublicAccessFilter implements Filter {
 
 			// Redirect based on role
 			if ("ADMIN".equalsIgnoreCase(role)) {
-				res.sendRedirect(req.getContextPath() + "/AdminServlet?button=dashboard");
+				res.sendRedirect(req.getContextPath() + "/admin?button=dashboard");
 				return;
 			} else if ("SUBADMIN".equalsIgnoreCase(role)) {
-				res.sendRedirect(req.getContextPath() + "/AgencyServlet?button=dashboard");
+				res.sendRedirect(req.getContextPath() + "/agency?button=dashboard");
 				return;
 			} else if ("USER".equalsIgnoreCase(role)) {
-				res.sendRedirect(req.getContextPath() + "/UserServlet?button=dashboard");
+				res.sendRedirect(req.getContextPath() + "/user?button=dashboard");
 				return;
 			}
 		}

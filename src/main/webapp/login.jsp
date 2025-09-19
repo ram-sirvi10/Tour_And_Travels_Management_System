@@ -13,11 +13,11 @@
 <%
     String role = request.getParameter("role");
     if (role == null) {
-        role = "user"; // default
+        role = "user"; 
     }
 
-    String heading = "Login as " + ("agency".equals(role) ? "Agency" : "User");
-    String buttonLabel = "Login as " + ("agency".equals(role) ? "Agency" : "User");
+    String heading = "Login " + ("agency".equals(role) ? " as Agency" : "");
+    String buttonLabel = "Login  " + ("agency".equals(role) ? " as Agency" : "");
 
     Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
     String globalError = (String) request.getAttribute("error");
@@ -28,7 +28,7 @@
 <div class="container">
     <h2><%= heading %></h2>
 
-    <form action="./AuthServlet" method="post">
+    <form action="./auth" method="post">
         <input type="hidden" name="action" value="login">
         <input type="hidden" name="role" value="<%= role %>"> 
 

@@ -12,20 +12,20 @@ import com.travelmanagement.model.User;
 
 public interface IAuthService {
 
-	User mapRegisterDtoToUser(RegisterRequestDTO registerRequestDTO);
-
-	User mapLoginDtoToUser(LoginRequestDTO loginRequestDTO);
+	
 
 	Map<String, String> validateRegisterAgencyDto(AgencyRegisterRequestDTO dto);
 
-	UserResponseDTO mapUserToUserResponseDTO(User user);
+	
 
 	Map<String, String> validateRegisterDto(RegisterRequestDTO dto);
 
-	AgencyResponseDTO mapAgencyToAgencyResponseDTO(Agency agency);
-
-	Agency mapRegisterAgencyDtoToAgency(AgencyRegisterRequestDTO dto);
+	
 
 	Map<String, String> validateLoginDto(LoginRequestDTO dto);
+
+
+
+	Map<String, String> validateLoginAgencyDto(LoginRequestDTO dto);
   
 }

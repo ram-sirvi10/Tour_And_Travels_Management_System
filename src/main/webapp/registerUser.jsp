@@ -22,7 +22,7 @@
         Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
     %>
 
-    <form action="./AuthServlet" method="post">
+    <form action="<%= request.getContextPath() %>/auth" method="post">
         <label>Name:</label>
         <input type="text" name="name" value="<%= request.getParameter("name") != null ? request.getParameter("name") : "" %>">
         <% if(errors != null && errors.get("username") != null){ %>
