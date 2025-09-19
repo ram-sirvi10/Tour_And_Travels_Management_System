@@ -6,9 +6,10 @@
 <%@ page import="java.util.List"%>
 
 <%
-    // Get the logged-in agency from session
-    Agency agency = (Agency) session.getAttribute("agency");
+    AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
+%>
 
+<%
     // Assume you already have a DAO or Service to fetch packages/bookings dynamically
     List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
     Integer totalBookings = (Integer) request.getAttribute("totalBookings");
@@ -103,7 +104,7 @@
                 </div>
             </div>
 
-            <!-- Recent Bookings Table -->
+          
             <div class="card p-3 shadow-sm">
                 <h5>Recent Bookings</h5>
                 <table class="table table-striped">
@@ -118,7 +119,7 @@
                                 for (PackageResponseDTO p : packages) {
                         %>
                         <tr>
-                            <td>PCK-<%= p.getPackageId() %></td>
+                            <td>PCK-<%= p.getPackageId()%></td>
                             <td>—</td>
                             <td><%= p.getTitle() %></td>
                             <td>—</td>
