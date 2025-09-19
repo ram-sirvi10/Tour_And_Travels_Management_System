@@ -2,10 +2,13 @@ package com.travelmanagement.util;
 
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
+import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.Packages;
 import com.travelmanagement.model.User;
 
 public class Mapper {
@@ -76,4 +79,41 @@ public class Mapper {
 		    dto.setUpdatedAt(agency.getUpdatedAt());
 		    return dto;
 		}
-}
+
+		    public static Packages mapToModel(PackageRegisterDTO dto) {
+		        Packages pkg = new Packages();
+		        if (dto.getPackageId() != null && !dto.getPackageId().isEmpty()) {
+		            pkg.setPackageId(Integer.parseInt(dto.getPackageId()));
+		        }
+		        pkg.setTitle(dto.getTitle());
+		        pkg.setAgencyId(Integer.parseInt(dto.getAgencyId()));
+		        pkg.setDescription(dto.getDescription());
+		        pkg.setPrice(Double.parseDouble(dto.getPrice()));
+		        pkg.setLocation(dto.getLocation());
+		        pkg.setDuration(Integer.parseInt(dto.getDuration()));
+		        pkg.setActive(Boolean.parseBoolean(dto.getIsActive()));
+		        return pkg;
+		    }
+		
+
+
+
+		    public static PackageResponseDTO toResponseDTO(Packages pkg) {
+		        PackageResponseDTO dto = new PackageResponseDTO();
+		        dto.setPackageId(pkg.getPackageId());
+		        dto.setTitle(pkg.getTitle());
+		        dto.setAgencyId(pkg.getAgencyId());
+		        dto.setDescription(pkg.getDescription());
+		        dto.setPrice(pkg.getPrice());
+		        dto.setLocation(pkg.getLocation());
+		        dto.setDuration(pkg.getDuration());
+		        dto.setIsActive(pkg.isActive());
+		        return dto;
+		    }
+
+		  
+		}
+
+		
+		
+

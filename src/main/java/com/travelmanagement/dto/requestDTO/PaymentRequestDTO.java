@@ -1,5 +1,3 @@
 package com.travelmanagement.dto.requestDTO;
 
-public class PaymentRequestDTO {
-
-}
+public class PaymentRequestDTO {}

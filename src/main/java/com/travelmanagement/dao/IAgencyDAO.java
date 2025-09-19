@@ -1,7 +1,8 @@
 package com.travelmanagement.dao;
 
-import com.travelmanagement.model.Agency;
 import java.util.List;
+
+import com.travelmanagement.model.Agency;
 
 public interface IAgencyDAO {
 	boolean createAgency(Agency agency) throws Exception;
@@ -12,11 +13,11 @@ public interface IAgencyDAO {
 
 	boolean deleteAgency(int id) throws Exception;
 
-	List<Agency> searchAgencies(String keyword,int limit, int offset) throws Exception;
+	List<Agency> searchAgencies(String keyword, int limit, int offset) throws Exception;
 
-	List<Agency> getAgenciesByStatus(String status,int limit, int offset) throws Exception;
+	List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception;
 
-	List<Agency> getAgenciesByActiveState(boolean key,int limit, int offset) throws Exception;
+	List<Agency> getAgenciesByActiveState(boolean key, int limit, int offset) throws Exception;
 
 	long countAgencies(String key) throws Exception;
 
@@ -27,7 +28,5 @@ public interface IAgencyDAO {
 	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
 
 	Agency getAgencyByField(String fieldName, String value) throws Exception;
-
-	
 
 }

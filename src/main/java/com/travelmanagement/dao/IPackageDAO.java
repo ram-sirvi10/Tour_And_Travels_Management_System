@@ -1,23 +1,18 @@
 package com.travelmanagement.dao;
 
-import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.Packages;
 import java.util.List;
 
 public interface IPackageDAO {
-	int createPackage(Agency p) throws Exception;
+	boolean addPackage(Packages pkg) throws Exception;
 
-	Agency getPackageById(int id) throws Exception;
+	boolean updatePackage(Packages pkg) throws Exception;
 
-	List<Agency> getAllPackages() throws Exception;
+	boolean deletePackage(int packageId) throws Exception;
 
-	List<Agency> searchPackages(String keyword) throws Exception;
+	boolean togglePackageStatus(int packageId) throws Exception;
 
-	boolean updatePackage(Agency p) throws Exception;
+	List<Packages> getAllPackages() throws Exception;
 
-	boolean deletePackage(int id) throws Exception;
-	
-	List<Agency> getAllPackagesByAgency(int agencyId) throws Exception;
-	
-	
-	
+	Packages getPackageById(int packageId) throws Exception;
 }
