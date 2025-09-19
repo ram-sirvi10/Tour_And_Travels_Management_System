@@ -2,7 +2,7 @@ package com.travelmanagement.model;
 
 import java.time.LocalDate;
 
-public class Package {
+public class Packages {
 
 	private int packageId;
 	private String title;
@@ -11,7 +11,7 @@ public class Package {
 	private double price;
 	private String location;
 	private int duration; 
-	private String imageUrl;
+	
 	private boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
@@ -97,5 +97,7 @@ public class Package {
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+	
 
 }

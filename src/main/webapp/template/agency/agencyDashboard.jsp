@@ -1,10 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" session="true"%>
-<%@ page import="com.travelmanagement.dto.responseDTO.AgencyResponseDTO" %>
+<%@ page import="com.travelmanagement.dto.responseDTO.AgencyResponseDTO"%>
+<%@ page import="com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
+<%@ page import="com.travelmanagement.model.Agency"%>
+<%@ page import="java.util.List"%>
 
 <%
-AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
+    // Get the logged-in agency from session
+    Agency agency = (Agency) session.getAttribute("agency");
+
+    // Assume you already have a DAO or Service to fetch packages/bookings dynamically
+    List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
+    Integer totalBookings = (Integer) request.getAttribute("totalBookings");
+    Double totalRevenue = (Double) request.getAttribute("totalRevenue");
 %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,7 +49,7 @@ AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
                 <p class="small">Agency Dashboard</p>
             </div>
             <ul class="nav flex-column px-2">
-                <li class="nav-item"><a href="#" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="?button=dashboard" class="nav-link">Dashboard</a></li>
                 <li class="nav-item"><a href="#" class="nav-link">My Packages</a></li>
                 <li class="nav-item"><a href="#" class="nav-link">Bookings</a></li>
                 <li class="nav-item"><a href="#" class="nav-link">Payments</a></li>
@@ -57,22 +67,22 @@ AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
                 <div class="col-md-4">
                     <div class="card card-analytics p-3 shadow-sm">
                         <h5>Total Packages</h5>
-                        <h2>24</h2>
+                        <h2><%= (packages != null ? packages.size() : 0) %></h2>
                         <p class="small-muted">Active packages you manage</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card card-analytics p-3 shadow-sm">
                         <h5>Total Bookings</h5>
-                        <h2>1287</h2>
-                        <p class="small-muted">+5% since last month</p>
+                        <h2><%= (totalBookings != null ? totalBookings : 0) %></h2>
+                        <p class="small-muted">Bookings this month</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card card-analytics p-3 shadow-sm">
                         <h5>Total Revenue</h5>
-                        <h2>₹12,547,850</h2>
-                        <p class="small-muted">+8% growth</p>
+                        <h2>₹<%= (totalRevenue != null ? totalRevenue.intValue() : 0) %></h2>
+                        <p class="small-muted">Revenue generated</p>
                     </div>
                 </div>
             </div>
@@ -103,9 +113,28 @@ AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>BKG-1001</td><td>Anita</td><td>Goa Beach Escape</td><td>2025-08-01</td><td class="status-confirmed">Confirmed</td><td>₹12,000</td></tr>
-                        <tr><td>BKG-1002</td><td>Rohan</td><td>Himalaya Trek</td><td>2025-09-10</td><td class="status-pending">Pending</td><td>₹22,000</td></tr>
-                        <tr><td>BKG-1003</td><td>Sita</td><td>Kerala Backwaters</td><td>2025-07-20</td><td class="status-cancelled">Cancelled</td><td>₹15,000</td></tr>
+                        <%
+                            if (packages != null) {
+                                for (PackageResponseDTO p : packages) {
+                        %>
+                        <tr>
+                            <td>PCK-<%= p.getPackageId() %></td>
+                            <td>—</td>
+                            <td><%= p.getTitle() %></td>
+                            <td>—</td>
+                            <td class="<%= p.isIsActive() ? "status-confirmed" : "status-pending" %>">
+                                <%= p.isIsActive() ? "Active" : "Inactive" %>
+                            </td>
+                            <td>₹<%= p.getPrice() %></td>
+                        </tr>
+                        <%
+                                }
+                            } else {
+                        %>
+                        <tr><td colspan="6">No packages found</td></tr>
+                        <%
+                            }
+                        %>
                     </tbody>
                 </table>
             </div>
@@ -116,30 +145,41 @@ AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
 
 <!-- Charts Script -->
 <script>
-new Chart(document.getElementById('bookingsChart'), {
-    type: 'line',
-    data: {
-        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
-        datasets: [{
-            label: 'Bookings',
-            data: [12,18,20,16,22,14,10,25,28],
-            borderColor: 'blue',
-            backgroundColor: 'rgba(0,123,255,0.2)',
-            fill: true
-        }]
-    }
-});
-new Chart(document.getElementById('revenueChart'), {
-    type: 'bar',
-    data: {
-        labels: ['Goa Escape','Himalaya Trek','Kerala Tour','Rajasthan Heritage','Andaman Package'],
-        datasets: [{
-            label: 'Revenue',
-            data: [320000,250000,180000,210000,350000],
-            backgroundColor: ['#007bff','#28a745','#ffc107','#17a2b8','#6f42c1']
-        }]
-    }
-});
+    const bookingsChart = new Chart(document.getElementById('bookingsChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
+            datasets: [{
+                label: 'Bookings',
+                data: [12,18,20,16,22,14,10,25,28],
+                borderColor: 'blue',
+                backgroundColor: 'rgba(0,123,255,0.2)',
+                fill: true
+            }]
+        }
+    });
+
+    const revenueChart = new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: [
+                <% if(packages != null){ 
+                    for(int i=0;i<packages.size();i++){ %>
+                        '<%= packages.get(i).getTitle() %>'<%= i < packages.size()-1 ? "," : "" %>
+                <% }} %>
+            ],
+            datasets: [{
+                label: 'Revenue',
+                data: [
+                    <% if(packages != null){ 
+                        for(int i=0;i<packages.size();i++){ %>
+                            <%= packages.get(i).getPrice() %><%= i < packages.size()-1 ? "," : "" %>
+                    <% }} %>
+                ],
+                backgroundColor: ['#007bff','#28a745','#ffc107','#17a2b8','#6f42c1']
+            }]
+        }
+    });
 </script>
 </body>
 </html>
