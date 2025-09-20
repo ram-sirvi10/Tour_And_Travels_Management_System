@@ -6,6 +6,12 @@
 
 <%
     AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
+
+%>
+
+<%
+    // Assume you already have a DAO or Service to fetch packages/bookings dynamically
+
     List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
     Integer totalBookings = (Integer) request.getAttribute("totalBookings");
     Double totalRevenue = (Double) request.getAttribute("totalRevenue");
@@ -140,6 +146,7 @@
                 </div>
             </div>
 
+
             <!-- Packages Table -->
             <div class="card p-3 shadow-sm">
                 <h5>My Packages</h5>
@@ -245,6 +252,7 @@
                             %>
                             <tr><td colspan="7" class="text-center">No packages found</td></tr>
                             <%
+
                                 }
                             %>
                         </tbody>

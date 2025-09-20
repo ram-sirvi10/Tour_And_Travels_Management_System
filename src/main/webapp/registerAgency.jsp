@@ -57,25 +57,35 @@
         <div class="error"><%= errors.get("phone") %></div>
     <% } %>
 
-    <input type="text" name="city" placeholder="City" value="<%= city %>">
-    <% if (errors != null && errors.get("city") != null) { %>
-        <div class="error"><%= errors.get("city") %></div>
-    <% } %>
+ <!-- Country/State/City Dropdown -->
+<label>Country</label>
+<select id="country" name="country" style="width:300px;" readonly>
+  <option value="India" selected>India</option>
+</select>
 
-    <input type="text" name="state" placeholder="State" value="<%= state %>">
-    <% if (errors != null && errors.get("state") != null) { %>
-        <div class="error"><%= errors.get("state") %></div>
-    <% } %>
 
-    <input type="text" name="country" placeholder="Country" value="<%= country %>">
-    <% if (errors != null && errors.get("country") != null) { %>
-        <div class="error"><%= errors.get("country") %></div>
-    <% } %>
+<label>State</label>
+<select id="state" name="state" style="width:300px;">
+  <option value="">Select State</option>
+</select>
+<% if (errors != null && errors.get("state") != null) { %>
+  <div class="error"><%= errors.get("state") %></div>
+<% } %>
 
-    <input type="text" name="pincode" placeholder="Pincode" value="<%= pincode %>">
-    <% if (errors != null && errors.get("pincode") != null) { %>
-        <div class="error"><%= errors.get("pincode") %></div>
-    <% } %>
+<label>City</label>
+<select id="city" name="city" style="width:300px;">
+  <option value="">Select City</option>
+</select>
+<% if (errors != null && errors.get("city") != null) { %>
+  <div class="error"><%= errors.get("city") %></div>
+<% } %>
+
+<label>Pincode</label>
+<input type="text" id="pincode" name="pincode" readonly value="<%= pincode %>">
+<% if (errors != null && errors.get("pincode") != null) { %>
+  <div class="error"><%= errors.get("pincode") %></div>
+<% } %>
+
 
     <input type="text" name="registration_number" placeholder="Registration Number" value="<%= regNumber %>">
     <% if (errors != null && errors.get("registrationNumber") != null) { %>
@@ -96,6 +106,72 @@
 </form>
 
 </div>
+
+<!-- Select2 for searchable dropdown -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#state, #city').select2();
+
+    function fetchData(type, value) {
+        let params = new URLSearchParams();
+        params.append("type", type);
+        params.append("value", value || "");
+
+        return fetch("location", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params
+        }).then(res => res.json());
+    }
+
+    // Load states
+    fetchData("states").then(data => {
+        if(data.data && data.data.states) {
+            data.data.states.forEach(s => {
+                $('#state').append(new Option(s.name, s.name));
+            });
+        }
+    });
+
+    // Load cities when state changes
+    $('#state').on('change', function() {
+        $('#city').empty().append(new Option("Select City", ""));
+        let state = this.value;
+
+        if(state) {
+            fetchData("cities", state).then(data => {
+                if(Array.isArray(data.data)) {
+                    data.data.forEach(c => {
+                        $('#city').append(new Option(c, c));
+                    });
+                }
+            });
+        }
+    });
+
+    // Load pincode when city changes
+    $('#city').on('change', function() {
+        let city = this.value;
+        if(city) {
+            fetchData("pincode", city).then(data => {
+                if(data[0] && data[0].Status === "Success") {
+                    $('#pincode').val(data[0].PostOffice[0].Pincode);
+                } else {
+                    $('#pincode').val("Not Found");
+                }
+            });
+        }
+    });
+});
+</script>
+
+
+
+
 
 </body>
 </html>
