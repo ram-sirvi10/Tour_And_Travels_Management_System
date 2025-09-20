@@ -8,10 +8,10 @@ public class PackageResponseDTO {
 	private double price;
 	private String location;
 	private int duration;
-	private String imageUrl;
+
 	private boolean isActive;
 
-	// Getters & Setters
+	
 	public int getPackageId() {
 		return packageId;
 	}
@@ -68,15 +68,9 @@ public class PackageResponseDTO {
 		this.duration = duration;
 	}
 
-	public String getImageUrl() {
-		return imageUrl;
-	}
+	
 
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
-	}
-
-	public boolean isIsActive() {
+	public boolean getIsActive() {
 		return isActive;
 	}
 
