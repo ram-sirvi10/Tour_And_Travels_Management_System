@@ -29,4 +29,8 @@ public interface IAgencyService {
 
 	boolean updateAgencyStatus(int agencyId, String status) throws Exception;
 
+	List<AgencyResponseDTO> getAgenciesByActiveState(boolean isActive, int limit, int offset) throws Exception;
+
+	long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception;
+
 }

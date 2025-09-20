@@ -17,53 +17,49 @@ import com.travelmanagement.util.PasswordHashing;
 
 public class AgencyServiceImpl implements IAgencyService {
 
-    private IAgencyDAO agencyDAO = new AgencyDAOImpl();
+	private IAgencyDAO agencyDAO = new AgencyDAOImpl();
 
-    
-    @Override
-    public AgencyResponseDTO login(LoginRequestDTO dto) throws Exception {
-        Agency dbAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
-        if (dbAgency == null) {
-            throw new UserNotFoundException("Agency not found!");
-        }
-        if (!PasswordHashing.checkPassword(dto.getPassword(), dbAgency.getPassword())) {
-            throw new BadRequestException("Invalid credentials!");
-        }
-        return Mapper.mapAgencyToAgencyResponseDTO(dbAgency);
-    }
+	@Override
+	public AgencyResponseDTO login(LoginRequestDTO dto) throws Exception {
+		Agency dbAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
+		if (dbAgency == null) {
+			throw new UserNotFoundException("Agency not found!");
+		}
+		if (!PasswordHashing.checkPassword(dto.getPassword(), dbAgency.getPassword())) {
+			throw new BadRequestException("Invalid credentials!");
+		}
+		return Mapper.mapAgencyToAgencyResponseDTO(dbAgency);
+	}
 
-    @Override
-    public AgencyResponseDTO getAgencyByEmail(String email) throws Exception {
-        Agency agency = agencyDAO.getAgencyByField("email", email);
-        if (agency == null) {
-            throw new UserNotFoundException("Agency not found with email: " + email);
-        }
-        return Mapper.mapAgencyToAgencyResponseDTO(agency);
-    }
+	@Override
+	public AgencyResponseDTO getAgencyByEmail(String email) throws Exception {
+		Agency agency = agencyDAO.getAgencyByField("email", email);
+		if (agency == null) {
+			throw new UserNotFoundException("Agency not found with email: " + email);
+		}
+		return Mapper.mapAgencyToAgencyResponseDTO(agency);
+	}
 
-    public AgencyResponseDTO getAgencyByRegistrationNumber(String regNo) throws Exception {
-        Agency agency = agencyDAO.getAgencyByField("registration_number", regNo);
-        if (agency == null) {
-            throw new UserNotFoundException("Agency not found with registration number: " + regNo);
-        }
-        return Mapper.mapAgencyToAgencyResponseDTO(agency);
-    }
+	public AgencyResponseDTO getAgencyByRegistrationNumber(String regNo) throws Exception {
+		Agency agency = agencyDAO.getAgencyByField("registration_number", regNo);
+		if (agency == null) {
+			throw new UserNotFoundException("Agency not found with registration number: " + regNo);
+		}
+		return Mapper.mapAgencyToAgencyResponseDTO(agency);
+	}
 
-    
-    
-    
-    @Override
-    public AgencyResponseDTO register(AgencyRegisterRequestDTO dto) throws Exception {
-        Agency agency = Mapper.mapRegisterAgencyDtoToAgency(dto);
-        agency.setPassword(PasswordHashing.ecryptPassword(agency.getPassword()));
+	@Override
+	public AgencyResponseDTO register(AgencyRegisterRequestDTO dto) throws Exception {
+		Agency agency = Mapper.mapRegisterAgencyDtoToAgency(dto);
+		agency.setPassword(PasswordHashing.ecryptPassword(agency.getPassword()));
 
-        boolean created = agencyDAO.createAgency(agency);
-        if (!created) {
-            throw new BadRequestException("Agency registration failed!");
-        }
+		boolean created = agencyDAO.createAgency(agency);
+		if (!created) {
+			throw new BadRequestException("Agency registration failed!");
+		}
 
-        return Mapper.mapAgencyToAgencyResponseDTO(agency);
-    }
+		return Mapper.mapAgencyToAgencyResponseDTO(agency);
+	}
 
 //    @Override
 //    public AgencyResponseDTO login(LoginRequestDTO dto) throws Exception {
@@ -81,14 +77,14 @@ public class AgencyServiceImpl implements IAgencyService {
 //
 //  
 
-    @Override
-    public AgencyResponseDTO getAgencyById(int agencyId) throws Exception {
-        Agency agency = agencyDAO.getAgencyById(agencyId);
-        if (agency == null) {
-            throw new UserNotFoundException("Agency not found with ID: " + agencyId);
-        }
-        return Mapper.mapAgencyToAgencyResponseDTO(agency);
-    }
+	@Override
+	public AgencyResponseDTO getAgencyById(int agencyId) throws Exception {
+		Agency agency = agencyDAO.getAgencyById(agencyId);
+		if (agency == null) {
+			throw new UserNotFoundException("Agency not found with ID: " + agencyId);
+		}
+		return Mapper.mapAgencyToAgencyResponseDTO(agency);
+	}
 
 //    @Override
 //    public AgencyResponseDTO getAgencyByEmail(String email) throws Exception {
@@ -99,51 +95,95 @@ public class AgencyServiceImpl implements IAgencyService {
 //        return Mapper.mapAgencyToAgencyResponseDTO(agency);
 //    }
 
-    @Override
-    public List<AgencyResponseDTO> getAllAgencies(int limit,int offset) throws Exception {
-        List<Agency> agencies = agencyDAO.getAllAgencies(limit, offset);
-        if (agencies == null) {
-            agencies = new ArrayList<>(); // safety check
-        }
-        List<AgencyResponseDTO> responseList = new ArrayList<>();
-        for (Agency a : agencies) {
-            responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-        }
-        return responseList;
-    }
+	@Override
+	public List<AgencyResponseDTO> getAllAgencies(int limit, int offset) throws Exception {
+		List<Agency> agencies = agencyDAO.getAllAgencies(limit, offset);
+		if (agencies == null) {
+			agencies = new ArrayList<>(); // safety check
+		}
+		List<AgencyResponseDTO> responseList = new ArrayList<>();
+		for (Agency a : agencies) {
+			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+		}
+		return responseList;
+	}
 
-    @Override
-    public List<AgencyResponseDTO> getAgenciesByStatus(String status,int limit,int offset) throws Exception {
-       
-        List<Agency> agencies = agencyDAO.getAgenciesByStatus(status.toUpperCase(), limit, offset); 
-        System.out.println("agency servliec agencyListBy status "+agencies.toString());
-        List<AgencyResponseDTO> responseList = new ArrayList<>();
-        for (Agency a : agencies) {
-            responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-        }
-        
-        return responseList;
-    }
+	@Override
+	public List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
 
-    @Override
-    public boolean updateAgency(Agency agency) throws Exception {
-        return agencyDAO.updateAgency(agency);
-    }
+		List<Agency> agencies = agencyDAO.getAgenciesByStatus(status.toUpperCase(), limit, offset);
+		System.out.println("agency servliec agencyListBy status " + agencies.toString());
+		List<AgencyResponseDTO> responseList = new ArrayList<>();
+		for (Agency a : agencies) {
+			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+		}
 
-    @Override
-    public boolean deleteAgency(int agencyId) throws Exception {
-        return agencyDAO.deleteAgency(agencyId);
-    }
+		return responseList;
+	}
 
-    
-    @Override
-    public boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception {
-        return agencyDAO.updateAgencyActiveState(agencyId, active);
-    }
-    @Override
-    public boolean updateAgencyStatus(int agencyId, String status) throws Exception {
-        return agencyDAO.updateAgencyStatus(agencyId, status); // call DAO method
-    }
+	@Override
+	public boolean updateAgency(Agency agency) throws Exception {
+		return agencyDAO.updateAgency(agency);
+	}
+
+	@Override
+	public boolean deleteAgency(int agencyId) throws Exception {
+		return agencyDAO.deleteAgency(agencyId);
+	}
+
+	@Override
+	public boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception {
+		return agencyDAO.updateAgencyActiveState(agencyId, active);
+	}
+
+	@Override
+	public boolean updateAgencyStatus(int agencyId, String status) throws Exception {
+		return agencyDAO.updateAgencyStatus(agencyId, status); // call DAO method
+	}
+
+	public List<AgencyResponseDTO> getDeletedAgencies(int limit, int offset) throws Exception {
+		List<Agency> agencies = agencyDAO.getDeletedAgencies(limit, offset);
+		List<AgencyResponseDTO> responseList = new ArrayList<>();
+		for (Agency a : agencies) {
+			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+		}
+		return responseList;
+	}
+
+	@Override
+	public List<AgencyResponseDTO> getAgenciesByActiveState(boolean isActive, int limit, int offset) throws Exception {
+		List<Agency> agencies = agencyDAO.getAgenciesByActiveState(isActive, limit, offset);
+		List<AgencyResponseDTO> responseList = new ArrayList<>();
+		for (Agency a : agencies) {
+			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+		}
+		return responseList;
+	}
+
+	public List<AgencyResponseDTO> filterAgencies(String status, String active, String startDate, String endDate, String keyword, int limit, int offset) throws Exception {
+	    List<Agency> agencies = agencyDAO.filterAgencies(status, active, startDate, endDate, keyword, limit, offset);
+	    List<AgencyResponseDTO> responseList = new ArrayList<>();
+	    for (Agency a : agencies) {
+	        responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+	    }
+	    return responseList;
+	}
+
+	
+	public List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
+	    List<Agency> agencies = agencyDAO.searchAgenciesByKeyword(keyword, limit, offset);
+	    List<AgencyResponseDTO> responseList = new ArrayList<>();
+	    for (Agency a : agencies) {
+	        responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+	    }
+	    return responseList;
+	}
+
+	
+	@Override
+	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception {
+	    return agencyDAO.countAgencies(status, activeState, isDeleted, keyword);
+	}
 
 
 }

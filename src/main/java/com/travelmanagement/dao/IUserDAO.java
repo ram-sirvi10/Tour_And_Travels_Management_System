@@ -19,8 +19,13 @@ public interface IUserDAO {
 
 	List<User> searchUsers(String Keyword ,int limit, int offset ) throws Exception;
 
-	List<User> getAllUsers(int limit, int offset) throws Exception;
-
 	boolean updateUserActiveState(int userId, boolean active) throws Exception;
+	
+	List<User> getDeletedUsers(int limit, int offset) throws Exception;
 
+	long countUser(boolean state,boolean deleted ,String keyword);
+
+	List<User> getUsersByState(Boolean active, int limit, int offset) throws Exception;
+
+	List<User> getAllUsers(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception;
 }

@@ -15,9 +15,12 @@ public interface IUserService {
 
 	UserResponseDTO getByEmail(String email) throws Exception;
 
-	List<UserResponseDTO> getAll(int limit,int offset) throws Exception;
-
 	boolean update(User user) throws Exception;
 
 	boolean delete(int id) throws Exception;
+
+	long countUser(Boolean active, Boolean deleted, String keyword) throws Exception;
+
+	List<UserResponseDTO> getAll(Boolean active, Boolean deleted, String keyword, int limit, int offset)
+			throws Exception;
 }

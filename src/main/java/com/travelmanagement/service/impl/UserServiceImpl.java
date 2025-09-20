@@ -78,16 +78,15 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<UserResponseDTO> getAll(int limit,int offset) throws Exception {
-        List<User> users = userDAO.getAllUsers(limit,offset);
+    public List<UserResponseDTO> getAll(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception {
+        List<User> users = userDAO.getAllUsers(active, deleted, keyword, limit, offset);
         List<UserResponseDTO> responseList = new ArrayList<>();
-
         for (User user : users) {
-            UserResponseDTO dto = Mapper.mapUserToUserResponseDTO(user);
-            responseList.add(dto);
+            responseList.add(Mapper.mapUserToUserResponseDTO(user));
         }
+        return responseList;
+    }
 
-        return responseList;}
 
     @Override
     public boolean update(User user) throws Exception {
@@ -102,4 +101,21 @@ public class UserServiceImpl implements IUserService {
     public boolean updateUserActiveState(int userId, boolean active) throws Exception {
         return userDAO.updateUserActiveState(userId, active);
     }
+    
+    public List<UserResponseDTO> getDeletedUsers(int limit, int offset) throws Exception {
+        List<User> users = userDAO.getDeletedUsers(limit, offset);
+        List<UserResponseDTO> responseList = new ArrayList<>();
+        for (User user : users) {
+            responseList.add(Mapper.mapUserToUserResponseDTO(user));
+        }
+        return responseList;
+    }
+
+    @Override
+    public long countUser(Boolean active, Boolean deleted, String keyword) throws Exception {
+        return userDAO.countUser(active, deleted, keyword);
+    }
+
+    
+    
 }

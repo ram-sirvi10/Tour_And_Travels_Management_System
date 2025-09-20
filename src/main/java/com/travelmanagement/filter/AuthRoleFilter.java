@@ -99,7 +99,8 @@ public class AuthRoleFilter implements Filter {
 
 		// Define allowed URLs + button combinations for each role
 		Map<String, List<String>> adminAccess = new HashMap<>();
-		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers","manageAgencies","userAction","agencyAction","pendingAgencies"));
+		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers", "manageAgencies", "userAction",
+				"agencyAction", "pendingAgencies", "deletedAgencies","deletedUsers"));
 		adminAccess.put(context + "/agency", List.of("dashboard"));
 		adminAccess.put(context + "/user", List.of("dashboard"));
 

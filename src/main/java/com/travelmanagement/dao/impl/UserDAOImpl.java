@@ -110,40 +110,59 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public List<User> getAllUsers(int limit, int offset) throws Exception {
-		List<User> users = new ArrayList<>();
-		try {
-//			connection = DatabaseConfig.getConnection();
-			String sql = "SELECT * FROM users WHERE is_delete= ? limit ? offset ?";
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setBoolean(1, false);
-			preparedStatement.setInt(2, limit);
-			preparedStatement.setInt(3, offset);
+	public List<User> getAllUsers(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception {
+	    List<User> users = new ArrayList<>();
+	    String sql = "SELECT * FROM users WHERE user_role = ? AND is_delete = ?";
 
-			resultSet = preparedStatement.executeQuery();
+	    if (active != null) {
+	        sql += " AND is_active = ?";
+	    }
 
-			while (resultSet.next()) {
-				User user = new User();
-				user.setUserId(resultSet.getInt("user_id"));
-				user.setUserName(resultSet.getString("user_name"));
-				user.setUserEmail(resultSet.getString("user_email"));
-				user.setUserPassword(resultSet.getString("user_password"));
-				user.setUserRole(resultSet.getString("user_role"));
-				user.setActive(resultSet.getBoolean("is_active"));
-				user.setDelete(resultSet.getBoolean("is_delete"));
-				if (resultSet.getDate("created_at") != null)
-					user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					user.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-				users.add(user);
-			}
+	    if (keyword != null && !keyword.isEmpty()) {
+	        sql += " AND (user_name LIKE ? OR user_email LIKE ?)";
+	    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
+	    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
 
-		}
-		return users;
+	    preparedStatement = connection.prepareStatement(sql);
+	    int index = 1;
+	    preparedStatement.setString(index++, "USER");
+	    preparedStatement.setBoolean(index++, deleted != null ? deleted : false);
+
+	    if (active != null) {
+	        preparedStatement.setBoolean(index++, active);
+	    }
+
+	    if (keyword != null && !keyword.isEmpty()) {
+	        String likeKeyword = "%" + keyword + "%";
+	        preparedStatement.setString(index++, likeKeyword);
+	        preparedStatement.setString(index++, likeKeyword);
+	    }
+
+	    preparedStatement.setInt(index++, limit);
+	    preparedStatement.setInt(index++, offset);
+
+	    resultSet = preparedStatement.executeQuery();
+
+	    while (resultSet.next()) {
+	        User user = new User();
+	        user.setUserId(resultSet.getInt("user_id"));
+	        user.setUserName(resultSet.getString("user_name"));
+	        user.setUserEmail(resultSet.getString("user_email"));
+	        user.setUserPassword(resultSet.getString("user_password"));
+	        user.setUserRole(resultSet.getString("user_role"));
+	        user.setActive(resultSet.getBoolean("is_active"));
+	        user.setDelete(resultSet.getBoolean("is_delete"));
+	        if (resultSet.getDate("created_at") != null)
+	            user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+	        if (resultSet.getDate("updated_at") != null)
+	            user.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+	        users.add(user);
+	    }
+
+	    return users;
 	}
+
 
 	@Override
 	public boolean updateUser(User user) throws Exception {
@@ -172,24 +191,22 @@ public class UserDAOImpl implements IUserDAO {
 
 	@Override
 	public boolean deleteUser(int id) throws Exception {
-		try {
+	    try {
+	        String sql = "UPDATE users SET is_delete = ?, is_active = ? WHERE user_id = ?";
+	        preparedStatement = connection.prepareStatement(sql);
+	        preparedStatement.setBoolean(1, true);  
+	        preparedStatement.setBoolean(2, false);  
+	        preparedStatement.setInt(3, id);
 
-			String sql = "UPDATE users SET is_delete=? WHERE user_id=?";
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setBoolean(1, true);
-			preparedStatement.setInt(2, id);
+	        int affectedRows = preparedStatement.executeUpdate();
+	        return affectedRows > 0;
 
-			int affectedRows = preparedStatement.executeUpdate();
-			if (affectedRows > 0) {
-				return true;
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		}
-		return false;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
 	}
+
 
 	@Override
 	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
@@ -219,5 +236,106 @@ public class UserDAOImpl implements IUserDAO {
 
 		return null;
 	}
+
+	
+	@Override
+	public List<User> getDeletedUsers(int limit, int offset) throws Exception {
+	    List<User> users = new ArrayList<>();
+	    String sql = "SELECT * FROM users WHERE user_role = ? AND is_delete = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+	    preparedStatement = connection.prepareStatement(sql);
+	    preparedStatement.setString(1, "USER");
+	    preparedStatement.setBoolean(2, true); // fetch deleted users
+	    preparedStatement.setInt(3, limit);
+	    preparedStatement.setInt(4, offset);
+
+	    resultSet = preparedStatement.executeQuery();
+	    while (resultSet.next()) {
+	        User user = new User();
+	        user.setUserId(resultSet.getInt("user_id"));
+	        user.setUserName(resultSet.getString("user_name"));
+	        user.setUserEmail(resultSet.getString("user_email"));
+	        user.setUserPassword(resultSet.getString("user_password"));
+	        user.setUserRole(resultSet.getString("user_role"));
+	        user.setActive(resultSet.getBoolean("is_active"));
+	        user.setDelete(resultSet.getBoolean("is_delete"));
+	        if (resultSet.getDate("created_at") != null)
+	            user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+	        if (resultSet.getDate("updated_at") != null)
+	            user.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+	        users.add(user);
+	    }
+	    return users;
+	}
+
+	
+	@Override
+	public long countUser(boolean active, boolean deleted, String keyword) {
+	    int total = 0;
+	    String sql = "SELECT COUNT(*) AS total FROM users "
+	               + "WHERE is_active = ? AND is_delete = ? "
+	               + "AND (user_name LIKE ? OR user_email LIKE ?)";
+
+	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	        ps.setBoolean(1, active);
+	        ps.setBoolean(2, deleted);
+	        ps.setString(3, "%" + keyword + "%");
+	        ps.setString(4, "%" + keyword + "%");
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                total = rs.getInt("total");
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return total;
+	}
+
+	
+	@Override
+	public List<User> getUsersByState(Boolean active, int limit, int offset) throws Exception {
+	    List<User> users = new ArrayList<>();
+	    String sql = "SELECT * FROM users WHERE user_role = ? AND is_delete = ?";
+
+	    if (active != null) {
+	        sql += " AND is_active = ?";
+	    }
+
+	    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
+	    preparedStatement = connection.prepareStatement(sql);
+	    int index = 1;
+	    preparedStatement.setString(index++, "USER");
+	    preparedStatement.setBoolean(index++, false); // only non-deleted users
+
+	    if (active != null) {
+	        preparedStatement.setBoolean(index++, active);
+	    }
+
+	    preparedStatement.setInt(index++, limit);
+	    preparedStatement.setInt(index++, offset);
+
+	    resultSet = preparedStatement.executeQuery();
+
+	    while (resultSet.next()) {
+	        User user = new User();
+	        user.setUserId(resultSet.getInt("user_id"));
+	        user.setUserName(resultSet.getString("user_name"));
+	        user.setUserEmail(resultSet.getString("user_email"));
+	        user.setUserPassword(resultSet.getString("user_password"));
+	        user.setUserRole(resultSet.getString("user_role"));
+	        user.setActive(resultSet.getBoolean("is_active"));
+	        user.setDelete(resultSet.getBoolean("is_delete"));
+	        if (resultSet.getDate("created_at") != null)
+	            user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+	        if (resultSet.getDate("updated_at") != null)
+	            user.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+	        users.add(user);
+	    }
+
+	    return users;
+	}
+
 
 }

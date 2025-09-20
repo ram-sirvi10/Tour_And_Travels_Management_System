@@ -13,8 +13,6 @@ public interface IAgencyDAO {
 
 	boolean deleteAgency(int id) throws Exception;
 
-	List<Agency> searchAgencies(String keyword, int limit, int offset) throws Exception;
-
 	List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception;
 
 	List<Agency> getAgenciesByActiveState(boolean key, int limit, int offset) throws Exception;
@@ -28,5 +26,14 @@ public interface IAgencyDAO {
 	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
 
 	Agency getAgencyByField(String fieldName, String value) throws Exception;
+
+	List<Agency> getDeletedAgencies(int limit, int offset) throws Exception;
+
+	long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception;
+
+	List<Agency> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception;
+
+	List<Agency> filterAgencies(String status, String active, String startDate, String endDate, String keyword,
+			int limit, int offset) throws Exception;
 
 }
