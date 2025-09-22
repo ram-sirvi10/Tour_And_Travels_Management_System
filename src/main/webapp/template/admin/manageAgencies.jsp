@@ -9,8 +9,34 @@ if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
 	return;
 }
 
-// Get agencies list from request
 List<AgencyResponseDTO> agenciesList = (List<AgencyResponseDTO>) request.getAttribute("agenciesList");
+String currentList = (String) request.getAttribute("listType");
+
+int currentPage = (Integer) request.getAttribute("currentPage");
+int totalPages = (Integer) request.getAttribute("totalPages");
+int pageSize = (Integer) request.getAttribute("pageSize");
+
+int windowSize = 3;
+int startPage = ((currentPage - 1) / windowSize) * windowSize + 1;
+int endPage = Math.min(startPage + windowSize - 1, totalPages);
+
+String buttonParam = "manageAgencies";
+if (currentList != null) {
+	if ("Deleted Agencies".equalsIgnoreCase(currentList)) {
+		buttonParam = "deletedAgencies";
+	} else if ("Pending Agencies".equalsIgnoreCase(currentList)) {
+		buttonParam = "pendingAgencies";
+	}
+}
+String keywordParam = request.getParameter("keyword") != null ? request.getParameter("keyword") : "";
+String statusParam = "Pending Agencies".equalsIgnoreCase(currentList)
+		? "PENDING"
+		: (request.getParameter("status") != null ? request.getParameter("status") : "");
+String activeParam = request.getParameter("active") != null ? request.getParameter("active") : "";
+String startDateParam = request.getParameter("startDate") != null ? request.getParameter("startDate") : "";
+String endDateParam = request.getParameter("endDate") != null ? request.getParameter("endDate") : "";
+
+
 %>
 
 <!DOCTYPE html>
@@ -20,204 +46,37 @@ List<AgencyResponseDTO> agenciesList = (List<AgencyResponseDTO>) request.getAttr
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manage Agencies | Admin Dashboard</title>
 <link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
 	rel="stylesheet">
-	<link
-		href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-		rel="stylesheet">
 <style>
-body {
-	font-family: 'Segoe UI', sans-serif;
-	background: #f7f9fc;
-	margin: 0;
-	padding: 0;
-}
-
-.navbar {
-	background: #0d6efd;
-	color: white;
-	padding: 15px 20px;
-}
-
-.navbar h1 {
-	margin: 0;
-	font-size: 1.8rem;
-}
-
-.dashboard-container {
-	display: flex;
-	min-height: 100vh;
-}
-
-/* Sidebar */
-.sidebar {
-	background: #0d6efd;
-	color: white;
-	width: 220px;
-	padding: 20px;
-	flex-shrink: 0;
-}
-
-.sidebar h3 {
-	margin-bottom: 20px;
-}
-
-.sidebar a {
-	display: block;
-	color: white;
-	text-decoration: none;
-	padding: 10px;
-	border-radius: 8px;
-	margin-bottom: 10px;
-	transition: 0.3s;
-}
-
-.sidebar a:hover {
-	background: #084298;
-}
-
-/* Main content */
-.main-content {
-	flex-grow: 1;
-	padding: 30px;
-}
-
-.main-content h2 {
-	color: #0d6efd;
-	margin-bottom: 20px;
-}
-
-/* Table */
-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-th, td {
-	padding: 12px;
-	text-align: left;
-	border-bottom: 1px solid #ddd;
-}
-
-a.action-link {
-	text-decoration: none;
-	margin-right: 10px;
-	color: #0d6efd;
-}
-
-a.action-link:hover {
-	text-decoration: underline;
-}
-
-a.text-danger:hover {
-	color: red;
-}
-
-/* Buttons */
-.btn-logout {
-	background: #ff3b2e;
-	color: white;
-	border: none;
-	padding: 10px 20px;
-	border-radius: 50px;
-	cursor: pointer;
-	transition: 0.3s;
-}
-
-.btn-logout:hover {
-	background: #e0291a;
-}
-
-/* Responsive */
-@media ( max-width : 768px) {
-	.dashboard-container {
-		flex-direction: column;
-	}
-	.sidebar {
-		width: 100%;
-	}
-}
 </style>
 </head>
 <body>
 
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<!-- Navbar -->
-	<div class="navbar d-flex justify-content-between align-items-center">
-		<h1>Admin Dashboard</h1>
-		<div>
-			<span>Welcome, <%=admin.getUserName()%>!
-			</span> <a href="<%=request.getContextPath()%>/auth?button=logout"
-				class="btn-logout ms-3">Log out</a>
-		</div>
-	</div>
-
 	<div class="dashboard-container">
-		<!-- Sidebar -->
-		<div class="sidebar">
-			<h3>Menu</h3>
-			<a href="<%=request.getContextPath()%>/admin?button=dashboard">Dashboard
-				Overview</a>
-			<!-- Dropdown for Manage Users -->
-			<div class="dropdown">
-				<a href="#" class="dropdown-toggle" data-bs-toggle="collapse"
-					data-bs-target="#userMenu" aria-expanded="false"> Manage Users
-				</a>
-				<div id="userMenu" class="collapse ms-3">
-					<a href="<%=request.getContextPath()%>/admin?button=manageUsers">User
-						List</a> <a
-						href="<%=request.getContextPath()%>/admin?button=deletedUsers">Deleted
-						History</a>
-				</div>
-			</div>
-
-			<!-- Dropdown for Manage Agencies -->
-			<div class="dropdown">
-				<a href="#" class="dropdown-toggle" data-bs-toggle="collapse"
-					data-bs-target="#agencyMenu" aria-expanded="false"> Manage
-					Agencies </a>
-				<div id="agencyMenu" class="collapse ms-3">
-					<a href="<%=request.getContextPath()%>/admin?button=manageAgencies">Agency
-						List</a> <a
-						href="<%=request.getContextPath()%>/admin?button=pendingAgencies">Pending
-						Requests</a> <a
-						href="<%=request.getContextPath()%>/admin?button=deletedAgencies">Deleted
-						History</a>
-				</div>
-			</div>
-		</div>
-
-
-		<!-- Main Content -->
+		<jsp:include page="sidebar.jsp" />
 		<div class="main-content">
+			<jsp:include page="header.jsp" />
 
+			<h2>Manage Agencies</h2>
 
-			<%
-			String currentList = (String) request.getAttribute("listType");
-			%>
+			<!-- Search & Filters -->
 
-
-			<!-- Search bar -->
-
-
-
-			<!-- Show filter bar only if NOT Deleted Agencies -->
-			
-			<div class="mb-3">
+			<div class="row g-2 mb-2">
+				<h6>Filter Option</h6>
 				<form method="post" action="<%=request.getContextPath()%>/admin"
-					class="row g-2">
+					class="row g-2" >
 					<input type="hidden" name="button"
 						value="<%=request.getParameter("button")%>" />
-<%
-			if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
-			%>
+
+					<%
+					if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
+					%>
 					<%
 					if ("Pending Agencies".equalsIgnoreCase(currentList)) {
 					%>
-					<!-- Only Status filter -->
 					<div class="col-md-2">
-						<select name="status" class="form-select">
+						<select name="status" class="form-select" >
 							<option value="PENDING"
 								<%="PENDING".equals(request.getParameter("status")) ? "selected" : ""%>>Pending</option>
 							<option value="REJECTED"
@@ -227,7 +86,6 @@ a.text-danger:hover {
 					<%
 					} else {
 					%>
-					<!-- Active, City, Date filters for All Agencies -->
 					<div class="col-md-2">
 						<select name="active" class="form-select">
 							<option value="">All</option>
@@ -237,8 +95,6 @@ a.text-danger:hover {
 								<%="false".equals(request.getParameter("active")) ? "selected" : ""%>>Inactive</option>
 						</select>
 					</div>
-
-
 					<div class="col-md-2">
 						<input type="date" name="startDate" class="form-control"
 							value="<%=request.getParameter("startDate") != null ? request.getParameter("startDate") : ""%>" />
@@ -250,52 +106,46 @@ a.text-danger:hover {
 					<%
 					}
 					%>
-
 					<div class="col-md-2">
 						<button type="submit" class="btn btn-primary w-100">Apply</button>
 					</div>
-	<%
-			}
-			%>
-					<div class="mb-3">
+					<%
+					}
+					%>
+				</form>
+			</div>
 
-						<input type="hidden" name="button"
-							value="<%=request.getParameter("button")%>" />
 
-						<div class="col-md-4">
-							<input type="text" name="keyword" class="form-control"
-								placeholder="Search  Agency "
-								value="<%=request.getParameter("keyword") != null ? request.getParameter("keyword") : ""%>" />
-						</div>
-						<div class="col-md-2">
-							<button type="submit" class="btn btn-primary w-100">Search</button>
-						</div>
-
+			<div class="row g-2 mb-3">
+				<form method="post" action="<%=request.getContextPath()%>/admin"
+					class="row g-2">
+					<input type="hidden" name="button"
+						value="<%=request.getParameter("button")%>" />
+					<div class="col-md-4">
+						<input type="text" name="keyword" class="form-control"
+							placeholder="Search Agency"
+							value="<%=request.getParameter("keyword") != null ? request.getParameter("keyword") : ""%>" />
+					</div>
+					<div class="col-md-2">
+						<button type="submit" class="btn btn-primary w-100">Search</button>
 					</div>
 				</form>
 			</div>
-		
 
 
-
-
-			<h2>Manage Agencies</h2>
 			<table class="table table-bordered table-striped mt-3">
 				<thead class="table-primary">
-
 					<tr>
 						<th>S.No</th>
 						<th>Agency Name</th>
 						<th>Owner Name</th>
 						<th>Email</th>
-						<th>City</th>
-						<%
-						if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
-						%>
+						<th>Mobile No.</th>
+						<th>Address</th>
+						<th>Registration No.</th>
+						<th>Registration Date</th>
 						<th>Actions</th>
-						<%
-						}
-						%>
+						
 					</tr>
 				</thead>
 				<tbody>
@@ -309,29 +159,73 @@ a.text-danger:hover {
 						<td><%=agency.getAgencyName()%></td>
 						<td><%=agency.getOwnerName()%></td>
 						<td><%=agency.getEmail()%></td>
-						<td><%=agency.getCity()%></td>
+						<td><%=agency.getPhone() %></td>
+						<td><%=agency.getCity()%>,<%=agency.getState()%>,<%=agency.getCountry()%>,<%=agency.getPincode()%></td>
+						<td><%=agency.getRegistrationNumber() %></td>
+						<td><%=agency.getCreatedAt() %></td>
+					<td>
+    <button type="button" class="btn btn-sm btn-info details-btn"
+        data-agencyname="<%=agency.getAgencyName()%>"
+        data-owner="<%=agency.getOwnerName()%>"
+        data-email="<%=agency.getEmail()%>"
+        data-phone="<%=agency.getPhone()%>"
+        data-city="<%=agency.getCity()%>"
+        data-state="<%=agency.getState()%>"
+        data-country="<%=agency.getCountry()%>"
+        data-pincode="<%=agency.getPincode()%>"
+        data-regno="<%=agency.getRegistrationNumber()%>"
+        data-created="<%=agency.getCreatedAt()%>">
+        Details
+    </button>
 
-						<td>
-							<%
-							if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
-								if ("PENDING".equalsIgnoreCase(agency.getStatus())) {
-							%> <a class="action-link"
-							href="<%=request.getContextPath()%>/admin?button=agencyAction&agencyId=<%=agency.getAgencyId()%>&action=approve">Approve</a>
-							<a class="action-link text-danger"
-							href="<%=request.getContextPath()%>/admin?button=agencyAction&agencyId=<%=agency.getAgencyId()%>&action=reject">Reject</a>
-							<%
-							} else {
-							%> <a class="action-link"
-							href="<%=request.getContextPath()%>/admin?button=agencyAction&agencyId=<%=agency.getAgencyId()%>&action=<%=agency.isActive() ? "deactivate" : "activate"%>">
-								<%=agency.isActive() ? "Deactivate" : "Activate"%>
-						</a> <a class="action-link text-danger"
-							href="<%=request.getContextPath()%>/admin?button=agencyAction&agencyId=<%=agency.getAgencyId()%>&action=delete"
-							onclick="return confirm('Are you sure you want to permanently delete this agency?');">
-								Delete </a> <%
- }
- }
- %>
-						</td>
+    <% if (!"Deleted Agencies".equalsIgnoreCase(currentList)) { %>
+        <% if ("PENDING".equalsIgnoreCase(agency.getStatus())) { %>
+            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
+                <input type="hidden" name="button" value="agencyAction">
+                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
+                <input type="hidden" name="keyword" value="<%= keywordParam %>">
+                <input type="hidden" name="status" value="<%= statusParam %>">
+                <input type="hidden" name="pageSize" value="<%= pageSize %>">
+                
+                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
+            </form>
+            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
+                <input type="hidden" name="button" value="agencyAction">
+                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
+                <input type="hidden" name="keyword" value="<%= keywordParam %>">
+                <input type="hidden" name="status" value="<%= statusParam %>">
+                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
+                <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+            </form>
+        <% } else { %>
+            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
+                <input type="hidden" name="button" value="agencyAction">
+                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
+                <input type="hidden" name="keyword" value="<%= keywordParam %>">
+                <input type="hidden" name="active" value="<%= activeParam %>">
+                <input type="hidden" name="startDate" value="<%= startDateParam %>">
+                <input type="hidden" name="endDate" value="<%= endDateParam %>">
+                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
+                <button type="submit" name="action" value="<%=agency.isActive() ? "deactivate" : "activate"%>" class="btn btn-sm btn-primary">
+                    <%=agency.isActive() ? "Deactivate" : "Activate"%>
+                </button>
+            </form>
+            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
+                <input type="hidden" name="button" value="agencyAction">
+                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
+                <input type="hidden" name="keyword" value="<%= keywordParam %>">
+                <input type="hidden" name="active" value="<%= activeParam %>">
+                <input type="hidden" name="startDate" value="<%= startDateParam %>">
+                <input type="hidden" name="endDate" value="<%= endDateParam %>">
+                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
+                <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger"
+                        onclick="return confirm('Are you sure you want to permanently delete this agency?');">
+                    Delete
+                </button>
+            </form>
+        <% } %>
+    <% } %>
+</td>
 
 					</tr>
 					<%
@@ -346,8 +240,147 @@ a.text-danger:hover {
 					%>
 				</tbody>
 			</table>
+
+
+
+
+			<%
+		%>
+
+			<!-- Page Size Selector -->
+			<div class="row mb-3">
+				<div class="col-md-2">
+					<form method="get" action="<%=request.getContextPath()%>/admin">
+						<input type="hidden" name="button" value="<%=buttonParam%>">
+						<input type="hidden" name="keyword" value="<%=keywordParam%>">
+						<input type="hidden" name="status" value="<%=statusParam%>">
+						<input type="hidden" name="active" value="<%=activeParam%>">
+						<input type="hidden" name="startDate" value="<%=startDateParam%>">
+						<input type="hidden" name="endDate" value="<%=endDateParam%>">
+						<label for="pageSize" class="form-label">Records per page:</label>
+						<select name="pageSize" id="pageSize" class="form-select"
+							onchange="this.form.submit()">
+							<option value="1" <%=(pageSize == 1) ? "selected" : ""%>>1</option>
+							<option value="2" <%=(pageSize == 2) ? "selected" : ""%>>2</option>
+							<option value="3" <%=(pageSize == 3) ? "selected" : ""%>>3</option>
+							<option value="4" <%=(pageSize == 4) ? "selected" : ""%>>4</option>
+						</select>
+					</form>
+				</div>
+			</div>
+
+			<!-- Pagination -->
+			<nav>
+				<ul class="pagination justify-content-center">
+					<%
+					if (currentPage > 1) {
+					%>
+					<li class="page-item"><a class="page-link"
+						href="?button=<%=buttonParam%>&keyword=<%=keywordParam%>&status=<%=statusParam%>&active=<%=activeParam%>&startDate=<%=startDateParam%>&endDate=<%=endDateParam%>&pageSize=<%=pageSize%>&page=<%=currentPage - 1%>">Prev</a>
+					</li>
+					<%
+					}
+					%>
+
+					<%
+					for (int i = startPage; i <= endPage; i++) {
+					%>
+					<li class="page-item <%=(i == currentPage) ? "active" : ""%>">
+						<a class="page-link"
+						href="?button=<%=buttonParam%>&keyword=<%=keywordParam%>&status=<%=statusParam%>&active=<%=activeParam%>&startDate=<%=startDateParam%>&endDate=<%=endDateParam%>&pageSize=<%=pageSize%>&page=<%=i%>"><%=i%></a>
+					</li>
+					<%
+					}
+					%>
+
+					<%
+					if (currentPage < totalPages) {
+					%>
+					<li class="page-item"><a class="page-link"
+						href="?button=<%=buttonParam%>&keyword=<%=keywordParam%>&status=<%=statusParam%>&active=<%=activeParam%>&startDate=<%=startDateParam%>&endDate=<%=endDateParam%>&pageSize=<%=pageSize%>&page=<%=currentPage + 1%>">Next</a>
+					</li>
+					<%
+					}
+					%>
+				</ul>
+			</nav>
+
+
+
+			<!-- Details Modal -->
+			<div class="modal fade" id="detailsModal" tabindex="-1"
+				aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-lg">
+					<div class="modal-content">
+						<div class="modal-header bg-primary text-white">
+							<h5 class="modal-title">Agency Details</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<table class="table table-bordered">
+								<tr>
+									<th>Agency Name</th>
+									<td id="m_agencyname"></td>
+								</tr>
+								<tr>
+									<th>Owner Name</th>
+									<td id="m_owner"></td>
+								</tr>
+								<tr>
+									<th>Email</th>
+									<td id="m_email"></td>
+								</tr>
+								<tr>
+									<th>Phone</th>
+									<td id="m_phone"></td>
+								</tr>
+								<tr>
+									<th>City</th>
+									<td id="m_city"></td>
+								</tr>
+								<tr>
+									<th>State</th>
+									<td id="m_state"></td>
+								</tr>
+								<tr>
+									<th>Country</th>
+									<td id="m_country"></td>
+								</tr>
+								<tr>
+									<th>Pin code</th>
+									<td id="m_pincode"></td>
+								</tr>
+								<tr>
+									<th>Registration No</th>
+									<td id="m_regno"></td>
+								</tr>
+								<tr>
+									<th>Registration Date</th>
+									<td id="m_created"></td>
+								</tr>
+								
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
 		</div>
 	</div>
 
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+document.querySelectorAll('.details-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+        const fields = ['agencyname','owner','email','phone','city','state','country','pincode','regno','created'];
+        fields.forEach(f=>{
+            document.getElementById('m_'+f).innerText = btn.dataset[f];
+        });
+        new bootstrap.Modal(document.getElementById('detailsModal')).show();
+    });
+});
+</script>
 </body>
 </html>

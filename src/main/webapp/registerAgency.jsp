@@ -17,7 +17,8 @@
 <html>
 <head>
   <title>Agency Registration</title>
-<link rel="stylesheet" href="style.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 </head>
 <body>
 
@@ -59,7 +60,7 @@
 
  <!-- Country/State/City Dropdown -->
 <label>Country</label>
-<select id="country" name="country" style="width:300px;" readonly>
+<select id="country" name="country" style="width:300px;" >
   <option value="India" selected>India</option>
 </select>
 
@@ -108,7 +109,7 @@
 </div>
 
 <!-- Select2 for searchable dropdown -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 

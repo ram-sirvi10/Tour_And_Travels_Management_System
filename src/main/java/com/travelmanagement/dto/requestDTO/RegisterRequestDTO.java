@@ -5,6 +5,19 @@ public class RegisterRequestDTO {
 	private String password;
 	private String confirmpassword;
 	private String email;
+	private int userId;
+	public String getConfirmpassword() {
+		return confirmpassword;
+	}
+	public void setConfirmpassword(String confirmpassword) {
+		this.confirmpassword = confirmpassword;
+	}
+	public int getUserId() {
+		return userId;
+	}
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
 	public String getUsername() {
 		return username;
 	}

@@ -33,4 +33,14 @@ public interface IAgencyService {
 
 	long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception;
 
+	List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception;
+
+	
+	List<AgencyResponseDTO> getDeletedAgencies(String keyword, int limit, int offset) throws Exception;
+
+	AgencyResponseDTO getAgencyByRegistrationNumber(String regNo) throws Exception;
+
+	List<AgencyResponseDTO> filterAgencies(String status, Boolean active, String startDate, String endDate,
+			String keyword, Boolean delete, int limit, int offset) throws Exception;
+
 }

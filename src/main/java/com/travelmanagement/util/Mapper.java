@@ -14,6 +14,7 @@ import com.travelmanagement.model.User;
 public class Mapper {
 	public static User mapRegisterDtoToUser(RegisterRequestDTO dto) {
 		User user = new User();
+		user.setUserId(dto.getUserId());
 		user.setUserName(dto.getUsername());
 		user.setUserEmail(dto.getEmail());
 		user.setUserPassword(dto.getPassword());

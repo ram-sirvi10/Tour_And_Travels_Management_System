@@ -17,105 +17,112 @@ import com.travelmanagement.util.PasswordHashing;
 
 public class UserServiceImpl implements IUserService {
 
-    
-    private IUserDAO userDAO = new UserDAOImpl();
+	private IUserDAO userDAO = new UserDAOImpl();
 
-    @Override
-    public UserResponseDTO register(RegisterRequestDTO dto) throws Exception {
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new BadRequestException("Passwords do not match!");
-        }
+	@Override
+	public UserResponseDTO register(RegisterRequestDTO dto) throws Exception {
+		if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+			throw new BadRequestException("Passwords do not match!");
+		}
 
-        User user = Mapper.mapRegisterDtoToUser(dto);
-        user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
+		User user = Mapper.mapRegisterDtoToUser(dto);
+		user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
 
-        boolean created = userDAO.createUser(user);
-        if (!created) {
-            throw new BadRequestException("User registration failed!");
-        }
+		boolean created = userDAO.createUser(user);
+		if (!created) {
+			throw new BadRequestException("User registration failed!");
+		}
 
-      
-        return Mapper.mapUserToUserResponseDTO(user);
-    }
+		return Mapper.mapUserToUserResponseDTO(user);
+	}
 
-    @Override
-    public UserResponseDTO login(LoginRequestDTO dto) throws Exception {
-        User loginUser = Mapper.mapLoginDtoToUser(dto);
+	@Override
+	public UserResponseDTO login(LoginRequestDTO dto) throws Exception {
+		User loginUser = Mapper.mapLoginDtoToUser(dto);
 
-        User dbUser = userDAO.getUserByEmail(loginUser.getUserEmail());
-        if (dbUser == null) {
-            throw new UserNotFoundException("User not found!");
-        }
-        if (!dbUser.isActive()) {
-            throw new BadRequestException("Account is blocked! Please contact support.");
-        }
-        if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
-            throw new BadRequestException("Invalid credentials!");
-        }
+		User dbUser = userDAO.getUserByEmail(loginUser.getUserEmail());
+		if (dbUser == null) {
+			throw new UserNotFoundException("User not found!");
+		}
+		if (!dbUser.isActive()) {
+			throw new BadRequestException("Account is blocked! Please contact support.");
+		}
+		if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
+			throw new BadRequestException("Invalid credentials!");
+		}
 
-     
-        return Mapper.mapUserToUserResponseDTO(dbUser);
-    }
+		return Mapper.mapUserToUserResponseDTO(dbUser);
+	}
 
-    @Override
-    public UserResponseDTO getById(int id) throws Exception {
-        User user = userDAO.getUserById(id);
-        if (user == null) {
-            throw new UserNotFoundException("User not found with id: " + id);
-        }
+	@Override
+	public UserResponseDTO getById(int id) throws Exception {
+		User user = userDAO.getUserById(id);
+		if (user == null) {
+			throw new UserNotFoundException("User not found with id: " + id);
+		}
 
-        return Mapper.mapUserToUserResponseDTO(user);
-    }
+		return Mapper.mapUserToUserResponseDTO(user);
+	}
 
-    @Override
-    public UserResponseDTO getByEmail(String email) throws Exception {
-        User user = userDAO.getUserByEmail(email);
-        if (user == null) {
-            throw new UserNotFoundException("User not found with email: " + email);
-        }
+	@Override
+	public UserResponseDTO getByEmail(String email) throws Exception {
+		User user = userDAO.getUserByEmail(email);
+		if (user == null) {
+			throw new UserNotFoundException("User not found with email: " + email);
+		}
 
-        return Mapper.mapUserToUserResponseDTO(user);
-    }
+		return Mapper.mapUserToUserResponseDTO(user);
+	}
 
-    @Override
-    public List<UserResponseDTO> getAll(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception {
-        List<User> users = userDAO.getAllUsers(active, deleted, keyword, limit, offset);
-        List<UserResponseDTO> responseList = new ArrayList<>();
-        for (User user : users) {
-            responseList.add(Mapper.mapUserToUserResponseDTO(user));
-        }
-        return responseList;
-    }
+	@Override
+	public List<UserResponseDTO> getAll(Boolean active, Boolean deleted, String keyword, int limit, int offset)
+			throws Exception {
+		List<User> users = userDAO.getAllUsers(active, deleted, keyword, limit, offset);
+		List<UserResponseDTO> responseList = new ArrayList<>();
+		for (User user : users) {
+			responseList.add(Mapper.mapUserToUserResponseDTO(user));
+		}
+		return responseList;
+	}
 
+	@Override
+	public boolean update(RegisterRequestDTO dto) throws Exception {
+		User user = Mapper.mapRegisterDtoToUser(dto);
+		if (user.getUserPassword() != null && !user.getUserPassword().isEmpty()) {
+			user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
+		}
+		return userDAO.updateUser(user);
+	}
 
-    @Override
-    public boolean update(User user) throws Exception {
-        return userDAO.updateUser(user);
-    }
+	@Override
+	public boolean changePassword(int userId, String newPassword) throws Exception {
+		String hashedPassword = PasswordHashing.ecryptPassword(newPassword);
+		return userDAO.changePassword(userId, hashedPassword);
+	}
 
-    @Override
-    public boolean delete(int id) throws Exception {
-        return userDAO.deleteUser(id);
-    }
-   
-    public boolean updateUserActiveState(int userId, boolean active) throws Exception {
-        return userDAO.updateUserActiveState(userId, active);
-    }
-    
-    public List<UserResponseDTO> getDeletedUsers(int limit, int offset) throws Exception {
-        List<User> users = userDAO.getDeletedUsers(limit, offset);
-        List<UserResponseDTO> responseList = new ArrayList<>();
-        for (User user : users) {
-            responseList.add(Mapper.mapUserToUserResponseDTO(user));
-        }
-        return responseList;
-    }
+	@Override
+	public boolean delete(int id) throws Exception {
+		return userDAO.deleteUser(id);
+	}
 
-    @Override
-    public long countUser(Boolean active, Boolean deleted, String keyword) throws Exception {
-        return userDAO.countUser(active, deleted, keyword);
-    }
+	@Override
+	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
+		return userDAO.updateUserActiveState(userId, active);
+	}
 
-    
-    
+	@Override
+	public List<UserResponseDTO> getDeletedUsers(String keyword, int limit, int offset) throws Exception {
+		List<User> users = userDAO.getAllUsers(null, true, keyword, limit, offset);
+		List<UserResponseDTO> responseList = new ArrayList<>();
+		for (User user : users) {
+			responseList.add(Mapper.mapUserToUserResponseDTO(user));
+		}
+		return responseList;
+	}
+
+	@Override
+	public long countUser(Boolean active, Boolean deleted, String keyword) throws Exception {
+		return userDAO.countUser(active, deleted, keyword);
+	}
+
 }

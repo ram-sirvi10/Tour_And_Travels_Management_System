@@ -21,56 +21,54 @@ public class AuthServiceImpl implements IAuthService {
 
 	@Override
 	public Map<String, String> validateRegisterDto(RegisterRequestDTO dto) {
-	    Map<String, String> errors = new HashMap<>();
+		Map<String, String> errors = new HashMap<>();
 
-	    if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
-	        errors.put("username", "Username cannot be empty");
-	    } else if (!ValidationUtil.isValidName(dto.getUsername())) {
-	        errors.put("username", "Invalid username");
-	    }
+		if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
+			errors.put("username", "Username cannot be empty");
+		} else if (!ValidationUtil.isValidName(dto.getUsername())) {
+			errors.put("username", "Invalid username");
+		}
 
-	    if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-	        errors.put("email", "Email cannot be empty");
-	    } else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
-	        errors.put("email", "Invalid email");
-	    } else {
-	        IUserDAO userDAO = new UserDAOImpl();
-	        try {
-	            User existingUser = userDAO.getUserByEmail(dto.getEmail());
-	            if (existingUser != null) {
-	                if (existingUser.isDelete()) {
-	                   
-	                } else if (!existingUser.isActive()) {
-	                    
-	                    errors.put("email", "Account is blocked! You cannot register with this email.");
-	                } else {
-	                   
-	                    errors.put("email", "Email already exists");
-	                }
-	            }
-	        } catch (Exception e) {
-	           
-	        }
-	    }
+		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+			errors.put("email", "Email cannot be empty");
+		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
+			errors.put("email", "Invalid email");
+		} else {
+			IUserDAO userDAO = new UserDAOImpl();
+			try {
+				User existingUser = userDAO.getUserByEmail(dto.getEmail());
+				if (existingUser != null) {
+					if (existingUser.isDelete()) {
 
-	    if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-	        errors.put("password", "Password cannot be empty");
-	    } else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-	        errors.put("password", "Invalid password");
-	    }
+					} else if (!existingUser.isActive()) {
 
-	    if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
-	        errors.put("confirmPassword", "Confirm Password cannot be empty");
-	    } else if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-	        errors.put("confirmPassword", "Passwords do not match");
-	    }
+						errors.put("email", "Account is blocked! You cannot register with this email.");
+					} else {
 
-	    return errors;
+						errors.put("email", "Email already exists");
+					}
+				}
+			} catch (Exception e) {
+
+			}
+		}
+
+		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+			errors.put("password", "Password cannot be empty");
+		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
+			errors.put("password", "Invalid password");
+		}
+
+		if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
+			errors.put("confirmPassword", "Confirm Password cannot be empty");
+		} else if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+			errors.put("confirmPassword", "Passwords do not match");
+		}
+
+		return errors;
 	}
 
-
-	
-	 @Override
+	@Override
 	public Map<String, String> validateLoginDto(LoginRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();
 
@@ -83,14 +81,14 @@ public class AuthServiceImpl implements IAuthService {
 		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
 			errors.put("password", "Password cannot be empty");
 		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-			errors.put("password", "Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
+			errors.put("password",
+					"Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
 		}
 
 		return errors;
 	}
 
-
-	 @Override
+	@Override
 	 public Map<String, String> validateRegisterAgencyDto(AgencyRegisterRequestDTO dto) {
 	     Map<String, String> errors = new HashMap<>();
 
@@ -118,13 +116,16 @@ public class AuthServiceImpl implements IAuthService {
 	     } else {
 	         try {
 	             Agency existingAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
+	            
 	             if (existingAgency != null) {
-	                 if (existingAgency.isDelete()) {
-	                
-	                 } else if (!existingAgency.isActive()) {
+	            	  if ("pending".equalsIgnoreCase(existingAgency.getStatus())) {
+	                     errors.put("email", "Registration request for this email already pending approval!");}
+	            	 
+						else if (existingAgency.isDelete()) {
+
+						} else if (!existingAgency.isActive()) {
 	                     errors.put("email", "Agency account is blocked! You cannot register with this email.");
-	                 } else if ("pending".equalsIgnoreCase(existingAgency.getStatus())) {
-	                     errors.put("email", "Registration request for this email already pending approval!");
+	                 
 	                 } else {
 	                     errors.put("email", "Email already exists");
 	                 }
@@ -210,26 +211,24 @@ public class AuthServiceImpl implements IAuthService {
 	     return errors;
 	 }
 
+	@Override
+	public Map<String, String> validateLoginAgencyDto(LoginRequestDTO dto) {
+		Map<String, String> errors = new HashMap<>();
 
-	 @Override
-	 public Map<String, String> validateLoginAgencyDto(LoginRequestDTO dto) {
-		    Map<String, String> errors = new HashMap<>();
+		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+			errors.put("email", "Email cannot be empty");
+		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
+			errors.put("email", "Invalid email");
+		}
 
-		
-		    if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
-		        errors.put("email", "Email cannot be empty");
-		    } else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
-		        errors.put("email", "Invalid email");
-		    }
+		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+			errors.put("password", "Password cannot be empty");
+		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
+			errors.put("password",
+					"Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
+		}
 
-		 
-		    if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-		        errors.put("password", "Password cannot be empty");
-		    } else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-		        errors.put("password", "Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
-		    }
-
-		    IAgencyDAO agencyDAO = new AgencyDAOImpl();
+		IAgencyDAO agencyDAO = new AgencyDAOImpl();
 //		    try {
 //		    	 Agency dbAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
 //		        if (dbAgency != null) {
@@ -244,27 +243,75 @@ public class AuthServiceImpl implements IAuthService {
 //		        e.printStackTrace();
 //		    }
 
-		    try {
-	             Agency existingAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
-	             if (existingAgency != null) {
-	                  if ("pending".equalsIgnoreCase(existingAgency.getStatus())) {
-	                     errors.put("email", " Request for this email is in pending approval!");
-	                 }     	
-	                 else if (existingAgency.isDelete()) {
-			                errors.put("email", "Agency not found!");
-			            }
-	                 else if (!existingAgency.isActive()) {
-	                     errors.put("email", "Agency account is blocked! You cannot login with this email.");
-	                 }
-	             }
-	         } catch (Exception e) {
-	             e.printStackTrace();
-	         }
-		    
-		    
-		    return errors;
+		try {
+			Agency existingAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
+			if (existingAgency != null) {
+				if ("pending".equalsIgnoreCase(existingAgency.getStatus())) {
+					errors.put("email", " Request for this email is in pending approval!");
+				} else if (existingAgency.isDelete()) {
+					errors.put("email", "Agency not found!");
+				} else if (!existingAgency.isActive()) {
+					errors.put("email", "Agency account is blocked! You cannot login with this email.");
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
+		return errors;
+	}
 
+	public Map<String, String> validateChangePassword(String newPassword, String confirmPassword) {
+		Map<String, String> errors = new HashMap<>();
+
+		if (newPassword == null || newPassword.trim().isEmpty()) {
+			errors.put("newPassword", "New password cannot be empty");
+		} else if (!ValidationUtil.isValidPassword(newPassword)) {
+			errors.put("newPassword", "Password must have min 6 chars, 1 upper, 1 lower, 1 digit, 1 special char");
+		}
+
+		if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+			errors.put("confirmPassword", "Confirm password cannot be empty");
+		} else if (!newPassword.equals(confirmPassword)) {
+			errors.put("confirmPassword", "Passwords do not match");
+		}
+
+		return errors;
+	}
+
+	public Map<String, String> validateUpdateUser(RegisterRequestDTO dto) {
+		Map<String, String> errors = new HashMap<>();
+		IUserDAO userDAO = new UserDAOImpl();
+
+		if (dto.getUsername() == null || dto.getUsername().trim().isEmpty()) {
+			errors.put("userName", "Username cannot be empty");
+		} else if (!ValidationUtil.isValidName(dto.getUsername())) {
+			errors.put("userName", "Invalid username");
+		}
+
+		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+			errors.put("userEmail", "Email cannot be empty");
+		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
+			errors.put("userEmail", "Invalid email");
+		} else {
+			try {
+				User existingUser = userDAO.getUserByEmail(dto.getEmail());
+				if (existingUser != null) {
+
+					if (existingUser.getUserId() != dto.getUserId() && !existingUser.isDelete()) {
+						if (!existingUser.isActive()) {
+							errors.put("userEmail", "Account is blocked! Cannot use this email.");
+						} else {
+							errors.put("userEmail", "Email already exists");
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return errors;
+	}
 
 }

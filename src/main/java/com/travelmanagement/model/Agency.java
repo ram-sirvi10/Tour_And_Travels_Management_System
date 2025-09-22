@@ -148,4 +148,13 @@ public class Agency {
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
+	@Override
+	public String toString() {
+		return "Agency [agencyId=" + agencyId + ", agencyName=" + agencyName + ", ownerName=" + ownerName + ", email="
+				+ email + ", phone=" + phone + ", city=" + city + ", state=" + state + ", country=" + country
+				+ ", pincode=" + pincode + ", registrationNumber=" + registrationNumber + ", password=" + password
+				+ ", status=" + status + ", isActive=" + isActive + ", isDelete=" + isDelete + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + "]";
+	}
 }

@@ -30,13 +30,12 @@ public class AuthServlet extends HttpServlet {
 	private IUserService userService = new UserServiceImpl();
 	private AuthServiceImpl authService = new AuthServiceImpl();
 	private IAgencyService agencyService = new AgencyServiceImpl();
-	
+
 //	public AuthServlet() {
 //		createAdmin();
 //	}
-	
-	
-	//USE THIS METHOD TO ADD ADMIN
+
+	// USE THIS METHOD TO ADD ADMIN
 //	 private void createAdmin() {
 //	    	System.out.println("CREATE ADMIN=============");
 //			if(!adminService.isAdminAvailable())
@@ -148,14 +147,14 @@ public class AuthServlet extends HttpServlet {
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setRole(request.getParameter("role"));
-		  Map<String, String> errors = new HashMap<>();
-		   if ("user".equalsIgnoreCase(dto.getRole())) {
-		        errors = authService.validateLoginDto(dto);
-		    } else if ("agency".equalsIgnoreCase(dto.getRole())) {
-		        errors = authService.validateLoginAgencyDto(dto);
-		    } else {
-		        errors.put("role", "Invalid role selected!");
-		    }
+		Map<String, String> errors = new HashMap<>();
+		if ("user".equalsIgnoreCase(dto.getRole())) {
+			errors = authService.validateLoginDto(dto);
+		} else if ("agency".equalsIgnoreCase(dto.getRole())) {
+			errors = authService.validateLoginAgencyDto(dto);
+		} else {
+			errors.put("role", "Invalid role selected!");
+		}
 
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
@@ -199,7 +198,7 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		HttpSession session  	= request.getSession(false);
+		HttpSession session = request.getSession(false);
 		if (session != null) {
 			session.invalidate();
 		}

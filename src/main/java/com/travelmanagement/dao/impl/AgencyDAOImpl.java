@@ -54,12 +54,13 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			throw new IllegalArgumentException("Invalid field: " + fieldName);
 		}
 
-		String sql = "SELECT * FROM travelAgency " + "WHERE " + fieldName + "=? AND is_delete=false "
-				+ "ORDER BY CASE WHEN status=? THEN 1 ELSE 2 END, updated_at DESC, created_at DESC LIMIT 1";
+		String sql = "SELECT * FROM travelAgency " + "WHERE " + fieldName + "=? "
+				+ "ORDER BY CASE WHEN status=? THEN 1  WHEN status=? THEN 2 ELSE 3 END,  created_at DESC LIMIT 1";
 
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			ps.setString(1, value);
 			ps.setString(2, "PENDING");
+			ps.setString(3, "APPROVED");
 
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
@@ -220,49 +221,57 @@ public class AgencyDAOImpl implements IAgencyDAO {
 
 	@Override
 	public List<Agency> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
-	    List<Agency> agencies = new ArrayList<>();
-	    if (keyword == null || keyword.isEmpty()) return agencies;
+		List<Agency> agencies = new ArrayList<>();
+		
 
-	    String sql = "SELECT * FROM travelAgency WHERE is_delete = false AND (" +
-	                 "agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? OR phone LIKE ? " +
-	                 "OR city LIKE ? OR state LIKE ? OR country LIKE ? OR pincode LIKE ? OR registration_number LIKE ?) " +
-	                 "ORDER BY created_at DESC LIMIT ? OFFSET ?";
+		String sql = "SELECT * FROM travelAgency WHERE is_delete = false AND ("
+				+ "agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? OR phone LIKE ? "
+				+ "OR city LIKE ? OR state LIKE ? OR country LIKE ? OR pincode LIKE ? OR registration_number LIKE ?) "
+				+ "ORDER BY created_at DESC LIMIT ? OFFSET ?";
+		if(keyword!=null ) {
+			
+			
+		}
+		
+		
+		try  {
+			 preparedStatement = connection.prepareStatement(sql);
+			String likeKeyword = "%" + keyword + "%";
+			for (int i = 1; i <= 9; i++)
+				preparedStatement.setString(i, likeKeyword);
+			preparedStatement.setInt(10, limit);
+			preparedStatement.setInt(11, offset);
 
-	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-	        String likeKeyword = "%" + keyword + "%";
-	        for (int i = 1; i <= 9; i++) ps.setString(i, likeKeyword); 
-	        ps.setInt(10, limit);
-	        ps.setInt(11, offset);
+			 resultSet = preparedStatement.executeQuery();
+				while (resultSet.next()) {
+					Agency agency = new Agency();
+					agency.setAgencyId(resultSet.getInt("agency_id"));
+					agency.setAgencyName(resultSet.getString("agency_name"));
+					agency.setOwnerName(resultSet.getString("owner_name"));
+					agency.setEmail(resultSet.getString("email"));
+					agency.setPhone(resultSet.getString("phone"));
+					agency.setCity(resultSet.getString("city"));
+					agency.setState(resultSet.getString("state"));
+					agency.setCountry(resultSet.getString("country"));
+					agency.setPincode(resultSet.getString("pincode"));
+					agency.setRegistrationNumber(resultSet.getString("registration_number"));
+					agency.setStatus(resultSet.getString("status"));
+					agency.setActive(resultSet.getBoolean("is_active"));
+					agency.setDelete(resultSet.getBoolean("is_delete"));
+					if (resultSet.getDate("created_at") != null)
+						agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+					if (resultSet.getDate("updated_at") != null)
+						agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
 
-	        try (ResultSet rs = ps.executeQuery()) {
-	            while (rs.next()) {
-	                Agency agency = new Agency();
-	                agency.setAgencyId(rs.getInt("agency_id"));
-	                agency.setAgencyName(rs.getString("agency_name"));
-	                agency.setOwnerName(rs.getString("owner_name"));
-	                agency.setEmail(rs.getString("email"));
-	                agency.setPhone(rs.getString("phone"));
-	                agency.setCity(rs.getString("city"));
-	                agency.setState(rs.getString("state"));
-	                agency.setCountry(rs.getString("country"));
-	                agency.setPincode(rs.getString("pincode"));
-	                agency.setRegistrationNumber(rs.getString("registration_number"));
-	                agency.setStatus(rs.getString("status"));
-	                agency.setActive(rs.getBoolean("is_active"));
-	                agency.setDelete(rs.getBoolean("is_delete"));
-	                if (rs.getDate("created_at") != null) agency.setCreatedAt(rs.getDate("created_at").toLocalDate());
-	                if (rs.getDate("updated_at") != null) agency.setUpdatedAt(rs.getDate("updated_at").toLocalDate());
+					agencies.add(agency);
+				}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	                agencies.add(agency);
-	            }
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-
-	    return agencies;
+		return agencies;
 	}
-
 
 	@Override
 	public List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
@@ -347,12 +356,6 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public long countAgencies(String key) throws Exception {
-
-		return 0;
-	}
-
-	@Override
 	public List<Agency> getAllAgencies(int limit, int offset) {
 		List<Agency> agencies = new ArrayList<>();
 		try {
@@ -393,16 +396,34 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public List<Agency> getDeletedAgencies(int limit, int offset) throws Exception {
+	public List<Agency> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
 		List<Agency> list = new ArrayList<>();
 		try {
-			String sql = "SELECT * FROM travelAgency WHERE is_delete = ? LIMIT ? OFFSET ?";
+			String sql = "SELECT * FROM travelAgency WHERE is_delete = true";
+
+			if (keyword != null && !keyword.isEmpty()) {
+				sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
+						+ "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "
+						+ "OR LOWER(pincode) LIKE ? OR LOWER(registration_number) LIKE ?)";
+			}
+
+			sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
 			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setBoolean(1, true);
-			preparedStatement.setInt(2, limit);
-			preparedStatement.setInt(3, offset);
+			int index = 1;
+
+			if (keyword != null && !keyword.isEmpty()) {
+				String kw = "%" + keyword.toLowerCase() + "%";
+				for (int i = 0; i < 9; i++) {
+					preparedStatement.setString(index++, kw);
+				}
+			}
+
+			preparedStatement.setInt(index++, limit);
+			preparedStatement.setInt(index++, offset);
 
 			resultSet = preparedStatement.executeQuery();
+
 			while (resultSet.next()) {
 				Agency agency = new Agency();
 				agency.setAgencyId(resultSet.getInt("agency_id"));
@@ -422,6 +443,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 				if (resultSet.getDate("updated_at") != null)
 					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+
 				list.add(agency);
 			}
 		} catch (Exception e) {
@@ -437,7 +459,9 @@ public class AgencyDAOImpl implements IAgencyDAO {
 
 		if (status != null && !status.isEmpty()) {
 			sql += " AND status = ?";
-		}
+		}else
+			sql+= " AND status = 'APPROVED'";
+		
 		if (activeState != null) {
 			sql += " AND is_active = ?";
 		}
@@ -486,94 +510,102 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public List<Agency> filterAgencies(String status, String active, String startDate, String endDate, String keyword,
-	        int limit, int offset) throws Exception {
-	    List<Agency> agencies = new ArrayList<>();
+	public List<Agency> filterAgencies(String status, Boolean active, String startDate, String endDate, String keyword,
+			Boolean delete,int limit, int offset) throws Exception {
+		List<Agency> agencies = new ArrayList<>();
 
-	    String sql = "SELECT * FROM travelAgency WHERE 1=1";
+		String sql = "SELECT * FROM travelAgency WHERE 1=1";
 
-	  
-	    if (status != null && !status.isEmpty()) {
-	        sql += " AND status = ?";
-	    }
+		if (status != null && !status.isEmpty()) {
+			sql += " AND status = ?";
+		}else
+			sql += " AND status = 'APPROVED' ";
 
-	  
-	    if (active != null && !active.isEmpty()) {
-	        sql += " AND is_active = ?";
-	    }
+		if (active != null) {
+			sql += " AND is_active = ?";
+		}
 
-	  
-	    if (startDate != null && !startDate.isEmpty()) {
-	        sql += " AND created_at >= ?";
-	    }
-	    if (endDate != null && !endDate.isEmpty()) {
-	        sql += " AND created_at <= ?";
-	    }
+		if (startDate != null && !startDate.isEmpty()) {
+			sql += " AND created_at >= ?";
+		}
+		if (endDate != null && !endDate.isEmpty()) {
+			sql += " AND created_at <= ?";
+		}
 
-	   
-	    if (keyword != null && !keyword.isEmpty()) {
-	        sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
-	             + "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "
-	             + "OR LOWER(pincode) LIKE ? OR LOWER(registration_number) LIKE ?)";
-	    }
-
-	    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-
-	    try {
-	        preparedStatement = connection.prepareStatement(sql);
-	        int index = 1;
-
-	        if (status != null && !status.isEmpty()) {
-	            preparedStatement.setString(index++, status);
+	    if (delete != null) {
+	        if (delete) {
+	          
+	        } else {
+	            sql += " AND is_delete = false";
 	        }
-	        if (active != null && !active.isEmpty()) {
-	            preparedStatement.setBoolean(index++, Boolean.parseBoolean(active));
-	        }
-	        if (startDate != null && !startDate.isEmpty()) {
-	            preparedStatement.setDate(index++, Date.valueOf(startDate));
-	        }
-	        if (endDate != null && !endDate.isEmpty()) {
-	            preparedStatement.setDate(index++, Date.valueOf(endDate));
-	        }
-	        if (keyword != null && !keyword.isEmpty()) {
-	            String kw = "%" + keyword.toLowerCase() + "%";
-	            for (int i = 0; i < 9; i++) {
-	                preparedStatement.setString(index++, kw);
-	            }
-	        }
-
-	        preparedStatement.setInt(index++, limit);
-	        preparedStatement.setInt(index++, offset);
-
-	        resultSet = preparedStatement.executeQuery();
-	        while (resultSet.next()) {
-	            Agency agency = new Agency();
-	            agency.setAgencyId(resultSet.getInt("agency_id"));
-	            agency.setAgencyName(resultSet.getString("agency_name"));
-	            agency.setOwnerName(resultSet.getString("owner_name"));
-	            agency.setEmail(resultSet.getString("email"));
-	            agency.setPhone(resultSet.getString("phone"));
-	            agency.setCity(resultSet.getString("city"));
-	            agency.setState(resultSet.getString("state"));
-	            agency.setCountry(resultSet.getString("country"));
-	            agency.setPincode(resultSet.getString("pincode"));
-	            agency.setRegistrationNumber(resultSet.getString("registration_number"));
-	            agency.setStatus(resultSet.getString("status"));
-	            agency.setActive(resultSet.getBoolean("is_active"));
-	            agency.setDelete(resultSet.getBoolean("is_delete"));
-	            if (resultSet.getDate("created_at") != null)
-	                agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-	            if (resultSet.getDate("updated_at") != null)
-	                agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-	            agencies.add(agency);
-	        }
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
+	    } else {
+	      
+	        sql += " AND is_delete = false";
 	    }
+		
+		if (keyword != null && !keyword.isEmpty()) {
+			sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
+					+ "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "
+					+ "OR LOWER(pincode) LIKE ? OR LOWER(registration_number) LIKE ?)";
+		}
 
-	    return agencies;
+		sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
+		try {
+			preparedStatement = connection.prepareStatement(sql);
+			int index = 1;
+
+			if (status != null && !status.isEmpty()) {
+				preparedStatement.setString(index++, status);
+			}
+			if (active != null) {
+				preparedStatement.setBoolean(index++, active);
+			}
+			if (startDate != null && !startDate.isEmpty()) {
+				preparedStatement.setDate(index++, Date.valueOf(startDate));
+			}
+			if (endDate != null && !endDate.isEmpty()) {
+				preparedStatement.setDate(index++, Date.valueOf(endDate));
+			}
+			if (keyword != null && !keyword.isEmpty()) {
+				String kw = "%" + keyword.toLowerCase() + "%";
+				for (int i = 0; i < 9; i++) {
+					preparedStatement.setString(index++, kw);
+				}
+			}
+
+			preparedStatement.setInt(index++, limit);
+			preparedStatement.setInt(index++, offset);
+
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				Agency agency = new Agency();
+				agency.setAgencyId(resultSet.getInt("agency_id"));
+				agency.setAgencyName(resultSet.getString("agency_name"));
+				agency.setOwnerName(resultSet.getString("owner_name"));
+				agency.setEmail(resultSet.getString("email"));
+				agency.setPhone(resultSet.getString("phone"));
+				agency.setCity(resultSet.getString("city"));
+				agency.setState(resultSet.getString("state"));
+				agency.setCountry(resultSet.getString("country"));
+				agency.setPincode(resultSet.getString("pincode"));
+				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+				agency.setStatus(resultSet.getString("status"));
+				agency.setActive(resultSet.getBoolean("is_active"));
+				agency.setDelete(resultSet.getBoolean("is_delete"));
+				if (resultSet.getDate("created_at") != null)
+					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+				if (resultSet.getDate("updated_at") != null)
+					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+
+				agencies.add(agency);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return agencies;
 	}
 
 }
