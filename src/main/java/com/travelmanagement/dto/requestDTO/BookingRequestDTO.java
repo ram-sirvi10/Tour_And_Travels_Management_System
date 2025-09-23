@@ -6,11 +6,11 @@ import java.util.Date;
 import com.travelmanagement.model.Traveler;
 
 public class BookingRequestDTO {
-    private int userId;              // ID of the user making the booking
-    private int packageId;           // ID of the selected travel package
-    private Date bookingDate;        // Date of the booking
-    private int numberOfTravelers;   // Total number of travelers
-    private ArrayList<Traveler> travelers; // List of traveler details
+    private int userId;              
+    private int packageId;           
+    private Date bookingDate;      
+    private int numberOfTravelers;   
+    private ArrayList<Traveler> travelers; 
 	public int getUserId() {
 		return userId;
 	}

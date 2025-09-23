@@ -11,7 +11,7 @@ if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
 
 List<AgencyResponseDTO> agenciesList = (List<AgencyResponseDTO>) request.getAttribute("agenciesList");
 String currentList = (String) request.getAttribute("listType");
-
+System.err.println(currentList);
 int currentPage = (Integer) request.getAttribute("currentPage");
 int totalPages = (Integer) request.getAttribute("totalPages");
 int pageSize = (Integer) request.getAttribute("pageSize");
@@ -73,7 +73,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
 					%>
 					<%
-					if ("Pending Agencies".equalsIgnoreCase(currentList)) {
+					if ("Pending Agencies".equalsIgnoreCase(currentList)||"REJECTED Agencies".equalsIgnoreCase(currentList)) {
 					%>
 					<div class="col-md-2">
 						<select name="status" class="form-select" >
@@ -178,7 +178,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
         Details
     </button>
 
-    <% if (!"Deleted Agencies".equalsIgnoreCase(currentList)) { %>
+    <% if (!"Deleted Agencies".equalsIgnoreCase(currentList)&&!"REJECTED Agencies".equalsIgnoreCase(currentList)) { %>
         <% if ("PENDING".equalsIgnoreCase(agency.getStatus())) { %>
             <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
                 <input type="hidden" name="button" value="agencyAction">

@@ -14,16 +14,23 @@ import com.travelmanagement.service.IUserService;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
+import com.travelmanagement.util.CloudinaryUtil;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @WebServlet("/auth")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AuthServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -96,9 +103,25 @@ public class AuthServlet extends HttpServlet {
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirmPassword"));
-
 		Map<String, String> errors = authService.validateRegisterDto(dto);
-
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
+		String imageUrl = null;
+		try {
+			Part filePart = request.getPart("profileImage");
+			imageUrl = CloudinaryUtil.uploadImage(filePart);
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("profileImage", e.getMessage());
+		}
+		dto.setImageurl(imageUrl);
+//		User user = new User();
+//		user.setUserName(dto.getUsername());
+//		user.setUserEmail(dto.getEmail());
+//		user.setUserPassword(PasswordHashing.ecryptPassword(dto.getPassword()));
+//		user.setImageurl(dto.getImageurl());
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
@@ -125,8 +148,8 @@ public class AuthServlet extends HttpServlet {
 		dto.setRegistrationNumber(request.getParameter("registration_number"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
-
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
+
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("registration_number", dto.getRegistrationNumber());

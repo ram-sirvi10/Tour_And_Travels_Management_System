@@ -43,6 +43,33 @@ body { font-family:'Segoe UI'; background:#f7f9fc; margin:0; padding:0; }
 }
 
 .dropdown { position: relative; } /* Ensures dropdown works inside flex navbar */
+
+.profile-card {
+    background: #ffffff;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+.profile-view-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 4px solid #0d6efd;
+    transition: transform 0.2s;
+}
+.profile-view-img:hover {
+    transform: scale(1.05);
+}
+
+.profile-view-icon {
+    font-size: 150px;
+    color: #0d6efd;
+}
 </style>
 </head>
 <body>
@@ -51,11 +78,19 @@ body { font-family:'Segoe UI'; background:#f7f9fc; margin:0; padding:0; }
     <h1>Admin Dashboard</h1>
 
     <div class="dropdown ms-auto" id="profileDropdownWrapper">
-        <button class="btn btn-primary dropdown-toggle d-flex align-items-center" 
-                type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle" style="font-size:1.5rem; margin-right:5px;"></i>
-            <span><%= user != null ? user.getUserName() : "Admin" %></span>
-        </button>
+       <button class="btn btn-primary dropdown-toggle d-flex align-items-center" 
+        type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+
+    <% if (user.getImageurl() != null && !user.getImageurl().isEmpty()) {%>
+    
+            <img src="<%=user.getImageurl()%>" alt="Profile" 
+                 style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+        <% } else {%>
+            <i class="bi bi-person-circle" style="font-size:1.5rem;"></i>
+        <% } %>
+    <span><%= user != null ? user.getUserName() : "Admin" %></span>
+</button>
+
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
             <li><a class="dropdown-item" href="<%=request.getContextPath()%>/template/admin/profileManagement.jsp?button=viewProfile">View Profile</a></li>
             <li><a class="dropdown-item" href="<%=request.getContextPath()%>/template/admin/profileManagement.jsp?button=updateProfile">Edit Profile</a></li>

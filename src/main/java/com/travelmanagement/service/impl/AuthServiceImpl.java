@@ -261,9 +261,16 @@ public class AuthServiceImpl implements IAuthService {
 		return errors;
 	}
 
-	public Map<String, String> validateChangePassword(String newPassword, String confirmPassword) {
+	public Map<String, String> validateChangePassword(String newPassword, String confirmPassword,String oldPassword) {
 		Map<String, String> errors = new HashMap<>();
 
+		if (oldPassword == null || oldPassword.trim().isEmpty()) {
+			errors.put("oldPassword", "Old password cannot be empty");
+		} else if (!ValidationUtil.isValidPassword(newPassword)) {
+			errors.put("oldPassword", "Password must have min 6 chars, 1 upper, 1 lower, 1 digit, 1 special char");
+		}
+
+		
 		if (newPassword == null || newPassword.trim().isEmpty()) {
 			errors.put("newPassword", "New password cannot be empty");
 		} else if (!ValidationUtil.isValidPassword(newPassword)) {

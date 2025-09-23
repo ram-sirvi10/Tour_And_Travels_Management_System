@@ -82,6 +82,7 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
     <thead class="table-primary">
         <tr>
             <th>S.No</th>
+            <th>Profile Image</th>
             <th>Name</th>
             <th>Email</th>
             <th>Register Date</th>
@@ -96,6 +97,17 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
         %>
         <tr>
             <td><%=serial++%></td>
+             <td>
+        <% if (user.getImageurl() != null && !user.getImageurl().isEmpty()) { %>
+            <img src="<%=user.getImageurl()%>" alt="Profile" 
+     class="table-profile-img" 
+       style="width:50px; height:50px; border-radius:50%; object-fit:cover; cursor:pointer;" 
+     onclick="showProfileImageModal('<%=user.getImageurl()%>')">
+
+        <% } else { %>
+            <i class="bi bi-person-circle" style="font-size:1.5rem;"></i>
+        <% } %>
+    </td>
             <td><%=user.getUserName()%></td>
             <td><%=user.getUserEmail()%></td>
             <td><%=(user.getCreatedAt() != null) ? user.getCreatedAt().toString() : "-"%></td>
@@ -134,6 +146,17 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
         <% } %>
     </tbody>
 </table>
+
+<div class="modal fade" id="profileImageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="modalProfileImage" src="" alt="Profile Image" 
+             style="max-width:100%; max-height:500px; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
 
         
 <%
@@ -179,6 +202,15 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
     </div>
       
 </div>
+<script>
+function showProfileImageModal(imageUrl) {
+    var modalImg = document.getElementById('modalProfileImage');
+    modalImg.src = imageUrl;
+
+    var myModal = new bootstrap.Modal(document.getElementById('profileImageModal'));
+    myModal.show();
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

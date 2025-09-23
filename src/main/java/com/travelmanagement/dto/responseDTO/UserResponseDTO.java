@@ -6,12 +6,27 @@ public class UserResponseDTO {
 	private int userId;
 	private String userName;
 	private String userEmail;
-//	private String userPassword;
+	private String userPassword;
 	private String userRole; 
 	private boolean isActive;
 	private boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
+	private String imageurl;
+	
+	
+	public String getUserPassword() {
+		return userPassword;
+	}
+	public void setUserPassword(String userPassword) {
+		this.userPassword = userPassword;
+	}
+	public String getImageurl() {
+		return imageurl;
+	}
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
 	public int getUserId() {
 		return userId;
 	}

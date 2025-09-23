@@ -1,6 +1,7 @@
 package com.travelmanagement.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,15 +11,23 @@ import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
+import com.travelmanagement.util.CloudinaryUtil;
+import com.travelmanagement.util.PasswordHashing;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @WebServlet("/admin")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AdminServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -85,12 +94,22 @@ public class AdminServlet extends HttpServlet {
 	private void changePassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String newPassword = request.getParameter("newPassword");
 		String confirmPassword = request.getParameter("confirmPassword");
+		String oldPassword = request.getParameter("oldPassword");
 		HttpSession session = request.getSession();
 		AuthServiceImpl authService = new AuthServiceImpl();
 		UserServiceImpl userService = new UserServiceImpl();
 		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+		UserResponseDTO dbUser = userService.getByEmail(user.getUserEmail());
 
-		Map<String, String> errors = authService.validateChangePassword(newPassword, confirmPassword);
+		Map<String, String> errors = authService.validateChangePassword(newPassword, confirmPassword, oldPassword);
+
+		System.out.println("old pass" + oldPassword);
+		System.out.println("dp pass" + dbUser.getUserPassword());
+		if (oldPassword != null && !oldPassword.isEmpty()) {
+			if (!PasswordHashing.checkPassword(oldPassword, dbUser.getUserPassword())) {
+				errors.put("oldPassword", "Old password is incorrect");
+			}
+		}
 
 		if (!errors.isEmpty()) {
 			request.setAttribute("actionType", "changePassword");
@@ -123,7 +142,19 @@ public class AdminServlet extends HttpServlet {
 		UserServiceImpl userService = new UserServiceImpl();
 
 		Map<String, String> errors = authService.validateUpdateUser(dto);
-
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
+		String imageUrl = null;
+		try {
+			Part filePart = request.getPart("profileImage");
+			imageUrl = CloudinaryUtil.uploadImage(filePart);
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("profileImage", e.getMessage());
+		}
+		dto.setImageurl(imageUrl);
 		if (!errors.isEmpty()) {
 			request.setAttribute("actionType", "updateProfile");
 			request.setAttribute("errors", errors);
@@ -188,12 +219,11 @@ public class AdminServlet extends HttpServlet {
 
 		int offset = (page - 1) * pageSize;
 
-		/////// change
-		long totalItems = agencyService.countAgencies(status, active, false, keyword);
+		long totalItems = agencyService.countAgencies(status, active, false, keyword, startDate, endDate);
 		int totalPages = (int) Math.ceil((double) totalItems / pageSize);
-		
+
 		if (totalPages < 1) {
-		    totalPages = 1;
+			totalPages = 1;
 		}
 
 		request.setAttribute("currentPage", page);
@@ -203,11 +233,29 @@ public class AdminServlet extends HttpServlet {
 		request.setAttribute("status", status);
 		request.setAttribute("startDate", startDate);
 		request.setAttribute("endDate", endDate);
+		List<AgencyResponseDTO> agenciesList = new ArrayList<AgencyResponseDTO>();
+		if ("REJECTED".equalsIgnoreCase(status)) {
 
-		List<AgencyResponseDTO> pendingAgencies = agencyService.filterAgencies(status, active, startDate, endDate,
-				keyword, false,pageSize, offset);
-		request.setAttribute("agenciesList", pendingAgencies);
-		request.setAttribute("listType", "Pending Agencies");
+			agenciesList = agencyService.filterAgencies(status, false, startDate, endDate, keyword, true, pageSize,
+					offset);
+		} else {
+			agenciesList = agencyService.filterAgencies(status, active, startDate, endDate, keyword, false, pageSize,
+					offset);
+		}
+
+		System.out.println("pending  agency ==== ");
+		System.out.println("status == " + status);
+		System.out.println("active == " + active);
+		System.out.println("keyword == " + keyword);
+		System.out.println("startDate == " + startDate);
+		System.out.println("endDate == " + endDate);
+		System.out.println("pagination in pending agency -===");
+		System.out.println("pagesize" + pageSize);
+		System.out.println("page" + page);
+		System.out.println("list size  = " + agenciesList.size());
+
+		request.setAttribute("agenciesList", agenciesList);
+		request.setAttribute("listType", status + " Agencies");
 		request.getRequestDispatcher("template/admin/manageAgencies.jsp").forward(request, response);
 	}
 
@@ -217,11 +265,11 @@ public class AdminServlet extends HttpServlet {
 
 			long totalUsers = userService.countUser(true, false, "");
 
-			long totalAgencies = agencyService.countAgencies("APPROVED", null, false, "");
+			long totalAgencies = agencyService.countAgencies("APPROVED", null, false, "", null, null);
 
-			long pendingAgencies = agencyService.countAgencies("PENDING", false, true, "");
+			long pendingAgencies = agencyService.countAgencies("PENDING", false, true, "", null, null);
 
-			long rejectedAgencies = agencyService.countAgencies("REJECTED", false, true, "");
+			long rejectedAgencies = agencyService.countAgencies("REJECTED", false, true, "", null, null);
 
 			System.out.println("totalUsers === " + totalUsers);
 			System.out.println("totalAgencies === " + totalAgencies);
@@ -280,7 +328,7 @@ public class AdminServlet extends HttpServlet {
 		long totalUsers = userService.countUser(false, true, keyword);
 		int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
 		if (totalPages < 1) {
-		    totalPages = 1;
+			totalPages = 1;
 		}
 		request.setAttribute("usersList", usersList);
 		request.setAttribute("currentPage", page);
@@ -337,7 +385,7 @@ public class AdminServlet extends HttpServlet {
 		long totalUsers = userService.countUser(active, false, keyword);
 		int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
 		if (totalPages < 1) {
-		    totalPages = 1;
+			totalPages = 1;
 		}
 		System.out.println("manage user=====>>");
 		System.out.println("keyword===" + keyword);
@@ -375,8 +423,7 @@ public class AdminServlet extends HttpServlet {
 				break;
 			}
 		}
-		
-		
+
 		manageUsers(request, response);
 	}
 
@@ -411,10 +458,10 @@ public class AdminServlet extends HttpServlet {
 
 		int offset = (page - 1) * pageSize;
 
-		long totalItems = agencyService.countAgencies(null, false, true, keyword);
+		long totalItems = agencyService.countAgencies("APPROVED", false, true, keyword, null, null);
 		int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 		if (totalPages < 1) {
-		    totalPages = 1;
+			totalPages = 1;
 		}
 		request.setAttribute("currentPage", page);
 		request.setAttribute("totalPages", totalPages);
@@ -469,7 +516,7 @@ public class AdminServlet extends HttpServlet {
 		int offset = (page - 1) * pageSize;
 
 		List<AgencyResponseDTO> agenciesList = agencyService.filterAgencies(status, active, startDate, endDate, keyword,
-				false,pageSize, offset);
+				false, pageSize, offset);
 		System.out.println("manage agency ==== ");
 		System.out.println("status == " + status);
 		System.out.println("active == " + active);
@@ -477,14 +524,14 @@ public class AdminServlet extends HttpServlet {
 		System.out.println("startDate == " + startDate);
 		System.out.println("endDate == " + endDate);
 		System.out.println("pagination in manage agency -===");
-		System.out.println("pagesize"+pageSize);
-		System.out.println("page"+page);
-		System.out.println("list size  = "+agenciesList.size());
+		System.out.println("pagesize" + pageSize);
+		System.out.println("page" + page);
+		System.out.println("list size  = " + agenciesList.size());
 		System.out.println(agenciesList.toString());
-		long totalItems = agencyService.countAgencies(status, active, false, keyword);
+		long totalItems = agencyService.countAgencies(status, active, false, keyword, startDate, endDate);
 		int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 		if (totalPages < 1) {
-		    totalPages = 1;
+			totalPages = 1;
 		}
 		request.setAttribute("agenciesList", agenciesList);
 		request.setAttribute("currentPage", page);
@@ -503,7 +550,7 @@ public class AdminServlet extends HttpServlet {
 	private void agencyAction(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String actionType = request.getParameter("action");
 		String agencyIdStr = request.getParameter("agencyId");
-	
+
 		if (actionType != null && agencyIdStr != null) {
 			int agencyId = Integer.parseInt(agencyIdStr);
 
@@ -528,7 +575,7 @@ public class AdminServlet extends HttpServlet {
 				break;
 			}
 		}
-	
+
 		if ("approve".equalsIgnoreCase(actionType) || "reject".equalsIgnoreCase(actionType)) {
 			pendingAgencies(request, response);
 		} else {

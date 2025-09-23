@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -74,6 +75,10 @@ import jakarta.servlet.http.HttpSession;
 //}
 
 @WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+maxFileSize = 1024 * 1024 * 5, // 5 MB
+maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AuthRoleFilter implements Filter {
 
 	@Override
@@ -95,6 +100,7 @@ public class AuthRoleFilter implements Filter {
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
+		System.out.println("filter -> "+button);
 		String context = req.getContextPath();
 
 		// Define allowed URLs + button combinations for each role
@@ -132,8 +138,9 @@ public class AuthRoleFilter implements Filter {
 	private boolean checkAccess(String path, String button, Map<String, List<String>> accessMap) {
 		for (Map.Entry<String, List<String>> entry : accessMap.entrySet()) {
 			if (path.startsWith(entry.getKey())) {
+				System.out.println(button);
 				List<String> buttons = entry.getValue();
-				// if button param is null, allow only if list contains empty string or null
+				// if button param is null, allow only if list contains empty string or null`
 				if (button == null) {
 					return buttons.contains(null) || buttons.contains("");
 				}

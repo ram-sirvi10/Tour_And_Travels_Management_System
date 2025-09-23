@@ -5,18 +5,16 @@ import java.util.List;
 import com.travelmanagement.model.Booking;
 
 public interface IBookingDAO {
+	
 	Boolean createBooking(Booking booking) throws Exception;
 
 	Booking getBookingById(int id) throws Exception;
-	
-	Boolean addTourist(int bookingId, String touristName) throws Exception;
-
-	List<Booking> getBookingsByUserId(int userId) throws Exception;
-
-	List<Booking> getAllBookings() throws Exception;
 
 	boolean updateBookingStatus(int bookingId, String status) throws Exception;
 
+	List<Booking> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers ,String status, String keyword, String startDate,
+			String endDate) throws Exception;
+
 	boolean cancelBooking(int bookingId) throws Exception;
-	
+
 }

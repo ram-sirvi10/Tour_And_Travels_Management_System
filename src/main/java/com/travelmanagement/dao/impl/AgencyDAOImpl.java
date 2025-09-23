@@ -222,50 +222,47 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	@Override
 	public List<Agency> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
 		List<Agency> agencies = new ArrayList<>();
-		
 
 		String sql = "SELECT * FROM travelAgency WHERE is_delete = false AND ("
 				+ "agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? OR phone LIKE ? "
 				+ "OR city LIKE ? OR state LIKE ? OR country LIKE ? OR pincode LIKE ? OR registration_number LIKE ?) "
 				+ "ORDER BY created_at DESC LIMIT ? OFFSET ?";
-		if(keyword!=null ) {
-			
-			
+		if (keyword != null) {
+
 		}
-		
-		
-		try  {
-			 preparedStatement = connection.prepareStatement(sql);
+
+		try {
+			preparedStatement = connection.prepareStatement(sql);
 			String likeKeyword = "%" + keyword + "%";
 			for (int i = 1; i <= 9; i++)
 				preparedStatement.setString(i, likeKeyword);
 			preparedStatement.setInt(10, limit);
 			preparedStatement.setInt(11, offset);
 
-			 resultSet = preparedStatement.executeQuery();
-				while (resultSet.next()) {
-					Agency agency = new Agency();
-					agency.setAgencyId(resultSet.getInt("agency_id"));
-					agency.setAgencyName(resultSet.getString("agency_name"));
-					agency.setOwnerName(resultSet.getString("owner_name"));
-					agency.setEmail(resultSet.getString("email"));
-					agency.setPhone(resultSet.getString("phone"));
-					agency.setCity(resultSet.getString("city"));
-					agency.setState(resultSet.getString("state"));
-					agency.setCountry(resultSet.getString("country"));
-					agency.setPincode(resultSet.getString("pincode"));
-					agency.setRegistrationNumber(resultSet.getString("registration_number"));
-					agency.setStatus(resultSet.getString("status"));
-					agency.setActive(resultSet.getBoolean("is_active"));
-					agency.setDelete(resultSet.getBoolean("is_delete"));
-					if (resultSet.getDate("created_at") != null)
-						agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-					if (resultSet.getDate("updated_at") != null)
-						agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				Agency agency = new Agency();
+				agency.setAgencyId(resultSet.getInt("agency_id"));
+				agency.setAgencyName(resultSet.getString("agency_name"));
+				agency.setOwnerName(resultSet.getString("owner_name"));
+				agency.setEmail(resultSet.getString("email"));
+				agency.setPhone(resultSet.getString("phone"));
+				agency.setCity(resultSet.getString("city"));
+				agency.setState(resultSet.getString("state"));
+				agency.setCountry(resultSet.getString("country"));
+				agency.setPincode(resultSet.getString("pincode"));
+				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+				agency.setStatus(resultSet.getString("status"));
+				agency.setActive(resultSet.getBoolean("is_active"));
+				agency.setDelete(resultSet.getBoolean("is_delete"));
+				if (resultSet.getDate("created_at") != null)
+					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+				if (resultSet.getDate("updated_at") != null)
+					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
 
-					agencies.add(agency);
-				}
-			
+				agencies.add(agency);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -399,7 +396,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	public List<Agency> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
 		List<Agency> list = new ArrayList<>();
 		try {
-			String sql = "SELECT * FROM travelAgency WHERE is_delete = true";
+			String sql = "SELECT * FROM travelAgency WHERE is_delete = true and status = 'APPROVED'";
 
 			if (keyword != null && !keyword.isEmpty()) {
 				sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
@@ -453,21 +450,30 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception {
+	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword, String startDate,
+			String endDate) throws Exception {
 		long total = 0;
 		String sql = "SELECT COUNT(*) AS total FROM travelAgency WHERE 1=1";
 
 		if (status != null && !status.isEmpty()) {
 			sql += " AND status = ?";
-		}else
-			sql+= " AND status = 'APPROVED'";
-		
+		} else
+			sql += " AND status = 'APPROVED'";
+
 		if (activeState != null) {
 			sql += " AND is_active = ?";
 		}
 		if (isDeleted != null) {
 			sql += " AND is_delete = ?";
 		}
+		if (startDate != null && !startDate.isEmpty()) {
+		    sql += " AND DATE(created_at) >= ?";
+		}
+		if (endDate != null && !endDate.isEmpty()) {
+		    sql += " AND DATE(created_at) <= ?";
+		}
+		
+		
 		if (keyword != null && !keyword.isEmpty()) {
 			sql += " AND (agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? "
 					+ "OR phone LIKE ? OR city LIKE ? OR state LIKE ? OR country LIKE ?)";
@@ -485,6 +491,12 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			}
 			if (isDeleted != null) {
 				preparedStatement.setBoolean(index++, isDeleted);
+			}
+			if (startDate != null && !startDate.isEmpty()) {
+				preparedStatement.setDate(index++, Date.valueOf(startDate));
+			}
+			if (endDate != null && !endDate.isEmpty()) {
+				preparedStatement.setDate(index++, Date.valueOf(endDate));
 			}
 			if (keyword != null && !keyword.isEmpty()) {
 				String likeKeyword = "%" + keyword + "%";
@@ -511,14 +523,14 @@ public class AgencyDAOImpl implements IAgencyDAO {
 
 	@Override
 	public List<Agency> filterAgencies(String status, Boolean active, String startDate, String endDate, String keyword,
-			Boolean delete,int limit, int offset) throws Exception {
+			Boolean delete, int limit, int offset) throws Exception {
 		List<Agency> agencies = new ArrayList<>();
 
 		String sql = "SELECT * FROM travelAgency WHERE 1=1";
 
 		if (status != null && !status.isEmpty()) {
 			sql += " AND status = ?";
-		}else
+		} else
 			sql += " AND status = 'APPROVED' ";
 
 		if (active != null) {
@@ -526,23 +538,23 @@ public class AgencyDAOImpl implements IAgencyDAO {
 		}
 
 		if (startDate != null && !startDate.isEmpty()) {
-			sql += " AND created_at >= ?";
+			sql += " AND DATE(created_at) >= ?";
 		}
 		if (endDate != null && !endDate.isEmpty()) {
-			sql += " AND created_at <= ?";
+			sql += " AND DATE(created_at) <= ?";
 		}
 
-	    if (delete != null) {
-	        if (delete) {
-	          
-	        } else {
-	            sql += " AND is_delete = false";
-	        }
-	    } else {
-	      
-	        sql += " AND is_delete = false";
-	    }
-		
+		if (delete != null) {
+			if (delete) {
+
+			} else {
+				sql += " AND is_delete = false";
+			}
+		} else {
+
+			sql += " AND is_delete = false";
+		}
+
 		if (keyword != null && !keyword.isEmpty()) {
 			sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
 					+ "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "

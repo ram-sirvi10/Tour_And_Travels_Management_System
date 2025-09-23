@@ -20,17 +20,20 @@ public class UserDAOImpl implements IUserDAO {
 		this.connection = DatabaseConfig.getConnection();
 	}
 
+	
+	
+	
 	@Override
 	public boolean createUser(User user) throws Exception {
 
 		try {
 //			connection = DatabaseConfig.getConnection();
-			String sql = "INSERT INTO users (user_name, user_email, user_password) VALUES (?, ?, ?)";
+			String sql = "INSERT INTO users (user_name, user_email, user_password , imageurl) VALUES (?, ?, ?,?)";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, user.getUserName());
 			preparedStatement.setString(2, user.getUserEmail());
 			preparedStatement.setString(3, user.getUserPassword());
-
+			preparedStatement.setObject(4, user.getImageurl());
 			int affectedRows = preparedStatement.executeUpdate();
 			if (affectedRows > 0) {
 				return true;
@@ -42,6 +45,30 @@ public class UserDAOImpl implements IUserDAO {
 		}
 		return false;
 	}
+	
+	
+	
+//	public boolean createUser(User user) throws Exception {
+//
+//		try {
+////			connection = DatabaseConfig.getConnection();
+//			String sql = "INSERT INTO users (user_name, user_email, user_password) VALUES (?, ?, ?)";
+//			preparedStatement = connection.prepareStatement(sql);
+//			preparedStatement.setString(1, user.getUserName());
+//			preparedStatement.setString(2, user.getUserEmail());
+//			preparedStatement.setString(3, user.getUserPassword());
+//
+//			int affectedRows = preparedStatement.executeUpdate();
+//			if (affectedRows > 0) {
+//				return true;
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//
+//		}
+//		return false;
+//	}
 
 	@Override
 	public User getUserById(int id) throws Exception {
@@ -63,6 +90,8 @@ public class UserDAOImpl implements IUserDAO {
 				user.setUserRole(resultSet.getString("user_role"));
 				user.setActive(resultSet.getBoolean("is_active"));
 				user.setDelete(resultSet.getBoolean("is_delete"));
+				if (resultSet.getString("imageurl") != null)
+					user.setImageurl(resultSet.getString("imageurl"));
 				if (resultSet.getDate("created_at") != null)
 					user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 				if (resultSet.getDate("updated_at") != null)
@@ -95,7 +124,8 @@ public class UserDAOImpl implements IUserDAO {
 				user.setUserRole(resultSet.getString("user_role"));
 				user.setActive(resultSet.getBoolean("is_active"));
 				user.setDelete(resultSet.getBoolean("is_delete"));
-
+				if (resultSet.getString("imageurl") != null)
+					user.setImageurl(resultSet.getString("imageurl"));
 				if (resultSet.getDate("created_at") != null)
 					user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 				if (resultSet.getDate("updated_at") != null)
@@ -153,6 +183,8 @@ public class UserDAOImpl implements IUserDAO {
 			user.setUserRole(resultSet.getString("user_role"));
 			user.setActive(resultSet.getBoolean("is_active"));
 			user.setDelete(resultSet.getBoolean("is_delete"));
+			if (resultSet.getString("imageurl") != null)
+				user.setImageurl(resultSet.getString("imageurl"));
 			if (resultSet.getDate("created_at") != null)
 				user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 			if (resultSet.getDate("updated_at") != null)
@@ -168,11 +200,12 @@ public class UserDAOImpl implements IUserDAO {
 
 		try {
 
-			String sql = "UPDATE users SET user_name=?, user_email=? WHERE user_id=?";
+			String sql = "UPDATE users SET user_name=?, user_email=? , imageurl = ? WHERE user_id=?";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, user.getUserName());
 			preparedStatement.setString(2, user.getUserEmail());
-			preparedStatement.setInt(3, user.getUserId());
+			preparedStatement.setObject(3, user.getImageurl());
+			preparedStatement.setInt(4, user.getUserId());
 
 			int affectedRows = preparedStatement.executeUpdate();
 			if (affectedRows > 0) {
@@ -261,6 +294,8 @@ public class UserDAOImpl implements IUserDAO {
 			user.setUserRole(resultSet.getString("user_role"));
 			user.setActive(resultSet.getBoolean("is_active"));
 			user.setDelete(resultSet.getBoolean("is_delete"));
+			if (resultSet.getString("imageurl") != null)
+				user.setImageurl(resultSet.getString("imageurl"));
 			if (resultSet.getDate("created_at") != null)
 				user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 			if (resultSet.getDate("updated_at") != null)
@@ -343,6 +378,8 @@ public class UserDAOImpl implements IUserDAO {
 			user.setUserRole(resultSet.getString("user_role"));
 			user.setActive(resultSet.getBoolean("is_active"));
 			user.setDelete(resultSet.getBoolean("is_delete"));
+			if (resultSet.getString("imageurl") != null)
+				user.setImageurl(resultSet.getString("imageurl"));
 			if (resultSet.getDate("created_at") != null)
 				user.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 			if (resultSet.getDate("updated_at") != null)

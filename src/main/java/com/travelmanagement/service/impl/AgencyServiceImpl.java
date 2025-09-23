@@ -181,8 +181,8 @@ public class AgencyServiceImpl implements IAgencyService {
 	}
 
 	@Override
-	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword) throws Exception {
-		return agencyDAO.countAgencies(status, activeState, isDeleted, keyword);
+	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword,String startDate,String endDate) throws Exception {
+		return agencyDAO.countAgencies(status, activeState, isDeleted, keyword,startDate,endDate);
 	}
 
 }

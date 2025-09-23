@@ -21,7 +21,6 @@ public interface IUserDAO {
 
 	List<User> getDeletedUsers(int limit, int offset) throws Exception;
 
-
 	List<User> getUsersByState(Boolean active, int limit, int offset) throws Exception;
 
 	List<User> getAllUsers(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception;
