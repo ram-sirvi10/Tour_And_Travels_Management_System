@@ -10,6 +10,14 @@ public class PackageResponseDTO {
 	private int duration;
 
 	private boolean isActive;
+	private String imageurl;
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
 
 	
 	public int getPackageId() {

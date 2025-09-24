@@ -8,31 +8,19 @@ import com.travelmanagement.service.IBookingService;
 public class BookingServiceImpl implements IBookingService{
 
 	@Override
-	public Booking createBooking(Booking booking) throws Exception {
+	public Boolean createBooking(Booking booking) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Booking getById(int id) throws Exception {
+	public Booking getBookingById(int id) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Booking> getByUserId(int userId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Booking> getAllBookings() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean updateStatus(int bookingId, String status) throws Exception {
+	public boolean updateBookingStatus(int bookingId, String status) throws Exception {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -43,4 +31,16 @@ public class BookingServiceImpl implements IBookingService{
 		return false;
 	}
 
-}
+	@Override
+	public List<Booking> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers, String status,
+			String keyword, String startDate, String endDate, int limit, int offset) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
+			String keyword, String startDate, String endDate) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
+	}}

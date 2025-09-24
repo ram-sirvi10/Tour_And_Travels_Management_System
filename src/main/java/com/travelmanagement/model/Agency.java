@@ -14,16 +14,27 @@ public class Agency {
 	private String pincode;
 	private String registrationNumber;
 	private String password;
-	private String status; // PENDING / APPROVED / REJECTED
+	private String status; 
 	private boolean isActive;
 	private boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
+private String imageurl;
+	
 
-	// Getters & Setters
+public String getImageurl() {
+	return imageurl;
+}
+
+public void setImageurl(String imageurl) {
+	this.imageurl = imageurl;
+}
+
+
 	public int getAgencyId() {
 		return agencyId;
 	}
+
 
 	public void setAgencyId(int agencyId) {
 		this.agencyId = agencyId;

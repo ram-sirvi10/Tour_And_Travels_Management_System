@@ -1,7 +1,10 @@
 package com.travelmanagement.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.jasper.tagplugins.jstl.core.ForEach;
 
 import com.travelmanagement.dao.IAgencyDAO;
 import com.travelmanagement.dao.IUserDAO;
@@ -10,9 +13,9 @@ import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
-import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
-import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.Traveler;
 import com.travelmanagement.model.User;
 import com.travelmanagement.service.IAuthService;
 import com.travelmanagement.util.ValidationUtil;
@@ -316,6 +319,16 @@ public class AuthServiceImpl implements IAuthService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+
+		return errors;
+	}
+	
+	
+	public Map<String, String> validateTravllers(List<TravelerRequestDTO> travelerRequestDTOs) {
+		Map<String, String> errors = new HashMap<>();
+		for( TravelerRequestDTO traveler : travelerRequestDTOs){
+			
 		}
 
 		return errors;

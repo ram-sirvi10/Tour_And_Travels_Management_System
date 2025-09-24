@@ -5,7 +5,7 @@
 <%
 UserResponseDTO admin = (UserResponseDTO) session.getAttribute("user");
 if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
-	response.sendRedirect("login.jsp");
+	 response.sendRedirect(request.getContextPath() + "/login.jsp");
 	return;
 }
 

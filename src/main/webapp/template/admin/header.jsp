@@ -1,7 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%
-    UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
+   
+UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+if(user == null || !"ADMIN".equals(user.getUserRole())){
+	 response.sendRedirect(request.getContextPath() + "/login.jsp");
+    return;
+}
 %>
 
 <!DOCTYPE html>

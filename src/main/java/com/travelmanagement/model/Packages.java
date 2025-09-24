@@ -10,13 +10,22 @@ public class Packages {
 	private String description;
 	private double price;
 	private String location;
-	private int duration; 
-	
+	private int duration;
+
 	private boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 
-	// Getters & Setters
+	private String imageurl;
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+
 	public int getPackageId() {
 		return packageId;
 	}
@@ -73,7 +82,6 @@ public class Packages {
 		this.duration = duration;
 	}
 
-
 	public boolean isActive() {
 		return isActive;
 	}
@@ -97,7 +105,5 @@ public class Packages {
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-
-	
 
 }

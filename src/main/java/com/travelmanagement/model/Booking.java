@@ -8,8 +8,16 @@ public class Booking {
 	private int packageId;
 	private LocalDate bookingDate;
 	private String status;
+	private int noOfTravellers;
 
-	
+	public int getNoOfTravellers() {
+		return noOfTravellers;
+	}
+
+	public void setNoOfTravellers(int noOfTravellers) {
+		this.noOfTravellers = noOfTravellers;
+	}
+
 	public int getBookingId() {
 		return bookingId;
 	}

@@ -98,16 +98,17 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleRegisterAsUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
 		RegisterRequestDTO dto = new RegisterRequestDTO();
 		dto.setUsername(request.getParameter("name"));
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirmPassword"));
 		Map<String, String> errors = authService.validateRegisterDto(dto);
-		if (!request.getContentType().startsWith("multipart/")) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
-			return;
-		}
+		
 		String imageUrl = null;
 		try {
 			Part filePart = request.getPart("profileImage");
@@ -135,7 +136,10 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleRegisterAsAgency(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
 		AgencyRegisterRequestDTO dto = new AgencyRegisterRequestDTO();
 		dto.setAgencyName(request.getParameter("agency_name"));
 		dto.setOwnerName(request.getParameter("owner_name"));
@@ -150,6 +154,16 @@ public class AuthServlet extends HttpServlet {
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
 
+		
+		String imageUrl = null;
+		try {
+			Part filePart = request.getPart("profileImage");
+			imageUrl = CloudinaryUtil.uploadImage(filePart);
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("profileImage", e.getMessage());
+		}
+		dto.setImageurl(imageUrl);
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("registration_number", dto.getRegistrationNumber());

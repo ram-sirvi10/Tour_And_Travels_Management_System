@@ -2,7 +2,6 @@ package com.travelmanagement.dto.requestDTO;
 
 public class PackageRegisterDTO {
 
-
 	private String packageId;
 	private String title;
 	private String agencyId;
@@ -10,10 +9,17 @@ public class PackageRegisterDTO {
 	private String price;
 	private String location;
 	private String duration;
-	private String imageUrl;
 	private String isActive;
+	private String imageurl;
 
-	// Getters & Setters
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+
 	public String getPackageId() {
 		return packageId;
 	}
@@ -68,14 +74,6 @@ public class PackageRegisterDTO {
 
 	public void setDuration(String duration) {
 		this.duration = duration;
-	}
-
-	public String getImageUrl() {
-		return imageUrl;
-	}
-
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
 	}
 
 	public String getIsActive() {

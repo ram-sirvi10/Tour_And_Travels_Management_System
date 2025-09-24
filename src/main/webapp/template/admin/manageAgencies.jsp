@@ -5,7 +5,7 @@
 <%
 UserResponseDTO admin = (UserResponseDTO) session.getAttribute("user");
 if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
-	response.sendRedirect("login.jsp");
+	 response.sendRedirect(request.getContextPath() + "/login.jsp");
 	return;
 }
 
@@ -26,7 +26,10 @@ if (currentList != null) {
 		buttonParam = "deletedAgencies";
 	} else if ("Pending Agencies".equalsIgnoreCase(currentList)) {
 		buttonParam = "pendingAgencies";
+	}else if ("Rejected Agencies".equalsIgnoreCase(currentList)) {
+	    buttonParam = "pendingAgencies";
 	}
+
 }
 String keywordParam = request.getParameter("keyword") != null ? request.getParameter("keyword") : "";
 String statusParam = "Pending Agencies".equalsIgnoreCase(currentList)
@@ -35,8 +38,6 @@ String statusParam = "Pending Agencies".equalsIgnoreCase(currentList)
 String activeParam = request.getParameter("active") != null ? request.getParameter("active") : "";
 String startDateParam = request.getParameter("startDate") != null ? request.getParameter("startDate") : "";
 String endDateParam = request.getParameter("endDate") != null ? request.getParameter("endDate") : "";
-
-
 %>
 
 <!DOCTYPE html>
@@ -65,7 +66,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 			<div class="row g-2 mb-2">
 				<h6>Filter Option</h6>
 				<form method="post" action="<%=request.getContextPath()%>/admin"
-					class="row g-2" >
+					class="row g-2">
 					<input type="hidden" name="button"
 						value="<%=request.getParameter("button")%>" />
 
@@ -73,10 +74,10 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					if (!"Deleted Agencies".equalsIgnoreCase(currentList)) {
 					%>
 					<%
-					if ("Pending Agencies".equalsIgnoreCase(currentList)||"REJECTED Agencies".equalsIgnoreCase(currentList)) {
+					if ("Pending Agencies".equalsIgnoreCase(currentList) || "REJECTED Agencies".equalsIgnoreCase(currentList)) {
 					%>
 					<div class="col-md-2">
-						<select name="status" class="form-select" >
+						<select name="status" class="form-select">
 							<option value="PENDING"
 								<%="PENDING".equals(request.getParameter("status")) ? "selected" : ""%>>Pending</option>
 							<option value="REJECTED"
@@ -137,6 +138,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 				<thead class="table-primary">
 					<tr>
 						<th>S.No</th>
+						<th>Profile Image</th>
 						<th>Agency Name</th>
 						<th>Owner Name</th>
 						<th>Email</th>
@@ -145,7 +147,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 						<th>Registration No.</th>
 						<th>Registration Date</th>
 						<th>Actions</th>
-						
+
 					</tr>
 				</thead>
 				<tbody>
@@ -156,76 +158,110 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					%>
 					<tr>
 						<td><%=serial++%></td>
+						<td>
+							<%
+							if (agency.getImageurl() != null && !agency.getImageurl().isEmpty()) {
+							%>
+							<img src="<%=agency.getImageurl()%>" alt="Profile"
+							class="table-profile-img"
+							style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+							onclick="showProfileImageModal('<%=agency.getImageurl()%>')">
+
+							<%
+							} else {
+							%> <i class="bi bi-person-circle"
+							style="font-size: 1.5rem;"></i> <%
+ }
+ %>
+						</td>
 						<td><%=agency.getAgencyName()%></td>
 						<td><%=agency.getOwnerName()%></td>
 						<td><%=agency.getEmail()%></td>
-						<td><%=agency.getPhone() %></td>
+						<td><%=agency.getPhone()%></td>
 						<td><%=agency.getCity()%>,<%=agency.getState()%>,<%=agency.getCountry()%>,<%=agency.getPincode()%></td>
-						<td><%=agency.getRegistrationNumber() %></td>
-						<td><%=agency.getCreatedAt() %></td>
-					<td>
-    <button type="button" class="btn btn-sm btn-info details-btn"
-        data-agencyname="<%=agency.getAgencyName()%>"
-        data-owner="<%=agency.getOwnerName()%>"
-        data-email="<%=agency.getEmail()%>"
-        data-phone="<%=agency.getPhone()%>"
-        data-city="<%=agency.getCity()%>"
-        data-state="<%=agency.getState()%>"
-        data-country="<%=agency.getCountry()%>"
-        data-pincode="<%=agency.getPincode()%>"
-        data-regno="<%=agency.getRegistrationNumber()%>"
-        data-created="<%=agency.getCreatedAt()%>">
-        Details
-    </button>
+						<td><%=agency.getRegistrationNumber()%></td>
+						<td><%=agency.getCreatedAt()%></td>
+						<td>
+							<button type="button" class="btn btn-sm btn-info details-btn"
+								data-agencyname="<%=agency.getAgencyName()%>"
+								data-owner="<%=agency.getOwnerName()%>"
+								data-email="<%=agency.getEmail()%>"
+								data-phone="<%=agency.getPhone()%>"
+								data-city="<%=agency.getCity()%>"
+								data-state="<%=agency.getState()%>"
+								data-country="<%=agency.getCountry()%>"
+								data-pincode="<%=agency.getPincode()%>"
+								data-regno="<%=agency.getRegistrationNumber()%>"
+								data-created="<%=agency.getCreatedAt()%>"
+								data-image="<%=agency.getImageurl()%>"> Details</button> <%
+ if (!"Deleted Agencies".equalsIgnoreCase(currentList) && !"REJECTED Agencies".equalsIgnoreCase(currentList)) {
+ %>
+							<%
+							if ("PENDING".equalsIgnoreCase(agency.getStatus())) {
+							%>
+							<form method="post" action="<%=request.getContextPath()%>/admin"
+								style="display: inline;">
+								<input type="hidden" name="button" value="agencyAction">
+								<input type="hidden" name="agencyId"
+									value="<%=agency.getAgencyId()%>"> <input type="hidden"
+									name="keyword" value="<%=keywordParam%>"> <input
+									type="hidden" name="status" value="<%=statusParam%>">
+								<input type="hidden" name="pageSize" value="<%=pageSize%>">
 
-    <% if (!"Deleted Agencies".equalsIgnoreCase(currentList)&&!"REJECTED Agencies".equalsIgnoreCase(currentList)) { %>
-        <% if ("PENDING".equalsIgnoreCase(agency.getStatus())) { %>
-            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
-                <input type="hidden" name="button" value="agencyAction">
-                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
-                <input type="hidden" name="keyword" value="<%= keywordParam %>">
-                <input type="hidden" name="status" value="<%= statusParam %>">
-                <input type="hidden" name="pageSize" value="<%= pageSize %>">
-                
-                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
-            </form>
-            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
-                <input type="hidden" name="button" value="agencyAction">
-                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
-                <input type="hidden" name="keyword" value="<%= keywordParam %>">
-                <input type="hidden" name="status" value="<%= statusParam %>">
-                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
-                <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
-            </form>
-        <% } else { %>
-            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
-                <input type="hidden" name="button" value="agencyAction">
-                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
-                <input type="hidden" name="keyword" value="<%= keywordParam %>">
-                <input type="hidden" name="active" value="<%= activeParam %>">
-                <input type="hidden" name="startDate" value="<%= startDateParam %>">
-                <input type="hidden" name="endDate" value="<%= endDateParam %>">
-                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
-                <button type="submit" name="action" value="<%=agency.isActive() ? "deactivate" : "activate"%>" class="btn btn-sm btn-primary">
-                    <%=agency.isActive() ? "Deactivate" : "Activate"%>
-                </button>
-            </form>
-            <form method="post" action="<%=request.getContextPath()%>/admin" style="display:inline;">
-                <input type="hidden" name="button" value="agencyAction">
-                <input type="hidden" name="agencyId" value="<%=agency.getAgencyId()%>">
-                <input type="hidden" name="keyword" value="<%= keywordParam %>">
-                <input type="hidden" name="active" value="<%= activeParam %>">
-                <input type="hidden" name="startDate" value="<%= startDateParam %>">
-                <input type="hidden" name="endDate" value="<%= endDateParam %>">
-                 <input type="hidden" name="pageSize" value="<%= pageSize %>">
-                <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger"
-                        onclick="return confirm('Are you sure you want to permanently delete this agency?');">
-                    Delete
-                </button>
-            </form>
-        <% } %>
-    <% } %>
-</td>
+								<button type="submit" name="action" value="approve"
+									class="btn btn-sm btn-success">Approve</button>
+							</form>
+							<form method="post" action="<%=request.getContextPath()%>/admin"
+								style="display: inline;">
+								<input type="hidden" name="button" value="agencyAction">
+								<input type="hidden" name="agencyId"
+									value="<%=agency.getAgencyId()%>"> <input type="hidden"
+									name="keyword" value="<%=keywordParam%>"> <input
+									type="hidden" name="status" value="<%=statusParam%>">
+								<input type="hidden" name="pageSize" value="<%=pageSize%>">
+								<button type="submit" name="action" value="reject"
+									class="btn btn-sm btn-danger">Reject</button>
+							</form> <%
+ } else {
+ %>
+							<form method="post" action="<%=request.getContextPath()%>/admin"
+								style="display: inline;">
+								<input type="hidden" name="button" value="agencyAction">
+								<input type="hidden" name="agencyId"
+									value="<%=agency.getAgencyId()%>"> <input type="hidden"
+									name="keyword" value="<%=keywordParam%>"> <input
+									type="hidden" name="active" value="<%=activeParam%>">
+								<input type="hidden" name="startDate"
+									value="<%=startDateParam%>"> <input type="hidden"
+									name="endDate" value="<%=endDateParam%>"> <input
+									type="hidden" name="pageSize" value="<%=pageSize%>">
+								<button type="submit" name="action"
+									value="<%=agency.isActive() ? "deactivate" : "activate"%>"
+									class="btn btn-sm btn-primary">
+									<%=agency.isActive() ? "Deactivate" : "Activate"%>
+								</button>
+							</form>
+							<form method="post" action="<%=request.getContextPath()%>/admin"
+								style="display: inline;">
+								<input type="hidden" name="button" value="agencyAction">
+								<input type="hidden" name="agencyId"
+									value="<%=agency.getAgencyId()%>"> <input type="hidden"
+									name="keyword" value="<%=keywordParam%>"> <input
+									type="hidden" name="active" value="<%=activeParam%>">
+								<input type="hidden" name="startDate"
+									value="<%=startDateParam%>"> <input type="hidden"
+									name="endDate" value="<%=endDateParam%>"> <input
+									type="hidden" name="pageSize" value="<%=pageSize%>">
+								<button type="submit" name="action" value="delete"
+									class="btn btn-sm btn-danger"
+									onclick="return confirm('Are you sure you want to permanently delete this agency?');">
+									Delete</button>
+							</form> <%
+ }
+ %> <%
+ }
+ %>
+						</td>
 
 					</tr>
 					<%
@@ -242,10 +278,19 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 			</table>
 
 
+			<div class="modal fade" id="profileImageModal" tabindex="-1"
+				aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-body text-center">
+							<img id="modalProfileImage" src="" alt="Profile Image"
+								style="max-width: 100%; max-height: 500px; border-radius: 8px;">
+						</div>
+					</div>
+				</div>
+			</div>
 
 
-			<%
-		%>
 
 			<!-- Page Size Selector -->
 			<div class="row mb-3">
@@ -320,6 +365,13 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 						<div class="modal-body">
 							<table class="table table-bordered">
 								<tr>
+									<th>Profile Image</th>
+									<td><img id="m_image" src="" alt="Profile Image"
+										style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+									</td>
+								</tr>
+
+								<tr>
 									<th>Agency Name</th>
 									<td id="m_agencyname"></td>
 								</tr>
@@ -359,7 +411,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 									<th>Registration Date</th>
 									<td id="m_created"></td>
 								</tr>
-								
+
 							</table>
 						</div>
 					</div>
@@ -372,15 +424,29 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-document.querySelectorAll('.details-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-        const fields = ['agencyname','owner','email','phone','city','state','country','pincode','regno','created'];
-        fields.forEach(f=>{
-            document.getElementById('m_'+f).innerText = btn.dataset[f];
-        });
-        new bootstrap.Modal(document.getElementById('detailsModal')).show();
-    });
-});
+	document.querySelectorAll('.details-btn').forEach(btn=>{
+	    btn.addEventListener('click', ()=>{
+	        const fields = ['agencyname','owner','email','phone','city','state','country','pincode','regno','created'];
+	        fields.forEach(f=>{
+	            document.getElementById('m_'+f).innerText = btn.dataset[f];
+	        });
+	
+	        document.getElementById('m_image').src = btn.dataset.image || "default.png";
+
+	        new bootstrap.Modal(document.getElementById('detailsModal')).show();
+	    });
+	});
+
+
+
+function showProfileImageModal(imageUrl) {
+    var modalImg = document.getElementById('modalProfileImage');
+    modalImg.src = imageUrl;
+
+    var myModal = new bootstrap.Modal(document.getElementById('profileImageModal'));
+    myModal.show();
+}
+
 </script>
 </body>
 </html>

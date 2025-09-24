@@ -21,7 +21,19 @@ public class AgencyResponseDTO {
 	private boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
-    // Getters and Setters
+	
+	private String imageurl;
+	
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+	
+   
     public int getAgencyId() {
         return agencyId;
     }

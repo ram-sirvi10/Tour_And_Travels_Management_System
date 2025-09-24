@@ -103,7 +103,7 @@ public class AuthRoleFilter implements Filter {
 		System.out.println("filter -> "+button);
 		String context = req.getContextPath();
 
-		// Define allowed URLs + button combinations for each role
+		
 		Map<String, List<String>> adminAccess = new HashMap<>();
 		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers", "manageAgencies", "userAction",
 				"agencyAction", "pendingAgencies", "deletedAgencies","deletedUsers","updateProfile","changePassword"));
@@ -117,7 +117,7 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile","updateProfile","changePassword"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings"));
 		userAccess.put(context + "/package", List.of("viewPackages"));
 
@@ -131,7 +131,10 @@ public class AuthRoleFilter implements Filter {
 		if (allowed) {
 			chain.doFilter(request, response);
 		} else {
-			res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied!");
+			request.setAttribute("errorMessage", "Access Denied! You don't have permission to access this page.");
+			request.getRequestDispatcher("/error.jsp").forward(request, response);
+			return;
+
 		}
 	}
 

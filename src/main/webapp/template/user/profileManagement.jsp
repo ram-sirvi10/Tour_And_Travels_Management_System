@@ -1,12 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true"%>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" session="true"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.requestDTO.RegisterRequestDTO"%>
 <%@ page import="java.util.Map"%>
 
 <%
 UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
-if(user == null || !"ADMIN".equals(user.getUserRole())){
-	 response.sendRedirect(request.getContextPath() + "/login.jsp");
+if(user == null || !"user".equalsIgnoreCase(user.getUserRole())){
+    response.sendRedirect("login.jsp");
     return;
 }
 
@@ -16,6 +16,8 @@ String errorMessage = (String) request.getAttribute("errorMessage");
 String actionType = request.getParameter("button");
 RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formData");
 %>
+<jsp:include page="header.jsp" />
+
 
 <style>
 .profile-upload-wrapper {
@@ -46,11 +48,36 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
     border-radius: 50%;
     object-fit: cover;
 }
-</style>
 
-<jsp:include page="header.jsp" />
+.profile-card {
+    background: #ffffff;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+.profile-view-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 4px solid #0d6efd;
+    transition: transform 0.2s;
+}
+.profile-view-img:hover {
+    transform: scale(1.05);
+}
+
+.profile-view-icon {
+    font-size: 150px;
+    color: #0d6efd;
+}
+</style>
 <div class="dashboard-container">
-    <jsp:include page="sidebar.jsp" />
+  
 
     <div class="main-content">
         <%-- Success/Error Messages --%>
@@ -61,29 +88,32 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
             <div class="alert alert-danger"><%= errorMessage %></div>
         <% } %>
 
-        <%-- VIEW PROFILE --%>
-        <% if("viewProfile".equals(actionType)) { %>
-            <div class="d-flex justify-content-center align-items-center vh-100">
-                <div class="card profile-card p-5 shadow-lg" style="width: 450px; border-radius: 20px;">
-                    <div class="d-flex flex-column align-items-center">
-                        <% if(user.getImageurl() != null && !user.getImageurl().isEmpty()) { %>
-                            <img src="<%= user.getImageurl() %>" alt="Profile" 
-                                 class="profile-view-img mb-4"
-                                 onclick="showProfileModal('<%= user.getImageurl() %>')">
-                        <% } else { %>
-                            <i class="bi bi-person-circle profile-view-icon mb-4" style="font-size: 80px;"></i>
-                        <% } %>
-                        <h3 class="card-title mb-2 text-center"><%= user.getUserName().toUpperCase() %></h3>
-                        <p class="text-muted mb-3 text-center"><%= user.getUserEmail() %></p>
-                        <div class="d-flex gap-3">
-                            <a href="<%=request.getContextPath()%>/template/admin/profileManagement.jsp?button=updateProfile" 
-                               class="btn btn-outline-primary btn-lg">Edit Profile</a>
-                            <a href="<%=request.getContextPath()%>/template/admin/profileManagement.jsp?button=changePassword"  
-                               class="btn btn-outline-secondary btn-lg">Change Password</a>
-                        </div>
-                    </div>
+     <%-- VIEW PROFILE --%>
+<% if("viewProfile".equals(actionType)) { %>
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="card profile-card p-5 shadow-lg" style="width: 450px; border-radius: 20px;">
+            <div class="d-flex flex-column align-items-center">
+                <% if(user.getImageurl() != null && !user.getImageurl().isEmpty()) { %>
+                    <!-- Only change: add return false to onclick -->
+                    <img src="<%= user.getImageurl() %>" alt="Profile" 
+                         class="profile-view-img mb-4"
+                         onclick="showProfileModal('<%= user.getImageurl() %>'); return false;">
+                <% } else { %>
+                    <i class="bi bi-person-circle profile-view-icon mb-4" style="font-size: 80px;"></i>
+                <% } %>
+                <h3 class="card-title mb-2 text-center"><%= user.getUserName().toUpperCase() %></h3>
+                <p class="text-muted mb-3 text-center"><%= user.getUserEmail() %></p>
+                <div class="d-flex gap-3">
+                    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=updateProfile" 
+                       class="btn btn-outline-primary btn-lg">Edit Profile</a>
+                    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=changePassword"  
+                       class="btn btn-outline-secondary btn-lg">Change Password</a>
                 </div>
             </div>
+        </div>
+    </div>
+
+
 
         <%-- UPDATE PROFILE --%>
         <% } else if ("updateProfile".equals(actionType)) { %>
@@ -91,7 +121,7 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
                 <div class="card profile-card p-4 shadow-lg" style="width: 450px; border-radius: 20px;">
                     <h3 class="text-center mb-4">Edit Profile</h3>
 
-                    <form method="post" action="<%= request.getContextPath() %>/admin" enctype="multipart/form-data">
+                    <form method="post" action="<%= request.getContextPath() %>/user" enctype="multipart/form-data">
                       
 
                         <div class="profile-upload-wrapper mb-3 text-center">
@@ -132,7 +162,7 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
                         <div class="d-flex justify-content-between">
                         <input type="hidden" name="button" value="updateProfile">
                             <button type="submit"  name="button" value="updateProfile" class="btn btn-primary">Update</button>
-                            <a href="<%= request.getContextPath() %>/admin?button=dashboard" class="btn btn-secondary">Cancel</a>
+                            <a href="<%= request.getContextPath() %>/user?button=dashboard" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -144,7 +174,7 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
                 <div class="card profile-card p-4 shadow-lg" style="width: 450px; border-radius: 20px;">
                     <h3 class="text-center mb-4">Change Password</h3>
 
-                    <form method="post" action="<%=request.getContextPath()%>/admin">
+                    <form method="post" action="<%=request.getContextPath()%>/user">
                      
 
                         <div class="mb-3">
@@ -173,7 +203,7 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
 
                         <div class="d-flex justify-content-between">
                             <button type="submit" name="button" value="changePassword" class="btn btn-primary">Change Password</button>
-                            <a href="<%=request.getContextPath()%>/admin?button=dashboard" class="btn btn-secondary">Cancel</a>
+                            <a href="<%=request.getContextPath()%>/user?button=dashboard" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -220,3 +250,6 @@ function showProfileModal(imageUrl) {
     myModal.show();
 }
 </script>
+
+
+<jsp:include page="footer.jsp" />

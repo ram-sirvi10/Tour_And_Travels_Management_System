@@ -15,6 +15,7 @@ import com.travelmanagement.util.CloudinaryUtil;
 import com.travelmanagement.util.PasswordHashing;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -91,7 +92,7 @@ public class AdminServlet extends HttpServlet {
 		}
 	}
 
-	private void changePassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void changePassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String newPassword = request.getParameter("newPassword");
 		String confirmPassword = request.getParameter("confirmPassword");
 		String oldPassword = request.getParameter("oldPassword");
@@ -108,14 +109,21 @@ public class AdminServlet extends HttpServlet {
 		if (oldPassword != null && !oldPassword.isEmpty()) {
 			if (!PasswordHashing.checkPassword(oldPassword, dbUser.getUserPassword())) {
 				errors.put("oldPassword", "Old password is incorrect");
+			} else if (oldPassword.equals(newPassword)) {
+				errors.put("newPassword", "New Paasword must be different from old password");
 			}
 		}
 
 		if (!errors.isEmpty()) {
 			request.setAttribute("actionType", "changePassword");
 			request.setAttribute("errors", errors);
-			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
-			return;
+			if ("USER".equalsIgnoreCase(user.getUserRole())) {
+				request.getRequestDispatcher("template/user/profileManagement.jsp").forward(request, response);
+				return;
+			} else {
+				request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
+				return;
+			}
 		}
 
 		boolean updated = userService.changePassword(user.getUserId(), newPassword);
@@ -125,11 +133,16 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("errorMessage", "Failed to change password!");
 		}
 		request.setAttribute("actionType", "changePassword");
-		request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
-		return;
+		if ("USER".equalsIgnoreCase(user.getUserRole())) {
+			request.getRequestDispatcher("template/user/profileManagement.jsp").forward(request, response);
+			return;
+		} else {
+			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
+			return;
+		}
 	}
 
-	private void updateProfile(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void updateProfile(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpSession session = request.getSession();
 		UserResponseDTO currentUser = (UserResponseDTO) session.getAttribute("user");
 
@@ -152,15 +165,25 @@ public class AdminServlet extends HttpServlet {
 			imageUrl = CloudinaryUtil.uploadImage(filePart);
 		} catch (Exception e) {
 			e.printStackTrace();
+
 			errors.put("profileImage", e.getMessage());
 		}
+		if (imageUrl == null || imageUrl.isEmpty()) {
+			imageUrl = currentUser.getImageurl();
+		}
+
 		dto.setImageurl(imageUrl);
 		if (!errors.isEmpty()) {
 			request.setAttribute("actionType", "updateProfile");
 			request.setAttribute("errors", errors);
 			request.setAttribute("formData", dto);
-			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
-			return;
+			if ("USER".equalsIgnoreCase(currentUser.getUserRole())) {
+				request.getRequestDispatcher("template/user/profileManagement.jsp").forward(request, response);
+				return;
+			} else {
+				request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
+				return;
+			}
 		}
 
 		boolean updated = userService.update(dto);
@@ -173,8 +196,13 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("errorMessage", "Failed to update profile!");
 		}
 		request.setAttribute("actionType", "updateProfile");
-		request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
-		return;
+		if ("USER".equalsIgnoreCase(currentUser.getUserRole())) {
+			request.getRequestDispatcher("template/user/profileManagement.jsp").forward(request, response);
+			return;
+		} else {
+			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
+			return;
+		}
 	}
 
 	private void pendingAgencies(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -219,7 +247,13 @@ public class AdminServlet extends HttpServlet {
 
 		int offset = (page - 1) * pageSize;
 
-		long totalItems = agencyService.countAgencies(status, active, false, keyword, startDate, endDate);
+		long totalItems;
+		if ("REJECTED".equalsIgnoreCase(status)) {
+			totalItems = agencyService.countAgencies(status, false, true, keyword, startDate, endDate);
+		} else {
+			totalItems = agencyService.countAgencies(status, null, false, keyword, startDate, endDate);
+		}
+
 		int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 
 		if (totalPages < 1) {
@@ -238,21 +272,21 @@ public class AdminServlet extends HttpServlet {
 
 			agenciesList = agencyService.filterAgencies(status, false, startDate, endDate, keyword, true, pageSize,
 					offset);
-		} else {
-			agenciesList = agencyService.filterAgencies(status, active, startDate, endDate, keyword, false, pageSize,
+		} else if ("PENDING".equalsIgnoreCase(status)) {
+
+			agenciesList = agencyService.filterAgencies(status, null, startDate, endDate, keyword, true, pageSize,
 					offset);
 		}
 
-		System.out.println("pending  agency ==== ");
-		System.out.println("status == " + status);
-		System.out.println("active == " + active);
-		System.out.println("keyword == " + keyword);
-		System.out.println("startDate == " + startDate);
-		System.out.println("endDate == " + endDate);
-		System.out.println("pagination in pending agency -===");
-		System.out.println("pagesize" + pageSize);
-		System.out.println("page" + page);
-		System.out.println("list size  = " + agenciesList.size());
+		System.out.println("=== DEBUG pendingAgencies ===");
+		System.out.println("status param = " + request.getParameter("status"));
+		System.out.println("status final = " + status);
+		System.out.println("active param = " + request.getParameter("active"));
+		System.out.println("active final = " + active);
+		System.out.println("keyword = " + keyword);
+		System.out.println("startDate = " + startDate);
+		System.out.println("endDate = " + endDate);
+		System.out.println("page = " + page + ", pageSize = " + pageSize + ", offset = " + offset);
 
 		request.setAttribute("agenciesList", agenciesList);
 		request.setAttribute("listType", status + " Agencies");
@@ -341,6 +375,7 @@ public class AdminServlet extends HttpServlet {
 	}
 
 	private void manageUsers(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		HttpSession session = request.getSession();
 		String activeParam = request.getParameter("active");
 		Boolean active = null;
 		String keyword = request.getParameter("keyword");
@@ -381,7 +416,10 @@ public class AdminServlet extends HttpServlet {
 
 		int offset = (page - 1) * pageSize;
 		List<UserResponseDTO> usersList = userService.getAll(active, false, keyword, pageSize, offset);
-
+		List<Integer> validUserIds = new ArrayList<>();
+		for (UserResponseDTO u : usersList)
+			validUserIds.add(u.getUserId());
+		session.setAttribute("validUserIds", validUserIds);
 		long totalUsers = userService.countUser(active, false, keyword);
 		int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
 		if (totalPages < 1) {
@@ -405,9 +443,22 @@ public class AdminServlet extends HttpServlet {
 	private void userAction(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String actionType = request.getParameter("action");
 		String userIdStr = request.getParameter("userId");
-		System.out.println(actionType);
+		HttpSession session = request.getSession();
+		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
 		if (actionType != null && userIdStr != null) {
 			int userId = Integer.parseInt(userIdStr);
+			List<Integer> validIds = (List<Integer>) session.getAttribute("validUserIds");
+			if (validIds == null || !validIds.contains(userId)) {
+				request.setAttribute("errorMessage", "Invalid User ID or action not allowed.");
+				request.getRequestDispatcher("/error.jsp").forward(request, response);
+				return;
+
+			} else if (user != null && user.getUserId() == userId) {
+				request.setAttribute("errorMessage", "Invalid User ID or action not allowed.");
+				request.getRequestDispatcher("/error.jsp").forward(request, response);
+				return;
+
+			}
 			switch (actionType) {
 			case "activate":
 				userService.updateUserActiveState(userId, true);
@@ -433,29 +484,21 @@ public class AdminServlet extends HttpServlet {
 			keyword = keyword.trim();
 		}
 		int page = 1;
-		int pageSize = 1;
-		String pageParam = request.getParameter("page");
-		String sizeParam = request.getParameter("pageSize");
-
-		if (pageParam != null) {
-			try {
-				page = Integer.parseInt(pageParam);
-				if (page < 1)
-					page = 1;
-			} catch (NumberFormatException e) {
+		int pageSize = 5;
+		try {
+			page = Integer.parseInt(request.getParameter("page"));
+			if (page < 1)
 				page = 1;
-			}
+		} catch (NumberFormatException e) {
+			page = 1;
 		}
-		if (sizeParam != null) {
-			try {
-				pageSize = Integer.parseInt(sizeParam);
-				if (pageSize < 1)
-					pageSize = 1;
-			} catch (NumberFormatException e) {
-				pageSize = 1;
-			}
+		try {
+			pageSize = Integer.parseInt(request.getParameter("pageSize"));
+			if (pageSize < 1 || pageSize > 50)
+				pageSize = 5;
+		} catch (NumberFormatException e) {
+			pageSize = 5;
 		}
-
 		int offset = (page - 1) * pageSize;
 
 		long totalItems = agencyService.countAgencies("APPROVED", false, true, keyword, null, null);
@@ -474,7 +517,7 @@ public class AdminServlet extends HttpServlet {
 	}
 
 	private void manageAgencies(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+		HttpSession session = request.getSession();
 		String status = request.getParameter("status");
 		String activeParam = request.getParameter("active");
 		Boolean active = null;
@@ -490,33 +533,30 @@ public class AdminServlet extends HttpServlet {
 			keyword = keyword.trim();
 		}
 		int page = 1;
-		int pageSize = 1;
-		String pageParam = request.getParameter("page");
-		String sizeParam = request.getParameter("pageSize");
-
-		if (pageParam != null) {
-			try {
-				page = Integer.parseInt(pageParam);
-				if (page < 1)
-					page = 1;
-			} catch (NumberFormatException e) {
+		int pageSize = 5;
+		try {
+			page = Integer.parseInt(request.getParameter("page"));
+			if (page < 1)
 				page = 1;
-			}
+		} catch (NumberFormatException e) {
+			page = 1;
 		}
-		if (sizeParam != null) {
-			try {
-				pageSize = Integer.parseInt(sizeParam);
-				if (pageSize < 1)
-					pageSize = 1;
-			} catch (NumberFormatException e) {
-				pageSize = 1;
-			}
+		try {
+			pageSize = Integer.parseInt(request.getParameter("pageSize"));
+			if (pageSize < 1 || pageSize > 50)
+				pageSize = 5;
+		} catch (NumberFormatException e) {
+			pageSize = 5;
 		}
-
 		int offset = (page - 1) * pageSize;
 
 		List<AgencyResponseDTO> agenciesList = agencyService.filterAgencies(status, active, startDate, endDate, keyword,
 				false, pageSize, offset);
+
+		List<Integer> validAgencyIds = new ArrayList<>();
+		for (AgencyResponseDTO a : agenciesList)
+			validAgencyIds.add(a.getAgencyId());
+		session.setAttribute("validAgencyIds", validAgencyIds);
 		System.out.println("manage agency ==== ");
 		System.out.println("status == " + status);
 		System.out.println("active == " + active);
@@ -550,10 +590,15 @@ public class AdminServlet extends HttpServlet {
 	private void agencyAction(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String actionType = request.getParameter("action");
 		String agencyIdStr = request.getParameter("agencyId");
-
+		HttpSession session = request.getSession();
 		if (actionType != null && agencyIdStr != null) {
 			int agencyId = Integer.parseInt(agencyIdStr);
-
+			List<Integer> validIds = (List<Integer>) session.getAttribute("validAgencyIds");
+			if (validIds == null || !validIds.contains(agencyId)) {
+				request.setAttribute("errorMessage", "Invalid Agency ID provided.");
+			    request.getRequestDispatcher("/error.jsp").forward(request, response);
+			    return;
+			}
 			switch (actionType) {
 			case "activate":
 				agencyService.updateAgencyActiveState(agencyId, true);

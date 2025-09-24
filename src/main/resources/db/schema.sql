@@ -90,4 +90,10 @@ ALTER TABLE travelAgency DROP INDEX email;
 
 -- add column for image url 
 ALTER TABLE users
-ADD COLUMN imageurl VARCHAR(200) ;
+ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travelAgency
+ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travel_packages
+ADD COLUMN imageurl VARCHAR(500) ;

@@ -1,23 +1,29 @@
 package com.travelmanagement.util;
 
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
+import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
+import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
+import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.Booking;
 import com.travelmanagement.model.Packages;
+import com.travelmanagement.model.Payment;
+import com.travelmanagement.model.Traveler;
 import com.travelmanagement.model.User;
 
 public class Mapper {
 	public static User mapRegisterDtoToUser(RegisterRequestDTO dto) {
 		User user = new User();
 		user.setUserId(dto.getUserId());
-		user.setUserName(dto.getUsername().trim());
-		user.setUserEmail(dto.getEmail().trim());
-		user.setUserPassword(dto.getPassword().trim());
+		user.setUserName(dto.getUsername());
+		user.setUserEmail(dto.getEmail());
+		user.setUserPassword(dto.getPassword());
 		user.setImageurl(dto.getImageurl());
 		return user;
 	}
@@ -39,24 +45,25 @@ public class Mapper {
 
 	public static User mapLoginDtoToUser(LoginRequestDTO dto) {
 		User user = new User();
-		user.setUserEmail(dto.getEmail().trim());
-		user.setUserPassword(dto.getPassword().trim());
+		user.setUserEmail(dto.getEmail());
+		user.setUserPassword(dto.getPassword());
 
 		return user;
 	}
 
 	public static Agency mapRegisterAgencyDtoToAgency(AgencyRegisterRequestDTO dto) {
 		Agency agency = new Agency();
-		agency.setAgencyName(dto.getAgencyName().trim());
-		agency.setOwnerName(dto.getOwnerName().trim());
-		agency.setEmail(dto.getEmail().trim());
-		agency.setPhone(dto.getPhone().trim());
-		agency.setCity(dto.getCity().trim());
-		agency.setState(dto.getState().trim());
-		agency.setCountry(dto.getCountry().trim());
-		agency.setPincode(dto.getPincode().trim());
-		agency.setRegistrationNumber(dto.getRegistrationNumber().trim());
-		agency.setPassword(dto.getPassword().trim());
+		agency.setAgencyName(dto.getAgencyName());
+		agency.setOwnerName(dto.getOwnerName());
+		agency.setEmail(dto.getEmail());
+		agency.setPhone(dto.getPhone());
+		agency.setCity(dto.getCity());
+		agency.setState(dto.getState());
+		agency.setCountry(dto.getCountry());
+		agency.setPincode(dto.getPincode());
+		agency.setRegistrationNumber(dto.getRegistrationNumber());
+		agency.setPassword(dto.getPassword());
+		agency.setImageurl(dto.getImageurl());
 		return agency;
 	}
 
@@ -77,6 +84,7 @@ public class Mapper {
 		dto.setDelete(agency.isDelete());
 		dto.setCreatedAt(agency.getCreatedAt());
 		dto.setUpdatedAt(agency.getUpdatedAt());
+		dto.setImageurl(agency.getImageurl());
 		return dto;
 	}
 
@@ -108,4 +116,29 @@ public class Mapper {
 		return dto;
 	}
 
+	public static Traveler mapTravelerRequestToTravler(TravelerRequestDTO dto) {
+		Traveler traveler = new Traveler();
+		traveler.setName(dto.getName());
+		traveler.setEmail(dto.getEmail());
+		traveler.setAge(dto.getAge());
+		traveler.setMobile(dto.getMobile());
+		return traveler;
+	}
+
+	public static Booking mapBookingRequestToBooking(BookingRequestDTO dto) {
+		Booking booking = new Booking();
+		booking.setUserId(dto.getUserId());
+		booking.setNoOfTravellers(dto.getNumberOfTravelers());
+		booking.setPackageId(dto.getPackageId());
+		return booking;
+
+	}
+
+	public static Payment mapPaymentRequestDTOToPayment(PaymentRequestDTO dto) {
+		Payment payment = new Payment();
+		payment.setAmount(dto.getAmount());
+		payment.setBookingId(dto.getBookingId());
+		return payment;
+
+	}
 }

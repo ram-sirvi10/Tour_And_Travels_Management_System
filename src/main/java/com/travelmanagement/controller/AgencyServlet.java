@@ -83,7 +83,7 @@ public class AgencyServlet extends HttpServlet {
 		dto.setPrice(request.getParameter("price"));
 		dto.setDuration(request.getParameter("duration"));
 		dto.setLocation(request.getParameter("location"));
-		dto.setImageUrl(request.getParameter("imageUrl"));
+		dto.setImageurl(request.getParameter("imageUrl"));
 		dto.setIsActive(request.getParameter("isActive"));
 		dto.setAgencyId(String.valueOf(agency.getAgencyId()));
 
