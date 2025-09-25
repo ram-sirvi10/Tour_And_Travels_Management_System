@@ -10,7 +10,16 @@ public class PackageRegisterDTO {
 	private String location;
 	private String duration;
 	private String isActive;
+	private int totalSeats;
 	private String imageurl;
+
+	public int getTotalSeats() {
+		return totalSeats;
+	}
+
+	public void setTotalSeats(int totalSeats) {
+		this.totalSeats = totalSeats;
+	}
 
 	public String getImageurl() {
 		return imageurl;
@@ -19,6 +28,7 @@ public class PackageRegisterDTO {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
+
 
 	public String getPackageId() {
 		return packageId;

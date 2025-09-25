@@ -240,7 +240,8 @@ public class AgencyDAOImpl implements IAgencyDAO {
 
 		try {
 			preparedStatement = connection.prepareStatement(sql);
-			String likeKeyword = "%" + keyword + "%";
+			String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+
 			for (int i = 1; i <= 9; i++)
 				preparedStatement.setString(i, likeKeyword);
 			preparedStatement.setInt(10, limit);
@@ -425,9 +426,10 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			int index = 1;
 
 			if (keyword != null && !keyword.isEmpty()) {
-				String kw = "%" + keyword.toLowerCase() + "%";
+				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+
 				for (int i = 0; i < 9; i++) {
-					preparedStatement.setString(index++, kw);
+					preparedStatement.setString(index++, likeKeyword);
 				}
 			}
 
@@ -515,14 +517,10 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				preparedStatement.setDate(index++, Date.valueOf(endDate));
 			}
 			if (keyword != null && !keyword.isEmpty()) {
-				String likeKeyword = "%" + keyword + "%";
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
-				preparedStatement.setString(index++, likeKeyword);
+				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+				for (int i = 0; i < 7; i++) {
+					preparedStatement.setString(index++, likeKeyword);
+				}
 			}
 
 			try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -598,9 +596,10 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				preparedStatement.setBoolean(index++, isDeleted);
 			}
 			if (keyword != null && !keyword.isEmpty()) {
-				String kw = "%" + keyword.toLowerCase() + "%";
+				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+
 				for (int i = 0; i < 9; i++) {
-					preparedStatement.setString(index++, kw);
+					preparedStatement.setString(index++, likeKeyword);
 				}
 			}
 

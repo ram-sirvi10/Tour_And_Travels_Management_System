@@ -325,13 +325,27 @@ public class AuthServiceImpl implements IAuthService {
 	}
 	
 	
-	public Map<String, String> validateTravllers(List<TravelerRequestDTO> travelerRequestDTOs) {
-		Map<String, String> errors = new HashMap<>();
-		for( TravelerRequestDTO traveler : travelerRequestDTOs){
-			
-		}
-
-		return errors;
+	public Map<String, String> validateTravelers(List<TravelerRequestDTO> travelerRequestDTOs) {
+	    Map<String, String> errors = new HashMap<>();
+	    int i = 1;
+	    for (TravelerRequestDTO t : travelerRequestDTOs) {
+	        if (t.getName() == null || t.getName().trim().isEmpty() || !ValidationUtil.isValidName(t.getName())) {
+	            errors.put("travelerName" + i, "Invalid name");
+	        }
+	        if (t.getEmail() == null || t.getEmail().trim().isEmpty() || !ValidationUtil.isValidEmail(t.getEmail())) {
+	            errors.put("travelerEmail" + i, "Invalid email");
+	        }
+	        if (t.getMobile() == null || !ValidationUtil.isValidMob(t.getMobile())) {
+	            errors.put("travelerMobile" + i, "Invalid mobile number");
+	        }
+	        if (t.getAge() <= 0) {
+	            errors.put("travelerAge" + i, "Invalid age");
+	        }
+	        i++;
+	    }
+	    return errors;
 	}
+
+	
 
 }

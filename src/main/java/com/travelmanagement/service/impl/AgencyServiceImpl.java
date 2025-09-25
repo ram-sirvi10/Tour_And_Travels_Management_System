@@ -123,21 +123,48 @@ public class AgencyServiceImpl implements IAgencyService {
 
 	@Override
 	public boolean updateAgency(Agency agency) throws Exception {
+		Agency dbAgency = agencyDAO.getAgencyById(agency.getAgencyId());
+		if (dbAgency == null) {
+			throw new UserNotFoundException("Agency not found ! " );
+		}
 		return agencyDAO.updateAgency(agency);
 	}
 
 	@Override
 	public boolean deleteAgency(int agencyId) throws Exception {
+		Agency dbAgency = agencyDAO.getAgencyById(agencyId);
+		if (dbAgency == null) {
+			throw new UserNotFoundException("Agency not found ! " );
+		}
 		return agencyDAO.deleteAgency(agencyId);
 	}
 
 	@Override
 	public boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception {
+		Agency dbAgency = agencyDAO.getAgencyById(agencyId);
+		if (dbAgency == null) {
+			throw new UserNotFoundException("Agency not found ! " );
+		}
+		else if(dbAgency.isActive()==active) {
+			String agencyState = "ACTIVE";
+			if (!active) {
+				agencyState = "Inactive";
+			}
+			throw new BadRequestException("Agency Already " + agencyState);
+		}
 		return agencyDAO.updateAgencyActiveState(agencyId, active);
 	}
 
 	@Override
 	public boolean updateAgencyStatus(int agencyId, String status) throws Exception {
+		Agency dbAgency = agencyDAO.getAgencyById(agencyId);
+		if (dbAgency == null) {
+			throw new UserNotFoundException("Agency not found ! " );
+		}
+		else if(dbAgency.getStatus().equalsIgnoreCase(status)) {
+			String agencyStatus = status;
+			throw new BadRequestException("Agency Already " + agencyStatus);
+		}
 		return agencyDAO.updateAgencyStatus(agencyId, status); // call DAO method
 	}
 

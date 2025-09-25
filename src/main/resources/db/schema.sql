@@ -97,3 +97,6 @@ ADD COLUMN imageurl VARCHAR(500) ;
 
 ALTER TABLE travel_packages
 ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travel_packages
+ADD COLUMN totalseats int not null ;

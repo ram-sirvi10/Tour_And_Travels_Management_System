@@ -7,6 +7,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+
+import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.service.impl.PackageServiceImpl;
 
 /**
  * Servlet implementation class UserServlet
@@ -91,10 +95,13 @@ public class UserServlet extends HttpServlet {
 	}
 
 	private void dashboard(HttpServletRequest request, HttpServletResponse response) {
+		PackageServiceImpl serviceImpl =  new PackageServiceImpl();
 		try {
-
+			List<PackageResponseDTO> packageResponseDTO = serviceImpl.searchPackages(null, null, null, null, null, null, 8, 0);
+			request.setAttribute("packages", packageResponseDTO);
 			request.getRequestDispatcher("template/user/userDashboard.jsp").forward(request, response);
-		} catch (ServletException | IOException e) {
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

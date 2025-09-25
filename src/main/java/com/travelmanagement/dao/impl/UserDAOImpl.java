@@ -20,9 +20,6 @@ public class UserDAOImpl implements IUserDAO {
 		this.connection = DatabaseConfig.getConnection();
 	}
 
-	
-	
-	
 	@Override
 	public boolean createUser(User user) throws Exception {
 
@@ -45,9 +42,7 @@ public class UserDAOImpl implements IUserDAO {
 		}
 		return false;
 	}
-	
-	
-	
+
 //	public boolean createUser(User user) throws Exception {
 //
 //		try {
@@ -78,6 +73,7 @@ public class UserDAOImpl implements IUserDAO {
 			String sql = "SELECT * FROM users WHERE user_id=? AND is_delete=?";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, id);
+
 			preparedStatement.setBoolean(2, false);
 			resultSet = preparedStatement.executeQuery();
 
@@ -164,7 +160,8 @@ public class UserDAOImpl implements IUserDAO {
 		}
 
 		if (keyword != null && !keyword.isEmpty()) {
-			String likeKeyword = "%" + keyword + "%";
+			String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+
 			preparedStatement.setString(index++, likeKeyword);
 			preparedStatement.setString(index++, likeKeyword);
 		}
@@ -329,7 +326,8 @@ public class UserDAOImpl implements IUserDAO {
 			}
 
 			if (keyword != null && !keyword.isEmpty()) {
-				String likeKeyword = "%" + keyword + "%";
+				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+
 				preparedStatement.setString(index++, likeKeyword);
 				preparedStatement.setString(index++, likeKeyword);
 			}

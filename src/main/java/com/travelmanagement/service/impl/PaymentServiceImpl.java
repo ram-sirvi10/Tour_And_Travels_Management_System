@@ -1,46 +1,18 @@
 package com.travelmanagement.service.impl;
 
-import java.util.List;
-
-import com.travelmanagement.model.Agency;
+import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
+import com.travelmanagement.model.Payment;
 import com.travelmanagement.service.IPaymentService;
+import com.travelmanagement.util.Mapper;
+import com.travelmanagement.dao.impl.PaymentDAOImpl;
 
-public class PaymentServiceImpl implements IPaymentService{
+public class PaymentServiceImpl implements IPaymentService {
 
-	@Override
-	public Agency createPackage(Agency p) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private PaymentDAOImpl paymentDAO = new PaymentDAOImpl();
 
-	@Override
-	public Agency getById(int id) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Agency> getAll() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Agency> search(String keyword) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean updatePackage(Agency p) throws Exception {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean deletePackage(int id) throws Exception {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+    @Override
+    public boolean addPayment(PaymentRequestDTO paymentDTO) throws Exception {
+        Payment payment = Mapper.mapPaymentRequestDTOToPayment(paymentDTO);
+        return paymentDAO.createPayment(payment);
+    }
 }

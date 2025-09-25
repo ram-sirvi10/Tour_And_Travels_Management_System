@@ -15,8 +15,16 @@ public class Packages {
 	private boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
-
+	private int totalSeats;
 	private String imageurl;
+
+	public int getTotalSeats() {
+		return totalSeats;
+	}
+
+	public void setTotalSeats(int totalSeats) {
+		this.totalSeats = totalSeats;
+	}
 
 	public String getImageurl() {
 		return imageurl;

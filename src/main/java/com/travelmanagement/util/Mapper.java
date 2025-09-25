@@ -8,6 +8,7 @@ import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
+import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
@@ -100,6 +101,8 @@ public class Mapper {
 		pkg.setLocation(dto.getLocation());
 		pkg.setDuration(Integer.parseInt(dto.getDuration()));
 		pkg.setActive(Boolean.parseBoolean(dto.getIsActive()));
+		pkg.setImageurl(dto.getImageurl());
+		pkg.setTotalSeats(dto.getTotalSeats());
 		return pkg;
 	}
 
@@ -113,16 +116,9 @@ public class Mapper {
 		dto.setLocation(pkg.getLocation());
 		dto.setDuration(pkg.getDuration());
 		dto.setIsActive(pkg.isActive());
+		dto.setImageurl(pkg.getImageurl());
+		dto.setTotalSeats(pkg.getTotalSeats());
 		return dto;
-	}
-
-	public static Traveler mapTravelerRequestToTravler(TravelerRequestDTO dto) {
-		Traveler traveler = new Traveler();
-		traveler.setName(dto.getName());
-		traveler.setEmail(dto.getEmail());
-		traveler.setAge(dto.getAge());
-		traveler.setMobile(dto.getMobile());
-		return traveler;
 	}
 
 	public static Booking mapBookingRequestToBooking(BookingRequestDTO dto) {
@@ -134,11 +130,31 @@ public class Mapper {
 
 	}
 
+	public static BookingResponseDTO mapBookingToBookingResponse(Booking booking) {
+		BookingResponseDTO bookingDTO = new BookingResponseDTO();
+		bookingDTO.setUserId(booking.getUserId());
+		bookingDTO.setBookingDate(booking.getBookingDate());
+		bookingDTO.setNoOfTravellers(booking.getNoOfTravellers());
+		bookingDTO.setBookingId(booking.getBookingId());
+		bookingDTO.setPackageId(booking.getPackageId());
+		bookingDTO.setStatus(booking.getStatus());
+		return bookingDTO;
+	}
 	public static Payment mapPaymentRequestDTOToPayment(PaymentRequestDTO dto) {
 		Payment payment = new Payment();
 		payment.setAmount(dto.getAmount());
 		payment.setBookingId(dto.getBookingId());
+		payment.setStatus(dto.getStatus());
 		return payment;
 
+	}
+
+	public static Traveler mapTravelerDtoToModel(TravelerRequestDTO dto) {
+		Traveler traveler = new Traveler();
+		traveler.setName(dto.getName());
+		traveler.setEmail(dto.getEmail());
+		traveler.setAge(dto.getAge());
+		traveler.setMobile(dto.getMobile());
+		return traveler;
 	}
 }

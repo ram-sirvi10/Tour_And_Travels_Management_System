@@ -21,15 +21,28 @@ public class BookingDAOImpl implements IBookingDAO {
 	}
 
 	@Override
-	public Boolean createBooking(Booking booking) throws Exception {
-		String sql = "INSERT INTO bookings (user_id, package_id, status, no_of_travellers) VALUES (?, ?, ?, ?)";
-		preparedStatement = connection.prepareStatement(sql);
-		preparedStatement.setInt(1, booking.getUserId());
-		preparedStatement.setInt(2, booking.getPackageId());
-		preparedStatement.setString(3, "PENDING");
-		preparedStatement.setInt(4, booking.getNoOfTravellers());
-		int rowsInserted = preparedStatement.executeUpdate();
-		return rowsInserted > 0;
+	public int createBooking(Booking booking) {
+		int bookingId = -1;
+		String sql = "INSERT INTO bookings (user_id, package_id,  no_of_travellers) VALUES (?,  ?,  ?)";
+
+		try {
+			preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+			preparedStatement.setInt(1, booking.getUserId());
+			preparedStatement.setInt(2, booking.getPackageId());
+			preparedStatement.setInt(3, booking.getNoOfTravellers());
+
+			int rows = preparedStatement.executeUpdate();
+			if (rows > 0) {
+				resultSet = preparedStatement.getGeneratedKeys();
+				if (resultSet.next()) {
+					bookingId = resultSet.getInt(1);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return bookingId;
 	}
 
 	@Override
@@ -64,7 +77,7 @@ public class BookingDAOImpl implements IBookingDAO {
 
 	@Override
 	public List<Booking> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-			String keyword, String startDate, String endDate,int limit,int offset) throws Exception {
+			String keyword, String startDate, String endDate, int limit, int offset) throws Exception {
 		List<Booking> bookings = new ArrayList<>();
 		String sql = "SELECT * FROM bookings WHERE 1=1";
 
@@ -110,53 +123,52 @@ public class BookingDAOImpl implements IBookingDAO {
 
 	@Override
 	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-	        String keyword, String startDate, String endDate) throws Exception {
-	    int count = 0;
-	    String sql = "SELECT COUNT(*) AS total FROM bookings WHERE 1=1";
+			String keyword, String startDate, String endDate) throws Exception {
+		int count = 0;
+		String sql = "SELECT COUNT(*) AS total FROM bookings WHERE 1=1";
 
-	    if (userId != null)
-	        sql += " AND user_id = ?";
-	    if (packageId != null)
-	        sql += " AND package_id = ?";
-	    if (noOfTravellers != null)
-	        sql += " AND no_of_travellers = ?";
-	    if (status != null && !status.isEmpty())
-	        sql += " AND status = ?";
-	    if (keyword != null && !keyword.isEmpty())
-	        sql += " AND (CAST(booking_id AS CHAR) LIKE ? OR status LIKE ?)"; 
-	    if (startDate != null && endDate != null)
-	        sql += " AND booking_date BETWEEN ? AND ?";
+		if (userId != null)
+			sql += " AND user_id = ?";
+		if (packageId != null)
+			sql += " AND package_id = ?";
+		if (noOfTravellers != null)
+			sql += " AND no_of_travellers = ?";
+		if (status != null && !status.isEmpty())
+			sql += " AND status = ?";
+		if (keyword != null && !keyword.isEmpty())
+			sql += " AND (CAST(booking_id AS CHAR) LIKE ? OR status LIKE ?)";
+		if (startDate != null && endDate != null)
+			sql += " AND booking_date BETWEEN ? AND ?";
 
-	    preparedStatement = connection.prepareStatement(sql);
+		preparedStatement = connection.prepareStatement(sql);
 
-	    int index = 1;
-	    if (userId != null)
-	        preparedStatement.setInt(index++, userId);
-	    if (packageId != null)
-	        preparedStatement.setInt(index++, packageId);
-	    if (noOfTravellers != null)
-	        preparedStatement.setInt(index++, noOfTravellers);
-	    if (status != null && !status.isEmpty())
-	        preparedStatement.setString(index++, status);
-	    if (keyword != null && !keyword.isEmpty()) {
-	        String k = "%" + keyword + "%";
-	        preparedStatement.setString(index++, k);
-	        preparedStatement.setString(index++, k);
-	    }
-	    if (startDate != null && endDate != null) {
-	        preparedStatement.setDate(index++, java.sql.Date.valueOf(startDate));
-	        preparedStatement.setDate(index++, java.sql.Date.valueOf(endDate));
-	    }
+		int index = 1;
+		if (userId != null)
+			preparedStatement.setInt(index++, userId);
+		if (packageId != null)
+			preparedStatement.setInt(index++, packageId);
+		if (noOfTravellers != null)
+			preparedStatement.setInt(index++, noOfTravellers);
+		if (status != null && !status.isEmpty())
+			preparedStatement.setString(index++, status);
+		if (keyword != null && !keyword.isEmpty()) {
+			String k = "%" + keyword + "%";
+			preparedStatement.setString(index++, k);
+			preparedStatement.setString(index++, k);
+		}
+		if (startDate != null && endDate != null) {
+			preparedStatement.setDate(index++, java.sql.Date.valueOf(startDate));
+			preparedStatement.setDate(index++, java.sql.Date.valueOf(endDate));
+		}
 
-	    resultSet = preparedStatement.executeQuery();
-	    if (resultSet.next()) {
-	        count = resultSet.getInt("total");
-	    }
+		resultSet = preparedStatement.executeQuery();
+		if (resultSet.next()) {
+			count = resultSet.getInt("total");
+		}
 
-	    return count;
+		return count;
 	}
 
-	
 	@Override
 	public boolean cancelBooking(int bookingId) throws Exception {
 		return updateBookingStatus(bookingId, "CANCELLED");

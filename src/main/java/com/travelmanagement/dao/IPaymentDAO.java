@@ -18,4 +18,6 @@ public interface IPaymentDAO {
 
 	int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status, String startDate,
 			String endDate) throws Exception;
+
+	
 }

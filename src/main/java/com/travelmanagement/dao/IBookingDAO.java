@@ -6,7 +6,7 @@ import com.travelmanagement.model.Booking;
 
 public interface IBookingDAO {
 
-	Boolean createBooking(Booking booking) throws Exception;
+	int createBooking(Booking booking) throws Exception;
 
 	Booking getBookingById(int id) throws Exception;
 

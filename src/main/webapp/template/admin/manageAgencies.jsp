@@ -52,7 +52,17 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 <style>
 </style>
 </head>
-<body>
+<body><% 
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    if (errorMessage != null && !errorMessage.isEmpty()) {
+%>
+    <div style="color: red; font-weight: bold; margin: 10px 0;">
+        <%= errorMessage %>
+    </div>
+<% 
+    }
+%>
+
 
 	<div class="dashboard-container">
 		<jsp:include page="sidebar.jsp" />
@@ -305,10 +315,10 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 						<label for="pageSize" class="form-label">Records per page:</label>
 						<select name="pageSize" id="pageSize" class="form-select"
 							onchange="this.form.submit()">
-							<option value="1" <%=(pageSize == 1) ? "selected" : ""%>>1</option>
-							<option value="2" <%=(pageSize == 2) ? "selected" : ""%>>2</option>
-							<option value="3" <%=(pageSize == 3) ? "selected" : ""%>>3</option>
-							<option value="4" <%=(pageSize == 4) ? "selected" : ""%>>4</option>
+							<option value="10" <%=(pageSize == 10) ? "selected" : ""%>>10</option>
+							<option value="20" <%=(pageSize == 20) ? "selected" : ""%>>20</option>
+							<option value="30" <%=(pageSize == 30) ? "selected" : ""%>>30</option>
+							<option value="40" <%=(pageSize == 40) ? "selected" : ""%>>40</option>
 						</select>
 					</form>
 				</div>

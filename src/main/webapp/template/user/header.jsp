@@ -104,10 +104,10 @@ a.nav-link:hover {
 
 		<div class="d-flex align-items-center gap-3">
 			<%-- Optional navigation links --%>
-			<a href="<%=request.getContextPath()%>/template/user/userDashboard.jsp"
+			<a href="<%=request.getContextPath()%>/user?button=dashboard"
 				class="nav-link">Home</a>
-			<a href="<%=request.getContextPath()%>/template/user/packages.jsp"
-				class="nav-link">Packages</a> <a
+			<a href="<%=request.getContextPath()%>/package?button=packageList" class="nav-link">Packages</a>
+ <a
 				href="<%=request.getContextPath()%>/template/user/bookingHistory.jsp"
 				class="nav-link">Bookings</a> <a
 				href="<%=request.getContextPath()%>/template/user/paymentHistory.jsp"

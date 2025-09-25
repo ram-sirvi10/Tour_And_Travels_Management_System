@@ -15,4 +15,9 @@ public interface IPackageDAO {
 	List<Packages> getAllPackages() throws Exception;
 
 	Packages getPackageById(int packageId) throws Exception;
+
+	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+			String dateTo, int limit, int offset) throws Exception;
+
+	boolean adjustSeats(int packageId, int seatsChange) throws Exception;
 }

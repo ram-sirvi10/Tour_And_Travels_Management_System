@@ -22,6 +22,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 
 	@Override
 	public boolean createTravelers(List<Traveler> travelers) throws Exception {
+		boolean success = false;
 		try {
 			connection.setAutoCommit(false);
 			preparedStatement = connection.prepareStatement(
@@ -42,12 +43,15 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				}
 			}
 			connection.commit();
-			return true;
+			success = true;
 		} catch (Exception e) {
 			connection.rollback();
 			e.printStackTrace();
+		} finally {
+
+			connection.setAutoCommit(true);
 		}
-		return false;
+		return success;
 	}
 
 	@Override
@@ -108,7 +112,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	@Override
 	public List<Traveler> getAllTravelers(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
 			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-			String startDate, String endDate ,int limit , int offset) throws Exception {
+			String startDate, String endDate, int limit, int offset) throws Exception {
 		List<Traveler> travelers = new ArrayList<>();
 		try {
 			String sql = "SELECT t.*, b.status AS booking_status, pay.status AS payment_status " + "FROM travelers t "
@@ -188,77 +192,75 @@ public class TravelerDAOImpl implements ITravelerDAO {
 
 	@Override
 	public int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
-	        Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-	        String startDate, String endDate) throws Exception {
-	    int count = 0;
-	    try {
-	        String sql = "SELECT COUNT(*) AS total " +
-	                "FROM travelers t " +
-	                "JOIN bookings b ON t.booking_id = b.booking_id " +
-	                "JOIN travel_packages p ON b.package_id = p.package_id " +
-	                "JOIN travelAgency a ON p.agency_id = a.agency_id " +
-	                "LEFT JOIN payments pay ON b.booking_id = pay.booking_id " +
-	                "WHERE 1=1 ";
+			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
+			String startDate, String endDate) throws Exception {
+		int count = 0;
+		try {
+			String sql = "SELECT COUNT(*) AS total " + "FROM travelers t "
+					+ "JOIN bookings b ON t.booking_id = b.booking_id "
+					+ "JOIN travel_packages p ON b.package_id = p.package_id "
+					+ "JOIN travelAgency a ON p.agency_id = a.agency_id "
+					+ "LEFT JOIN payments pay ON b.booking_id = pay.booking_id " + "WHERE 1=1 ";
 
-	        if (travelerId != null)
-	            sql += "AND t.traveler_id = ? ";
-	        if (bookingId != null)
-	            sql += "AND t.booking_id = ? ";
-	        if (userId != null)
-	            sql += "AND b.user_id = ? ";
-	        if (packageId != null)
-	            sql += "AND p.package_id = ? ";
-	        if (agencyId != null)
-	            sql += "AND a.agency_id = ? ";
-	        if (paymentId != null)
-	            sql += "AND pay.payment_id = ? ";
-	        if (bookingStatus != null && !bookingStatus.isEmpty())
-	            sql += "AND b.status = ? ";
-	        if (paymentStatus != null && !paymentStatus.isEmpty())
-	            sql += "AND pay.status = ? ";
-	        if (keyword != null && !keyword.isEmpty())
-	            sql += "AND (t.name LIKE ? OR t.email LIKE ? OR t.mobile LIKE ?) ";
-	        if (startDate != null && endDate != null)
-	            sql += "AND b.booking_date BETWEEN ? AND ? ";
+			if (travelerId != null)
+				sql += "AND t.traveler_id = ? ";
+			if (bookingId != null)
+				sql += "AND t.booking_id = ? ";
+			if (userId != null)
+				sql += "AND b.user_id = ? ";
+			if (packageId != null)
+				sql += "AND p.package_id = ? ";
+			if (agencyId != null)
+				sql += "AND a.agency_id = ? ";
+			if (paymentId != null)
+				sql += "AND pay.payment_id = ? ";
+			if (bookingStatus != null && !bookingStatus.isEmpty())
+				sql += "AND b.status = ? ";
+			if (paymentStatus != null && !paymentStatus.isEmpty())
+				sql += "AND pay.status = ? ";
+			if (keyword != null && !keyword.isEmpty())
+				sql += "AND (t.name LIKE ? OR t.email LIKE ? OR t.mobile LIKE ?) ";
+			if (startDate != null && endDate != null)
+				sql += "AND b.booking_date BETWEEN ? AND ? ";
 
-	        preparedStatement = connection.prepareStatement(sql);
+			preparedStatement = connection.prepareStatement(sql);
 
-	        int index = 1;
-	        if (travelerId != null)
-	            preparedStatement.setInt(index++, travelerId);
-	        if (bookingId != null)
-	            preparedStatement.setInt(index++, bookingId);
-	        if (userId != null)
-	            preparedStatement.setInt(index++, userId);
-	        if (packageId != null)
-	            preparedStatement.setInt(index++, packageId);
-	        if (agencyId != null)
-	            preparedStatement.setInt(index++, agencyId);
-	        if (paymentId != null)
-	            preparedStatement.setInt(index++, paymentId);
-	        if (bookingStatus != null && !bookingStatus.isEmpty())
-	            preparedStatement.setString(index++, bookingStatus);
-	        if (paymentStatus != null && !paymentStatus.isEmpty())
-	            preparedStatement.setString(index++, paymentStatus);
-	        if (keyword != null && !keyword.isEmpty()) {
-	            String k = "%" + keyword + "%";
-	            preparedStatement.setString(index++, k);
-	            preparedStatement.setString(index++, k);
-	            preparedStatement.setString(index++, k);
-	        }
-	        if (startDate != null && endDate != null) {
-	            preparedStatement.setString(index++, startDate);
-	            preparedStatement.setString(index++, endDate);
-	        }
+			int index = 1;
+			if (travelerId != null)
+				preparedStatement.setInt(index++, travelerId);
+			if (bookingId != null)
+				preparedStatement.setInt(index++, bookingId);
+			if (userId != null)
+				preparedStatement.setInt(index++, userId);
+			if (packageId != null)
+				preparedStatement.setInt(index++, packageId);
+			if (agencyId != null)
+				preparedStatement.setInt(index++, agencyId);
+			if (paymentId != null)
+				preparedStatement.setInt(index++, paymentId);
+			if (bookingStatus != null && !bookingStatus.isEmpty())
+				preparedStatement.setString(index++, bookingStatus);
+			if (paymentStatus != null && !paymentStatus.isEmpty())
+				preparedStatement.setString(index++, paymentStatus);
+			if (keyword != null && !keyword.isEmpty()) {
+				String k = "%" + keyword + "%";
+				preparedStatement.setString(index++, k);
+				preparedStatement.setString(index++, k);
+				preparedStatement.setString(index++, k);
+			}
+			if (startDate != null && endDate != null) {
+				preparedStatement.setString(index++, startDate);
+				preparedStatement.setString(index++, endDate);
+			}
 
-	        resultSet = preparedStatement.executeQuery();
-	        if (resultSet.next()) {
-	            count = resultSet.getInt("total");
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return count;
+			resultSet = preparedStatement.executeQuery();
+			if (resultSet.next()) {
+				count = resultSet.getInt("total");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return count;
 	}
 
 }

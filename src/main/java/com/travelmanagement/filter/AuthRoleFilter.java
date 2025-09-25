@@ -76,8 +76,8 @@ import jakarta.servlet.http.HttpSession;
 
 @WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
-maxFileSize = 1024 * 1024 * 5, // 5 MB
-maxRequestSize = 1024 * 1024 * 10 // 10 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
 )
 public class AuthRoleFilter implements Filter {
 
@@ -100,13 +100,13 @@ public class AuthRoleFilter implements Filter {
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
-		System.out.println("filter -> "+button);
+		System.out.println("filter -> " + button);
 		String context = req.getContextPath();
 
-		
 		Map<String, List<String>> adminAccess = new HashMap<>();
-		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers", "manageAgencies", "userAction",
-				"agencyAction", "pendingAgencies", "deletedAgencies","deletedUsers","updateProfile","changePassword"));
+		adminAccess.put(context + "/admin",
+				List.of("dashboard", "manageUsers", "manageAgencies", "userAction", "agencyAction", "pendingAgencies",
+						"deletedAgencies", "deletedUsers", "updateProfile", "changePassword"));
 		adminAccess.put(context + "/agency", List.of("dashboard"));
 		adminAccess.put(context + "/user", List.of("dashboard"));
 
@@ -117,9 +117,10 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile","updateProfile","changePassword"));
-		userAccess.put(context + "/booking", List.of("book", "viewBookings"));
-		userAccess.put(context + "/package", List.of("viewPackages"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword"));
+		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
+				"paymentConfirm", "viewBookingForm", "bookingHistroy"));
+		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {
 		case "ADMIN" -> checkAccess(path, button, adminAccess);
@@ -131,10 +132,7 @@ public class AuthRoleFilter implements Filter {
 		if (allowed) {
 			chain.doFilter(request, response);
 		} else {
-			request.setAttribute("errorMessage", "Access Denied! You don't have permission to access this page.");
-			request.getRequestDispatcher("/error.jsp").forward(request, response);
-			return;
-
+			res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied!");
 		}
 	}
 
