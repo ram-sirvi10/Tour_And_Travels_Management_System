@@ -12,7 +12,16 @@ public class AgencyRegisterRequestDTO {
     private String registrationNumber;
     private String password;
     private String confirmPassword;
+    private String imageurl;
+	
 
+    public String getImageurl() {
+    	return imageurl;
+    }
+
+    public void setImageurl(String imageurl) {
+    	this.imageurl = imageurl;
+    }
    
     public String getAgencyName() {
         return agencyName;

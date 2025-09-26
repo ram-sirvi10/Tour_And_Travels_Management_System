@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -74,6 +75,10 @@ import jakarta.servlet.http.HttpSession;
 //}
 
 @WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AuthRoleFilter implements Filter {
 
 	@Override
@@ -95,12 +100,13 @@ public class AuthRoleFilter implements Filter {
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
+		System.out.println("filter -> " + button);
 		String context = req.getContextPath();
 
-		// Define allowed URLs + button combinations for each role
 		Map<String, List<String>> adminAccess = new HashMap<>();
-		adminAccess.put(context + "/admin", List.of("dashboard", "manageUsers", "manageAgencies", "userAction",
-				"agencyAction", "pendingAgencies", "deletedAgencies","deletedUsers"));
+		adminAccess.put(context + "/admin",
+				List.of("dashboard", "manageUsers", "manageAgencies", "userAction", "agencyAction", "pendingAgencies",
+						"deletedAgencies", "deletedUsers", "updateProfile", "changePassword"));
 		adminAccess.put(context + "/agency", List.of("dashboard"));
 		adminAccess.put(context + "/user", List.of("dashboard"));
 
@@ -111,9 +117,10 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile"));
-		userAccess.put(context + "/booking", List.of("book", "viewBookings"));
-		userAccess.put(context + "/package", List.of("viewPackages"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword"));
+		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
+				"paymentConfirm", "viewBookingForm", "bookingHistroy"));
+		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {
 		case "ADMIN" -> checkAccess(path, button, adminAccess);
@@ -134,8 +141,9 @@ public class AuthRoleFilter implements Filter {
 	private boolean checkAccess(String path, String button, Map<String, List<String>> accessMap) {
 		for (Map.Entry<String, List<String>> entry : accessMap.entrySet()) {
 			if (path.startsWith(entry.getKey())) {
+				System.out.println(button);
 				List<String> buttons = entry.getValue();
-				// if button param is null, allow only if list contains empty string or null
+				// if button param is null, allow only if list contains empty string or null`
 				if (button == null) {
 					return buttons.contains(null) || buttons.contains("");
 				}

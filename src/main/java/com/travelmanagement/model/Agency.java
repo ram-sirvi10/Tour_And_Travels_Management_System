@@ -14,16 +14,27 @@ public class Agency {
 	private String pincode;
 	private String registrationNumber;
 	private String password;
-	private String status; // PENDING / APPROVED / REJECTED
+	private String status; 
 	private boolean isActive;
 	private boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
+private String imageurl;
+	
 
-	// Getters & Setters
+public String getImageurl() {
+	return imageurl;
+}
+
+public void setImageurl(String imageurl) {
+	this.imageurl = imageurl;
+}
+
+
 	public int getAgencyId() {
 		return agencyId;
 	}
+
 
 	public void setAgencyId(int agencyId) {
 		this.agencyId = agencyId;
@@ -147,5 +158,14 @@ public class Agency {
 
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	@Override
+	public String toString() {
+		return "Agency [agencyId=" + agencyId + ", agencyName=" + agencyName + ", ownerName=" + ownerName + ", email="
+				+ email + ", phone=" + phone + ", city=" + city + ", state=" + state + ", country=" + country
+				+ ", pincode=" + pincode + ", registrationNumber=" + registrationNumber + ", password=" + password
+				+ ", status=" + status + ", isActive=" + isActive + ", isDelete=" + isDelete + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + "]";
 	}
 }

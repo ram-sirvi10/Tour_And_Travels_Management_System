@@ -84,7 +84,19 @@ CREATE TABLE travelers (
 ALTER TABLE bookings
 ADD COLUMN no_of_travellers INT NOT NULL DEFAULT 1;
 
-
 -- drop unique constraints in tables  
 ALTER TABLE users DROP INDEX user_email;
 ALTER TABLE travelAgency DROP INDEX email;
+
+-- add column for image url 
+ALTER TABLE users
+ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travelAgency
+ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travel_packages
+ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travel_packages
+ADD COLUMN totalseats int not null ;

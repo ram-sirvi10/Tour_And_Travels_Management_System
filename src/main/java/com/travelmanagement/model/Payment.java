@@ -1,12 +1,12 @@
 package com.travelmanagement.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Payment {
 
 	private int paymentId;
 	private int bookingId;
-	private LocalDate paymentDate;
+	private LocalDateTime paymentDate;
 	private String status;
 	private double amount;
 
@@ -26,12 +26,12 @@ public class Payment {
 		this.bookingId = bookingId;
 	}
 
-	public LocalDate getPaymentDate() {
+	public LocalDateTime getPaymentDate() {
 		return paymentDate;
 	}
 
-	public void setPaymentDate(LocalDate paymentDate) {
-		this.paymentDate = paymentDate;
+	public void setPaymentDate(LocalDateTime localDateTime) {
+		this.paymentDate = localDateTime;
 	}
 
 	public String getStatus() {

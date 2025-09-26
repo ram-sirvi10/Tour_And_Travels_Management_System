@@ -17,15 +17,13 @@ public interface IUserDAO {
 
 	boolean changePassword(int userId, String newPassword) throws Exception;
 
-	List<User> searchUsers(String Keyword ,int limit, int offset ) throws Exception;
-
 	boolean updateUserActiveState(int userId, boolean active) throws Exception;
-	
-	List<User> getDeletedUsers(int limit, int offset) throws Exception;
 
-	long countUser(boolean state,boolean deleted ,String keyword);
+	List<User> getDeletedUsers(int limit, int offset) throws Exception;
 
 	List<User> getUsersByState(Boolean active, int limit, int offset) throws Exception;
 
 	List<User> getAllUsers(Boolean active, Boolean deleted, String keyword, int limit, int offset) throws Exception;
+
+	long countUser(Boolean active, Boolean deleted, String keyword);
 }

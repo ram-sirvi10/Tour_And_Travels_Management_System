@@ -12,9 +12,17 @@ public class User {
 	private boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
-
+	 private String imageurl;
 	public int getUserId() {
 		return userId;
+	}
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
 	}
 
 	public void setUserId(int userId) {

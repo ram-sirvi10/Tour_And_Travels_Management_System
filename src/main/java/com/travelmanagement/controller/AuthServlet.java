@@ -14,29 +14,35 @@ import com.travelmanagement.service.IUserService;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
+import com.travelmanagement.util.CloudinaryUtil;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @WebServlet("/auth")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AuthServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private IUserService userService = new UserServiceImpl();
 	private AuthServiceImpl authService = new AuthServiceImpl();
 	private IAgencyService agencyService = new AgencyServiceImpl();
-	
+
 //	public AuthServlet() {
 //		createAdmin();
 //	}
-	
-	
-	//USE THIS METHOD TO ADD ADMIN
+
+	// USE THIS METHOD TO ADD ADMIN
 //	 private void createAdmin() {
 //	    	System.out.println("CREATE ADMIN=============");
 //			if(!adminService.isAdminAvailable())
@@ -92,14 +98,31 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleRegisterAsUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
 		RegisterRequestDTO dto = new RegisterRequestDTO();
 		dto.setUsername(request.getParameter("name"));
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirmPassword"));
-
 		Map<String, String> errors = authService.validateRegisterDto(dto);
-
+		
+		String imageUrl = null;
+		try {
+			Part filePart = request.getPart("profileImage");
+			imageUrl = CloudinaryUtil.uploadImage(filePart);
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("profileImage", e.getMessage());
+		}
+		dto.setImageurl(imageUrl);
+//		User user = new User();
+//		user.setUserName(dto.getUsername());
+//		user.setUserEmail(dto.getEmail());
+//		user.setUserPassword(PasswordHashing.ecryptPassword(dto.getPassword()));
+//		user.setImageurl(dto.getImageurl());
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
@@ -113,7 +136,10 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleRegisterAsAgency(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+		if (!request.getContentType().startsWith("multipart/")) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
+			return;
+		}
 		AgencyRegisterRequestDTO dto = new AgencyRegisterRequestDTO();
 		dto.setAgencyName(request.getParameter("agency_name"));
 		dto.setOwnerName(request.getParameter("owner_name"));
@@ -126,8 +152,18 @@ public class AuthServlet extends HttpServlet {
 		dto.setRegistrationNumber(request.getParameter("registration_number"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
-
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
+
+		
+		String imageUrl = null;
+		try {
+			Part filePart = request.getPart("profileImage");
+			imageUrl = CloudinaryUtil.uploadImage(filePart);
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("profileImage", e.getMessage());
+		}
+		dto.setImageurl(imageUrl);
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("registration_number", dto.getRegistrationNumber());
@@ -148,14 +184,14 @@ public class AuthServlet extends HttpServlet {
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setRole(request.getParameter("role"));
-		  Map<String, String> errors = new HashMap<>();
-		   if ("user".equalsIgnoreCase(dto.getRole())) {
-		        errors = authService.validateLoginDto(dto);
-		    } else if ("agency".equalsIgnoreCase(dto.getRole())) {
-		        errors = authService.validateLoginAgencyDto(dto);
-		    } else {
-		        errors.put("role", "Invalid role selected!");
-		    }
+		Map<String, String> errors = new HashMap<>();
+		if ("user".equalsIgnoreCase(dto.getRole())) {
+			errors = authService.validateLoginDto(dto);
+		} else if ("agency".equalsIgnoreCase(dto.getRole())) {
+			errors = authService.validateLoginAgencyDto(dto);
+		} else {
+			errors.put("role", "Invalid role selected!");
+		}
 
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
@@ -199,7 +235,7 @@ public class AuthServlet extends HttpServlet {
 	}
 
 	private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		HttpSession session  	= request.getSession(false);
+		HttpSession session = request.getSession(false);
 		if (session != null) {
 			session.invalidate();
 		}

@@ -8,6 +8,7 @@ import com.travelmanagement.dao.impl.PackageDAOImpl;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.exception.ResourceNotFoundException;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.Packages;
 import com.travelmanagement.service.IPackageService;
@@ -59,16 +60,19 @@ public class PackageServiceImpl implements IPackageService {
 		return null;
 	}
 
-	public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
-		List<Packages> list = packageDAO.getAllPackages();
-		List<PackageResponseDTO> dtoList = new ArrayList<>();
-		for (Packages p : list) {
-			if (p.getAgencyId() == agencyId) {
-				dtoList.add(Mapper.toResponseDTO(p));
-			}
-		}
-		return dtoList;
-	}
+
+
+//    public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
+//        List<Packages> list = packageDAO.getAllPackages();
+//        List<PackageResponseDTO> dtoList = new ArrayList<>();
+//        for(Packages p : list) {
+//            if(p.getAgencyId() == agencyId) {
+//                dtoList.add(Mapper.toResponseDTO(p));
+//            }
+//        }
+//        return dtoList;
+//    }
+
 
 	@Override
 	public boolean addPackage(Packages pkg) throws Exception {
@@ -76,9 +80,15 @@ public class PackageServiceImpl implements IPackageService {
 		return packageDAO.addPackage(pkg);
 	}
 
-	public Packages getPackageById(int id) throws Exception {
-		return packageDAO.getPackageById(id);
-	}
+//
+//	public Packages getPackageById(int id) throws Exception {
+//		return packageDAO.getPackageById(id);
+//	}
+
+//    @Override
+//    public Packages getPackageById(int id) throws Exception {
+//        return packageDAO.getPackageById(id);
+//    }
 
 	@Override
 	public List<Packages> getAllPackages() throws Exception {
@@ -98,31 +108,13 @@ public class PackageServiceImpl implements IPackageService {
 		return filtered;
 	}
 
+
+	@Override
 	public boolean updatePackage(Packages pkg) throws Exception {
 		validatePackage(pkg);
 		return packageDAO.updatePackage(pkg);
 	}
 
-	// -------------------- Update Package --------------------
-	private void updatePackage(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
-			throws Exception {
-		int packageId = Integer.parseInt(request.getParameter("packageId"));
-		Packages pkg = IPackageService.getPackageById(packageId);
-
-		if (pkg != null) {
-			pkg.setTitle(request.getParameter("title"));
-			pkg.setDescription(request.getParameter("description"));
-			pkg.setLocation(request.getParameter("location"));
-			pkg.setPrice(Double.parseDouble(request.getParameter("price")));
-			pkg.setDuration(Integer.parseInt(request.getParameter("duration")));
-			// Make Active always true by default, as you requested
-			pkg.setActive(true);
-
-			IPackageService.updatePackage(pkg);
-		}
-
-		response.sendRedirect("agency?button=dashboard");
-	}
 
 	// ---------------- Private helper ----------------
 
@@ -136,4 +128,71 @@ public class PackageServiceImpl implements IPackageService {
 		if (pkg.getDuration() <= 0)
 			throw new Exception("Invalid Duration");
 	}
+
+	@Override
+	public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
+		List<Packages> list = packageDAO.getAllPackages();
+		List<PackageResponseDTO> dtoList = new ArrayList<>();
+		for (Packages p : list) {
+			if (agencyId == 0 || p.getAgencyId() == agencyId) {
+				dtoList.add(Mapper.toResponseDTO(p));
+			}
+		}
+		return dtoList;
+	}
+
+	@Override
+	public List<PackageResponseDTO> searchPackagesByKeyword(String keyword) throws Exception {
+		List<Packages> all = packageDAO.getAllPackages();
+		List<PackageResponseDTO> filtered = new ArrayList<>();
+		if (keyword != null && !keyword.isEmpty()) {
+			for (Packages p : all) {
+				if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
+						|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
+					filtered.add(Mapper.toResponseDTO(p));
+				}
+			}
+		}
+		return filtered;
+	}
+
+	@Override
+	public PackageResponseDTO getPackageById(int id) throws Exception {
+		Packages packages = packageDAO.getPackageById(id);
+		if (packages == null) {
+			throw new ResourceNotFoundException("Package not found ");
+		}
+
+		return Mapper.toResponseDTO(packages);
+	}
+
+	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
+		Packages pkg = packageDAO.getPackageById(packageId);
+		if (pkg == null)
+			return false;
+
+		int newSeats = pkg.getTotalSeats() + seatsChange;
+		if (newSeats < 0)
+			return false;
+
+		System.out.println(
+				"Adjusting seats: current=" + pkg.getTotalSeats() + ", change=" + seatsChange + ", new=" + newSeats);
+
+		return packageDAO.adjustSeats(packageId, newSeats);
+	}
+
+	@Override
+	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
+			String dateFrom, String dateTo, int limit, int offset) throws Exception {
+		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo, limit,
+				offset);
+		List<PackageResponseDTO> dtoList = new ArrayList<>();
+		for (Packages pkg : packages) {
+			dtoList.add(Mapper.toResponseDTO(pkg));
+		}
+
+		return dtoList;
+	}
+
+
 }

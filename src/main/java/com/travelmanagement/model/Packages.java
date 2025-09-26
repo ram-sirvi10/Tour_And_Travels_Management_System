@@ -10,13 +10,30 @@ public class Packages {
 	private String description;
 	private double price;
 	private String location;
-	private int duration; 
-	
+	private int duration;
+
 	private boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
+	private int totalSeats;
+	private String imageurl;
 
-	// Getters & Setters
+	public int getTotalSeats() {
+		return totalSeats;
+	}
+
+	public void setTotalSeats(int totalSeats) {
+		this.totalSeats = totalSeats;
+	}
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+
 	public int getPackageId() {
 		return packageId;
 	}
@@ -73,7 +90,6 @@ public class Packages {
 		this.duration = duration;
 	}
 
-
 	public boolean isActive() {
 		return isActive;
 	}
@@ -97,7 +113,5 @@ public class Packages {
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-
-	
 
 }

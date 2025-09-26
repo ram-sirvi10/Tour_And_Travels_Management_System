@@ -10,6 +10,25 @@ public class PackageResponseDTO {
 	private int duration;
 
 	private boolean isActive;
+	private String imageurl;
+	private int totalSeats;
+	
+
+	public int getTotalSeats() {
+		return totalSeats;
+	}
+
+	public void setTotalSeats(int totalSeats) {
+		this.totalSeats = totalSeats;
+	}
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
 
 	public int getPackageId() {
 		return packageId;
