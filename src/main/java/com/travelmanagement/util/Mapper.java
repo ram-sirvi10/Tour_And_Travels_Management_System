@@ -10,6 +10,7 @@ import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.Booking;
@@ -138,14 +139,32 @@ public class Mapper {
 		bookingDTO.setBookingId(booking.getBookingId());
 		bookingDTO.setPackageId(booking.getPackageId());
 		bookingDTO.setStatus(booking.getStatus());
+		bookingDTO.setCreated_at(booking.getCreated_at());
 		return bookingDTO;
 	}
+
 	public static Payment mapPaymentRequestDTOToPayment(PaymentRequestDTO dto) {
 		Payment payment = new Payment();
 		payment.setAmount(dto.getAmount());
 		payment.setBookingId(dto.getBookingId());
 		payment.setStatus(dto.getStatus());
+		
+		
+	
+		
 		return payment;
+
+	}
+
+	public static PaymentResponseDTO mapPaymentToPaymentResponse(Payment payment) {
+		PaymentResponseDTO dto = new PaymentResponseDTO();
+		
+		dto.setPaymentId(payment.getPaymentId());
+		dto.setBookingId(payment.getBookingId());
+		dto.setAmount(payment.getAmount());
+		dto.setStatus(payment.getStatus());
+		dto.setPaymentDate(payment.getPaymentDate());
+		return dto;
 
 	}
 

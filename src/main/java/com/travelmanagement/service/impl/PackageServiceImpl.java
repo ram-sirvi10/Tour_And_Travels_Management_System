@@ -169,15 +169,27 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, int limit, int offset) throws Exception {
-		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo, limit,
-				offset);
+			String dateFrom, String dateTo, Integer totalSeats, String departureDate, Boolean isActive, int limit,
+			int offset, Boolean isAgencyView) throws Exception {
+
+		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo,
+				totalSeats, departureDate, isActive, limit, offset, isAgencyView);
+
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
 			dtoList.add(Mapper.toResponseDTO(pkg));
 		}
 
 		return dtoList;
+	}
+
+	@Override
+	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+			String dateTo, Integer totalSeats, String departureDate, Boolean isActive, Boolean isAgencyView)
+			throws Exception {
+
+		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, departureDate,
+				isActive, isAgencyView);
 	}
 
 }

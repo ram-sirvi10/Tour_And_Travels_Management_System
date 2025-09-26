@@ -97,3 +97,15 @@ ADD COLUMN imageurl VARCHAR(500) ;
 
 ALTER TABLE travel_packages
 ADD COLUMN imageurl VARCHAR(500) ;
+
+ALTER TABLE travel_packages
+ADD COLUMN totalseats int not null ;
+
+ALTER TABLE bookings
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ;
+
+ALTER TABLE travel_packages
+ADD COLUMN departure_date TIMESTAMP not null;
+
+ALTER TABLE travel_packages
+drop COLUMN departure_date ;

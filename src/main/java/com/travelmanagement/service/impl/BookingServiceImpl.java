@@ -61,8 +61,6 @@ public class BookingServiceImpl implements IBookingService {
 		return bookingDAO.cancelBooking(bookingId);
 	}
 
-	
-
 	@Override
 	public boolean updateBookingStatus(int bookingId, String status) throws Exception {
 		Booking booking = bookingDAO.getBookingById(bookingId);
@@ -92,5 +90,15 @@ public class BookingServiceImpl implements IBookingService {
 	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
 			String keyword, String startDate, String endDate) throws Exception {
 		return bookingDAO.getAllBookingsCount(userId, packageId, noOfTravellers, status, keyword, startDate, endDate);
+	}
+
+	public List<Integer> getPendingBookingsInLast10Minutes() {
+
+		try {
+			return bookingDAO.getPendingBookingsInLast10Minutes();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

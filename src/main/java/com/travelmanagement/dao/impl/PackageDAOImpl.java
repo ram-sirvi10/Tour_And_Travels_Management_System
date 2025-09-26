@@ -25,8 +25,8 @@ public class PackageDAOImpl implements IPackageDAO {
 		String sql = "INSERT INTO travel_packages (title, agency_id, description, price, location, duration, is_active, created_at, updated_at) "
 				+ "VALUES (?,?,?,?,?,?,?, NOW(), NOW())";
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
 
 		preparedStatement.setString(1, pkg.getTitle());
 		preparedStatement.setInt(2, pkg.getAgencyId());
@@ -43,8 +43,8 @@ public class PackageDAOImpl implements IPackageDAO {
 	public boolean updatePackage(Packages pkg) throws Exception {
 		String sql = "UPDATE travel_packages SET title=?, agency_id=?, description=?, price=?, location=?, duration=?, is_active=?, updated_at = NOW() WHERE package_id=?";
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
 
 		preparedStatement.setString(1, pkg.getTitle());
 		preparedStatement.setInt(2, pkg.getAgencyId());
@@ -62,8 +62,8 @@ public class PackageDAOImpl implements IPackageDAO {
 	public boolean deletePackage(int packageId) throws Exception {
 		String sql = "DELETE FROM travel_packages WHERE package_id=?";
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, packageId);
 
 		return preparedStatement.executeUpdate() > 0;
@@ -73,8 +73,8 @@ public class PackageDAOImpl implements IPackageDAO {
 	public boolean togglePackageStatus(int packageId) throws Exception {
 		String sql = "UPDATE travel_packages SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END, updated_at = NOW() WHERE package_id=?";
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, packageId);
 
 		return preparedStatement.executeUpdate() > 0;
@@ -85,9 +85,9 @@ public class PackageDAOImpl implements IPackageDAO {
 		String sql = "SELECT * FROM travel_packages ORDER BY package_id DESC";
 		List<Packages> list = new ArrayList<>();
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
-		 resultSet = preparedStatement.executeQuery();
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
+		resultSet = preparedStatement.executeQuery();
 
 		while (resultSet.next()) {
 			Packages pkg = new Packages();
@@ -114,10 +114,10 @@ public class PackageDAOImpl implements IPackageDAO {
 	public Packages getPackageById(int packageId) throws Exception {
 		String sql = "SELECT * FROM travel_packages WHERE package_id = ?";
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql);
+		connection = DatabaseConfig.getConnection();
+		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, packageId);
-		 resultSet = preparedStatement.executeQuery();
+		resultSet = preparedStatement.executeQuery();
 
 		if (resultSet.next()) {
 			Packages pkg = new Packages();
@@ -141,80 +141,112 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, int limit, int offset) throws Exception {
-		List<Packages> list = new ArrayList<>();
+	        String dateFrom, String dateTo, Integer totalSeats, String departureDate, Boolean isActive, 
+	        int limit, int offset, Boolean isAgencyView) throws Exception {
 
-		StringBuilder sql = new StringBuilder("SELECT * FROM travel_packages WHERE 1=1");
+	    List<Packages> list = new ArrayList<>();
 
-		if (title != null && !title.isEmpty()) {
-			sql.append(" AND title LIKE ?");
-		}
-		if (agencyId != null) {
-			sql.append(" AND agency_id = ?");
-		}
-		if (location != null && !location.isEmpty()) {
-			sql.append(" AND location LIKE ?");
-		}
-		if (keyword != null && !keyword.isEmpty()) {
-			sql.append(" AND (title LIKE ? OR description LIKE ? OR location LIKE ?)");
-		}
-		if (dateFrom != null && !dateFrom.isEmpty()) {
-			sql.append(" AND DATE(created_at) >= ?");
-		}
-		if (dateTo != null && !dateTo.isEmpty()) {
-			sql.append(" AND  DATE(created_at) <= ?");
-		}
+	    StringBuilder sql = new StringBuilder("SELECT * FROM travel_packages WHERE 1=1");
 
-		sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
+	    if (title != null && !title.isEmpty()) {
+	        sql.append(" AND title LIKE ?");
+	    }
+	    if (agencyId != null) {
+	        sql.append(" AND agency_id = ?");
+	    }
+	    if (location != null && !location.isEmpty()) {
+	        sql.append(" AND location LIKE ?");
+	    }
+	    if (keyword != null && !keyword.isEmpty()) {
+	        sql.append(" AND (title LIKE ? OR description LIKE ? OR location LIKE ?)");
+	    }
+	    if (dateFrom != null && !dateFrom.isEmpty()) {
+	        sql.append(" AND DATE(created_at) >= ?");
+	    }
+	    if (dateTo != null && !dateTo.isEmpty()) {
+	        sql.append(" AND DATE(created_at) <= ?");
+	    }
 
-		 connection = DatabaseConfig.getConnection();
-		 preparedStatement = connection.prepareStatement(sql.toString());
+	    if (departureDate != null && !departureDate.isEmpty()) {
+	        sql.append(" AND DATE(departure_date) = ?");
+	    } else {
+	        if (isAgencyView == null || !isAgencyView) {
+	            sql.append(" AND DATE(departure_date) >= CURDATE() + INTERVAL 10 DAY");
+	        }
+	    }
 
-		int index = 1;
-		if (title != null && !title.isEmpty()) {
-			preparedStatement.setString(index++, "%" + title + "%");
-		}
-		if (agencyId != null) {
-			preparedStatement.setInt(index++, agencyId);
-		}
-		if (location != null && !location.isEmpty()) {
-			preparedStatement.setString(index++, "%" + location + "%");
-		}
-		if (keyword != null && !keyword.isEmpty()) {
-			preparedStatement.setString(index++, "%" + keyword + "%");
-			preparedStatement.setString(index++, "%" + keyword + "%");
-			preparedStatement.setString(index++, "%" + keyword + "%");
-		}
-		if (dateFrom != null && !dateFrom.isEmpty()) {
-			preparedStatement.setString(index++, dateFrom);
-		}
-		if (dateTo != null && !dateTo.isEmpty()) {
-			preparedStatement.setString(index++, dateTo);
-		}
+	    if (totalSeats != null) {
+	        sql.append(" AND totalseats = ?");
+	    }
+	    if (isActive != null) {
+	        sql.append(" AND is_active = ?");
+	    }
+	    if (isAgencyView == null || !isAgencyView) {
+	        sql.append(" AND totalseats > 0");
+	    }
 
-		preparedStatement.setInt(index++, limit);
-		preparedStatement.setInt(index, offset);
+	    sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
 
-		 resultSet = preparedStatement.executeQuery();
-		while (resultSet.next()) {
-			Packages pkg = new Packages();
-			pkg.setPackageId(resultSet.getInt("package_id"));
-			pkg.setTitle(resultSet.getString("title"));
-			pkg.setAgencyId(resultSet.getInt("agency_id"));
-			pkg.setDescription(resultSet.getString("description"));
-			pkg.setPrice(resultSet.getDouble("price"));
-			pkg.setLocation(resultSet.getString("location"));
-			pkg.setDuration(resultSet.getInt("duration"));
-			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("totalseats"));
-			if (resultSet.getString("imageurl") != null) {
-				pkg.setImageurl(resultSet.getString("imageurl"));
-			}
-			list.add(pkg);
-		}
+	    connection = DatabaseConfig.getConnection();
+	    preparedStatement = connection.prepareStatement(sql.toString());
 
-		return list;
+	    int index = 1;
+	    if (title != null && !title.isEmpty()) {
+	        preparedStatement.setString(index++, "%" + title + "%");
+	    }
+	    if (agencyId != null) {
+	        preparedStatement.setInt(index++, agencyId);
+	    }
+	    if (location != null && !location.isEmpty()) {
+	        preparedStatement.setString(index++, "%" + location + "%");
+	    }
+	    if (keyword != null && !keyword.isEmpty()) {
+	        String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+	        preparedStatement.setString(index++, kw);
+	        preparedStatement.setString(index++, kw);
+	        preparedStatement.setString(index++, kw);
+	    }
+	    if (dateFrom != null && !dateFrom.isEmpty()) {
+	        preparedStatement.setString(index++, dateFrom);
+	    }
+	    if (dateTo != null && !dateTo.isEmpty()) {
+	        preparedStatement.setString(index++, dateTo);
+	    }
+	    if (departureDate != null && !departureDate.isEmpty()) {
+	        preparedStatement.setString(index++, departureDate);
+	    }
+	    if (totalSeats != null) {
+	        preparedStatement.setInt(index++, totalSeats);
+	    }
+	    if (isActive != null) {
+	        preparedStatement.setBoolean(index++, isActive);
+	    }
+
+	    preparedStatement.setInt(index++, limit);
+	    preparedStatement.setInt(index++, offset);
+
+	    resultSet = preparedStatement.executeQuery();
+	    while (resultSet.next()) {
+	        Packages pkg = new Packages();
+	        pkg.setPackageId(resultSet.getInt("package_id"));
+	        pkg.setTitle(resultSet.getString("title"));
+	        pkg.setAgencyId(resultSet.getInt("agency_id"));
+	        pkg.setDescription(resultSet.getString("description"));
+	        pkg.setPrice(resultSet.getDouble("price"));
+	        pkg.setLocation(resultSet.getString("location"));
+	        pkg.setDuration(resultSet.getInt("duration"));
+	        pkg.setActive(resultSet.getBoolean("is_active"));
+	        pkg.setTotalSeats(resultSet.getInt("totalseats"));
+	        if (resultSet.getString("imageurl") != null) {
+	            pkg.setImageurl(resultSet.getString("imageurl"));
+	        }
+	        list.add(pkg);
+	    }
+
+	    return list;
 	}
+
+
 
 	@Override
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
@@ -222,17 +254,105 @@ public class PackageDAOImpl implements IPackageDAO {
 			return false;
 
 		String sql = "UPDATE travel_packages SET totalseats = ?, updated_at = NOW() WHERE package_id = ?";
-		try  {
-			 preparedStatement = connection.prepareStatement(sql);
+		try {
+			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, seatsChange);
 			preparedStatement.setInt(2, packageId);
 			int rows = preparedStatement.executeUpdate();
 			System.out.println("Rows updated: " + rows);
 			return rows > 0;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
 	}
+
+	@Override
+	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+	        String dateTo, Integer totalSeats, String departureDate, Boolean isActive, Boolean isAgencyView)
+	        throws Exception {
+	    int count = 0;
+
+	    StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS total FROM travel_packages WHERE 1=1");
+
+	    if (title != null && !title.isEmpty()) {
+	        sql.append(" AND title LIKE ?");
+	    }
+	    if (agencyId != null) {
+	        sql.append(" AND agency_id = ?");
+	    }
+	    if (location != null && !location.isEmpty()) {
+	        sql.append(" AND location LIKE ?");
+	    }
+	    if (keyword != null && !keyword.isEmpty()) {
+	        sql.append(" AND (title LIKE ? OR description LIKE ? OR location LIKE ?)");
+	    }
+	    if (dateFrom != null && !dateFrom.isEmpty()) {
+	        sql.append(" AND DATE(created_at) >= ?");
+	    }
+	    if (dateTo != null && !dateTo.isEmpty()) {
+	        sql.append(" AND DATE(created_at) <= ?");
+	    }
+	    if (departureDate != null && !departureDate.isEmpty()) {
+	        sql.append(" AND DATE(departure_date) = ?");
+	    } else {
+	        if (isAgencyView == null || !isAgencyView) {
+	            sql.append(" AND DATE(departure_date) >= CURDATE() + INTERVAL 10 DAY");
+	        }
+	    }
+	    if (totalSeats != null) {
+	        sql.append(" AND totalSeats = ?");
+	    }
+	    if (isActive != null) {
+	        sql.append(" AND is_active = ?");
+	    }
+
+	    if (isAgencyView == null || !isAgencyView) {
+	        sql.append(" AND totalseats > 0");
+	    }
+
+	    connection = DatabaseConfig.getConnection();
+	    preparedStatement = connection.prepareStatement(sql.toString());
+
+	    int index = 1;
+	    if (title != null && !title.isEmpty()) {
+	        preparedStatement.setString(index++, "%" + title + "%");
+	    }
+	    if (agencyId != null) {
+	        preparedStatement.setInt(index++, agencyId);
+	    }
+	    if (location != null && !location.isEmpty()) {
+	        preparedStatement.setString(index++, "%" + location + "%");
+	    }
+	    if (keyword != null && !keyword.isEmpty()) {
+	        String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+	        preparedStatement.setString(index++, kw);
+	        preparedStatement.setString(index++, kw);
+	        preparedStatement.setString(index++, kw);
+	    }
+	    if (dateFrom != null && !dateFrom.isEmpty()) {
+	        preparedStatement.setString(index++, dateFrom);
+	    }
+	    if (dateTo != null && !dateTo.isEmpty()) {
+	        preparedStatement.setString(index++, dateTo);
+	    }
+	    if (departureDate != null && !departureDate.isEmpty()) {
+	        preparedStatement.setString(index++, departureDate);
+	    }
+	    if (totalSeats != null) {
+	        preparedStatement.setInt(index++, totalSeats);
+	    }
+	    if (isActive != null) {
+	        preparedStatement.setBoolean(index++, isActive);
+	    }
+
+	    resultSet = preparedStatement.executeQuery();
+	    if (resultSet.next()) {
+	        count = resultSet.getInt("total");
+	    }
+
+	    return count;
+	}
+
 
 }

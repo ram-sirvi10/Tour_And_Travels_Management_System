@@ -60,6 +60,8 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setBookingDate(resultSet.getDate("booking_date").toLocalDate());
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
+			if (resultSet.getTimestamp("created_at") != null)
+				booking.setCreated_at((resultSet.getTimestamp("created_at").toLocalDateTime()));
 			return booking;
 		}
 		return null;
@@ -115,6 +117,8 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setBookingDate(resultSet.getDate("booking_date").toLocalDate());
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
+			if (resultSet.getTimestamp("created_at") != null)
+				booking.setCreated_at((resultSet.getTimestamp("created_at").toLocalDateTime()));
 			bookings.add(booking);
 		}
 
@@ -135,8 +139,7 @@ public class BookingDAOImpl implements IBookingDAO {
 			sql += " AND no_of_travellers = ?";
 		if (status != null && !status.isEmpty())
 			sql += " AND status = ?";
-		if (keyword != null && !keyword.isEmpty())
-			sql += " AND (CAST(booking_id AS CHAR) LIKE ? OR status LIKE ?)";
+	
 		if (startDate != null && endDate != null)
 			sql += " AND booking_date BETWEEN ? AND ?";
 
@@ -151,11 +154,7 @@ public class BookingDAOImpl implements IBookingDAO {
 			preparedStatement.setInt(index++, noOfTravellers);
 		if (status != null && !status.isEmpty())
 			preparedStatement.setString(index++, status);
-		if (keyword != null && !keyword.isEmpty()) {
-			String k = "%" + keyword + "%";
-			preparedStatement.setString(index++, k);
-			preparedStatement.setString(index++, k);
-		}
+		
 		if (startDate != null && endDate != null) {
 			preparedStatement.setDate(index++, java.sql.Date.valueOf(startDate));
 			preparedStatement.setDate(index++, java.sql.Date.valueOf(endDate));
@@ -173,4 +172,21 @@ public class BookingDAOImpl implements IBookingDAO {
 	public boolean cancelBooking(int bookingId) throws Exception {
 		return updateBookingStatus(bookingId, "CANCELLED");
 	}
+	@Override
+	public List<Integer> getPendingBookingsInLast10Minutes() throws Exception {
+	    List<Integer> bookingIds = new ArrayList<>();
+	    String sql = "SELECT booking_id FROM bookings " +
+	                 "WHERE status = 'PENDING' " +
+	                 "AND created_at >= (NOW() - INTERVAL 10 MINUTE)";
+
+	    preparedStatement = connection.prepareStatement(sql);
+	    resultSet = preparedStatement.executeQuery();
+
+	    while (resultSet.next()) {
+	        bookingIds.add(resultSet.getInt("booking_id"));
+	    }
+
+	    return bookingIds;
+	}
+
 }

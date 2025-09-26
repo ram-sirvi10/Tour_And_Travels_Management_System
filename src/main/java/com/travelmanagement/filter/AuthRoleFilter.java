@@ -5,8 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.travelmanagement.dao.impl.AgencyDAOImpl;
+import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.User;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -97,6 +101,42 @@ public class AuthRoleFilter implements Filter {
 			return;
 		}
 
+		boolean isActive = true;
+		if (user != null) {
+			UserDAOImpl userDAO = new UserDAOImpl();
+			User latestUser;
+			try {
+				latestUser = userDAO.getUserById(user.getUserId());
+				if (latestUser == null || !latestUser.isActive()) {
+					isActive = false;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} else if (agency != null) {
+			AgencyDAOImpl agencyDAO = new AgencyDAOImpl();
+			Agency latestAgency;
+			try {
+				latestAgency = agencyDAO.getAgencyById(agency.getAgencyId());
+				if (latestAgency == null || !latestAgency.isActive()) {
+					isActive = false;
+				}
+			} catch (Exception e) {
+				
+				e.printStackTrace();
+			}
+
+		}
+
+		if (!isActive) {
+			if (session != null) {
+				session.invalidate();
+			}
+			res.sendRedirect(req.getContextPath() + "/login.jsp?error=inactive");
+			return;
+		}
+
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
@@ -119,7 +159,7 @@ public class AuthRoleFilter implements Filter {
 		Map<String, List<String>> userAccess = new HashMap<>();
 		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy"));
+				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {

@@ -1,6 +1,7 @@
 package com.travelmanagement.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Booking {
 	private int bookingId;
@@ -9,6 +10,15 @@ public class Booking {
 	private LocalDate bookingDate;
 	private String status;
 	private int noOfTravellers;
+	private LocalDateTime created_at;
+
+	public LocalDateTime getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(LocalDateTime created_at) {
+		this.created_at = created_at;
+	}
 
 	public int getNoOfTravellers() {
 		return noOfTravellers;
@@ -57,4 +67,6 @@ public class Booking {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	
 }

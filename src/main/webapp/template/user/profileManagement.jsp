@@ -103,12 +103,12 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
                 <% } %>
                 <h3 class="card-title mb-2 text-center"><%= user.getUserName().toUpperCase() %></h3>
                 <p class="text-muted mb-3 text-center"><%= user.getUserEmail() %></p>
-                <div class="d-flex gap-3">
-                    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=updateProfile" 
-                       class="btn btn-outline-primary btn-lg">Edit Profile</a>
-                    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=changePassword"  
-                       class="btn btn-outline-secondary btn-lg">Change Password</a>
-                </div>
+                <div class="d-flex gap-2">
+    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=updateProfile" class="btn btn-outline-primary btn-lg">Edit Profile</a>
+    <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=changePassword" class="btn btn-outline-secondary btn-lg">Change Password</a>
+    <a href="<%=request.getContextPath()%>/auth?button=logout" class="btn btn-danger btn-lg">Logout</a>
+</div>
+
             </div>
         </div>
     </div>

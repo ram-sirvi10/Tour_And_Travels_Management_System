@@ -17,6 +17,16 @@ if (user == null) {
 List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
 %>
 
+<% 
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    if (errorMessage != null && !errorMessage.isEmpty()) {
+%>
+    <div style="color: red; font-weight: bold; margin: 10px 0;">
+        <%= errorMessage %>
+    </div>
+<% 
+    }
+%>
 <div class="text-center mb-5">
 	<h1 class="fw-bold">
 		Welcome,

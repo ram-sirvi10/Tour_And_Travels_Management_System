@@ -27,15 +27,7 @@
                     <td><span class="badge bg-success">Successful</span></td>
                     <td>2025-09-24</td>
                 </tr>
-                <tr>
-                    <td>2</td>
-                    <td>202</td>
-                    <td>102</td>
-                    <td>Rome Adventure</td>
-                    <td>$950</td>
-                    <td><span class="badge bg-warning text-dark">Pending</span></td>
-                    <td>2025-09-20</td>
-                </tr>
+                
             </tbody>
         </table>
     </div>

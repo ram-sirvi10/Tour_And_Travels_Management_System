@@ -162,7 +162,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 			if (paymentStatus != null && !paymentStatus.isEmpty())
 				preparedStatement.setString(index++, paymentStatus);
 			if (keyword != null && !keyword.isEmpty()) {
-				String k = "%" + keyword + "%";
+				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
@@ -243,7 +243,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 			if (paymentStatus != null && !paymentStatus.isEmpty())
 				preparedStatement.setString(index++, paymentStatus);
 			if (keyword != null && !keyword.isEmpty()) {
-				String k = "%" + keyword + "%";
+				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);

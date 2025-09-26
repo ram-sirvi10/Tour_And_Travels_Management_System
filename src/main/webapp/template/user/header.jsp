@@ -108,7 +108,7 @@ a.nav-link:hover {
 				class="nav-link">Home</a>
 			<a href="<%=request.getContextPath()%>/package?button=packageList" class="nav-link">Packages</a>
  <a
-				href="<%=request.getContextPath()%>/template/user/bookingHistory.jsp"
+				href="<%=request.getContextPath()%>/booking?button=bookingHistroy"
 				class="nav-link">Bookings</a> <a
 				href="<%=request.getContextPath()%>/template/user/paymentHistory.jsp"
 				class="nav-link">Payments</a>
