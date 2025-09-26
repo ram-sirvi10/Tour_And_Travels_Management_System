@@ -211,29 +211,29 @@
                                           <input type="hidden" name="packageId" value="<%= p.getPackageId() %>">
                                           <div class="mb-2">
                                               <label class="form-label">Title:</label>
-                                              <input type="text" class="form-control" name="title" value="<%= p.getTitle() %>" required>
+                                              <input type="text" class="form-control" name="title" value="<%= p.getTitle() %>" >
                                           </div>
                                           <div class="mb-2">
                                               <label class="form-label">Description:</label>
-                                              <textarea class="form-control" name="description" rows="3" required><%= p.getDescription() %></textarea>
+                                              <textarea class="form-control" name="description" rows="3" ><%= p.getDescription() %></textarea>
                                           </div>
                                           <div class="mb-2">
                                               <label class="form-label">Location:</label>
-                                              <input type="text" class="form-control" name="location" value="<%= p.getLocation() %>" required>
+                                              <input type="text" class="form-control" name="location" value="<%= p.getLocation() %>" >
                                           </div>
                                           <div class="mb-2">
                                               <label class="form-label">Price:</label>
-                                              <input type="number" class="form-control" name="price" value="<%= p.getPrice() %>" step="0.01" required>
+                                              <input type="number" class="form-control" name="price" value="<%= p.getPrice() %>" step="0.01" >
                                           </div>
                                           <div class="mb-2">
                                               <label class="form-label">Duration (days):</label>
-                                              <input type="number" class="form-control" name="duration" value="<%= p.getDuration() %>" required>
+                                              <input type="number" class="form-control" name="duration" value="<%= p.getDuration() %>" >
                                           </div>
                                           <div class="mb-2">
                                               <label class="form-label">Active:</label>
                                               <select class="form-select" name="isActive">
-                                                  <option value="true" <%= p.getIsActive() ? "selected" : "" %>>Yes</option>
-                                                  <option value="false" <%= !p.getIsActive() ? "selected" : "" %>>No</option>
+                                                  <option value="true" <%= p.getIsActive() ? "selected" : "" %>>Active</option>
+                                                  <option value="false" <%= !p.getIsActive() ? "selected" : "" %>>Inactive</option>
                                               </select>
                                           </div>
                                       </div>

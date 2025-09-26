@@ -11,7 +11,6 @@ public class PackageResponseDTO {
 
 	private boolean isActive;
 
-	
 	public int getPackageId() {
 		return packageId;
 	}
@@ -68,8 +67,6 @@ public class PackageResponseDTO {
 		this.duration = duration;
 	}
 
-	
-
 	public boolean getIsActive() {
 		return isActive;
 	}
@@ -80,6 +77,6 @@ public class PackageResponseDTO {
 
 	public void setPackageId(Package[] packages) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

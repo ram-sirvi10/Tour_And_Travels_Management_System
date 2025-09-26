@@ -13,7 +13,6 @@ public class PackageRegisterDTO {
 	private String imageUrl;
 	private String isActive;
 
-	// Getters & Setters
 	public String getPackageId() {
 		return packageId;
 	}

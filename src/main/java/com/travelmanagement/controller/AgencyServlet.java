@@ -3,7 +3,6 @@ package com.travelmanagement.controller;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
-import com.travelmanagement.model.Agency;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.util.ValidationUtil;
 
@@ -34,6 +33,9 @@ public class AgencyServlet extends HttpServlet {
 		AgencyResponseDTO agency = (AgencyResponseDTO) request.getSession().getAttribute("agency");
 
 		try {
+			if (action == null)
+				action = "dashboard";
+
 			switch (action) {
 			case "dashboard":
 				dashboard(request, response, agency);
@@ -71,7 +73,6 @@ public class AgencyServlet extends HttpServlet {
 		List<PackageResponseDTO> packages = packageService.getAllPackages(agency.getAgencyId());
 		request.setAttribute("packages", packages);
 		request.getRequestDispatcher("template/agency/agencyDashboard.jsp").forward(request, response);
-		return;
 	}
 
 	// -------------------- Add Package --------------------
@@ -84,7 +85,7 @@ public class AgencyServlet extends HttpServlet {
 		dto.setDuration(request.getParameter("duration"));
 		dto.setLocation(request.getParameter("location"));
 		dto.setImageUrl(request.getParameter("imageUrl"));
-		dto.setIsActive(request.getParameter("isActive"));
+		dto.setIsActive("true"); // Default active
 		dto.setAgencyId(String.valueOf(agency.getAgencyId()));
 
 		// Validate package data
