@@ -4,6 +4,8 @@
 <%@ page import="java.util.List"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
+<%@ page
+	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 
 <%@ include file="header.jsp"%>
 
@@ -15,17 +17,28 @@ if (user == null) {
 }
 
 List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
+List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
 %>
 
-<% 
-    String errorMessage = (String) request.getAttribute("errorMessage");
-    if (errorMessage != null && !errorMessage.isEmpty()) {
+<%
+String errorMessage = (String) request.getAttribute("errorMessage");
+if (errorMessage != null && !errorMessage.isEmpty()) {
 %>
-    <div style="color: red; font-weight: bold; margin: 10px 0;">
-        <%= errorMessage %>
-    </div>
-<% 
-    }
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div class="toast show align-items-center text-bg-danger border-0"
+		role="alert" aria-live="assertive" aria-atomic="true"
+		data-bs-delay="3000" data-bs-autohide="true">
+		<div class="d-flex">
+			<div class="toast-body">
+				<%=errorMessage%>
+			</div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+<%
+}
 %>
 <div class="text-center mb-5">
 	<h1 class="fw-bold">
@@ -122,24 +135,110 @@ List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttrib
 
 		<!-- Right Column: Recent Bookings -->
 		<div class="col-lg-4 mb-4">
-			<h2 class="fw-bold mb-4">Recent Bookings</h2>
-			<div class="list-group">
-				<%
-				for (int i = 1; i <= 5; i++) {
-				%>
-				<div
-					class="list-group-item d-flex justify-content-between align-items-center">
-					<div>
-						<h6 class="mb-1">Paris Delight</h6>
-						<small class="text-muted">Booked on: 2025-09-24</small>
-					</div>
-					<span class="badge bg-primary rounded-pill">$1200</span>
-				</div>
-				<%
-				}
-				%>
-			</div>
-		</div>
+    <h2 class="fw-bold mb-4">Recent Bookings</h2>
+    <div class="list-group">
+        <%
+        if (bookings != null && !bookings.isEmpty()) {
+            for (BookingResponseDTO dto : bookings) {
+                java.time.LocalDateTime departure = dto.getDepartureDateAndTime();
+        %>
+        <div class="list-group-item mb-3 p-3 shadow-sm rounded">
+
+            <!-- Countdown Section -->
+            <div class="mb-2 text-center">
+                <h6 class="mb-1">Departure In:</h6>
+                <span id="countdown-<%=dto.getBookingId()%>" class="fw-bold fs-6 text-primary"></span>
+            </div>
+
+            <!-- Package Info -->
+            <div class="mb-2">
+                <h5 class="mb-1"><%=dto.getPackageName()%></h5>
+                <small class="text-muted d-block">Booked on: <%=dto.getBookingDate()%></small>
+                <small class="text-muted d-block">Departure: 
+                    <%= departure != null ? departure.toLocalDate() + " " + departure.toLocalTime() : "Not Mentioned" %>
+                </small>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <!-- Amount -->
+                <div class="text-center mb-2">
+                    <h6 class="mb-1">Amount</h6>
+                    <span class="badge bg-primary rounded-pill">$<%=dto.getAmount()%></span>
+                </div>
+
+                <!-- Status -->
+                <div class="text-center mb-2">
+                    <h6 class="mb-1">Status</h6>
+                    <%
+                    String statusClass = "bg-danger";
+                    if ("CONFIRMED".equalsIgnoreCase(dto.getStatus())) {
+                        statusClass = "bg-success";
+                    } else if ("PENDING".equalsIgnoreCase(dto.getStatus())) {
+                        statusClass = "bg-warning text-dark";
+                    }
+                    %>
+                    <span class="badge <%=statusClass%>"><%=dto.getStatus()%></span>
+                </div>
+            </div>
+        </div>
+
+    <script>
+    // Countdown + Departure Alert
+    const countdown<%=dto.getBookingId()%> = () => {
+        const departure = new Date("<%= departure != null ? departure.toString() : "" %>");
+        const now = new Date();
+        const countdownEl = document.getElementById("countdown-<%=dto.getBookingId()%>");
+
+        if (isNaN(departure) || now >= departure) {
+            countdownEl.innerText = "Departed";
+            
+            // Show toast only once
+            if (!countdownEl.dataset.alertShown) {
+                const toastHtml = `
+                <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+                    <div class="toast show align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Your trip for <%=dto.getPackageName()%> has started today!
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.insertAdjacentHTML('beforeend', toastHtml);
+                countdownEl.dataset.alertShown = "true";
+            }
+            return;
+        }
+
+        const diff = departure - now;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        countdownEl.innerText = days + "d " + hours + "h " + minutes + "m " + seconds + "s to go";
+    }
+
+    countdown<%=dto.getBookingId()%>();
+    setInterval(countdown<%=dto.getBookingId()%>, 1000); // Update every second
+</script>
+
+
+        <%
+    
+            }
+        } else {
+        %>
+        <p>No Bookings available.</p>
+        <%
+        }
+        %>
+    </div>
+</div>
+
+
 	</div>
 </div>
 

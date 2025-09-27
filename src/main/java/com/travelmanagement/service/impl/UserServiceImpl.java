@@ -87,11 +87,6 @@ public class UserServiceImpl implements IUserService {
 
 	@Override
 	public boolean update(RegisterRequestDTO dto) throws Exception {
-		User dbUser = userDAO.getUserById(dto.getUserId());
-		if (dbUser == null) {
-			throw new UserNotFoundException("User not found ! ");
-
-		}
 		User user = Mapper.mapRegisterDtoToUser(dto);
 		if (user.getUserPassword() != null && !user.getUserPassword().isEmpty()) {
 			user.setUserPassword(PasswordHashing.ecryptPassword(user.getUserPassword()));
@@ -101,38 +96,17 @@ public class UserServiceImpl implements IUserService {
 
 	@Override
 	public boolean changePassword(int userId, String newPassword) throws Exception {
-		User dbUser = userDAO.getUserById(userId);
-		if (dbUser == null) {
-			throw new UserNotFoundException("User not found  ! ");
-
-		}
 		String hashedPassword = PasswordHashing.ecryptPassword(newPassword);
 		return userDAO.changePassword(userId, hashedPassword);
 	}
 
 	@Override
 	public boolean delete(int id) throws Exception {
-		User dbUser = userDAO.getUserById(id);
-		if (dbUser == null) {
-			throw new UserNotFoundException("User not found !");
-
-		}
 		return userDAO.deleteUser(id);
 	}
 
 	@Override
 	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
-		User dbUser = userDAO.getUserById(userId);
-		if (dbUser == null) {
-			throw new UserNotFoundException("User not found ! ");
-
-		} else if (dbUser.isActive() == active) {
-			String userState = "ACTIVE";
-			if (!active) {
-				userState = "Inactive";
-			}
-			throw new BadRequestException("User Already " + userState);
-		}
 		return userDAO.updateUserActiveState(userId, active);
 	}
 

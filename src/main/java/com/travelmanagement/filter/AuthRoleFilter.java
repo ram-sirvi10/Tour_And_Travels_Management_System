@@ -88,11 +88,17 @@ public class AuthRoleFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		HttpSession session = req.getSession(false);
 
+	
+	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+	        res.setHeader("Pragma", "no-cache"); 
+	        res.setDateHeader("Expires", 0); 
+		
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
 
@@ -123,7 +129,7 @@ public class AuthRoleFilter implements Filter {
 					isActive = false;
 				}
 			} catch (Exception e) {
-				
+			
 				e.printStackTrace();
 			}
 
@@ -147,8 +153,8 @@ public class AuthRoleFilter implements Filter {
 		adminAccess.put(context + "/admin",
 				List.of("dashboard", "manageUsers", "manageAgencies", "userAction", "agencyAction", "pendingAgencies",
 						"deletedAgencies", "deletedUsers", "updateProfile", "changePassword"));
-		adminAccess.put(context + "/agency", List.of("dashboard"));
-		adminAccess.put(context + "/user", List.of("dashboard"));
+//		adminAccess.put(context + "/agency", List.of("dashboard"));
+//		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
 		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage"));
@@ -157,9 +163,9 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword","viewProfile"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers"));
+				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {

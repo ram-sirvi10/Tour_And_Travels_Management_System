@@ -14,7 +14,6 @@
         }
     }
 
-    // Hide booking info after message
     Integer bookingIdAttr = showDashboard ? null : (Integer) request.getAttribute("bookingId");
     Double amountAttr = showDashboard ? null : (Double) request.getAttribute("amount");
     int bookingId = (bookingIdAttr != null) ? bookingIdAttr : 0;
@@ -70,7 +69,7 @@
                     clearInterval(timer);
                     countdownElem.textContent = "00:00";
 
-                    // Replace form with error message and dashboard button
+                  
                     paymentForm.innerHTML = `
                         <div class="alert alert-danger" role="alert">
                             Payment time expired! Booking automatically cancelled.

@@ -1,6 +1,10 @@
 
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
-
+<%
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setDateHeader("Expires", 0);
+%>
 <%
 UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
 if (user == null) {
@@ -110,12 +114,12 @@ a.nav-link:hover {
  <a
 				href="<%=request.getContextPath()%>/booking?button=bookingHistroy"
 				class="nav-link">Bookings</a> <a
-				href="<%=request.getContextPath()%>/template/user/paymentHistory.jsp"
+				href="<%=request.getContextPath()%>/booking?button=paymentHistory"
 				class="nav-link">Payments</a>
 
 			<%-- Profile image --%>
 			<a
-				href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=viewProfile">
+				href="<%=request.getContextPath()%>/user?button=viewProfile">
 				<%
 				if (user.getImageurl() != null && !user.getImageurl().isEmpty()) {
 				%>

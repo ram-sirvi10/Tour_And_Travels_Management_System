@@ -55,7 +55,7 @@ CREATE TABLE bookings (
     user_id INT NOT NULL,
     package_id INT NOT NULL,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('CONFIRMED', 'PENDING', 'CANCELLED') DEFAULT 'PENDING',
+    status ENUM('CONFIRMED', 'PENDING', 'CANCELLED','COMPLETE') DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (package_id) REFERENCES travel_packages(package_id) ON DELETE CASCADE
 );
@@ -108,4 +108,5 @@ ALTER TABLE travel_packages
 ADD COLUMN departure_date TIMESTAMP not null;
 
 ALTER TABLE travel_packages
-drop COLUMN departure_date ;
+ADD COLUMN version INT NOT NULL DEFAULT 0;
+

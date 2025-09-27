@@ -44,11 +44,17 @@ public class PaymentServiceImpl implements IPaymentService {
 				limit, offset);
 
 		for (Payment p : payments) {
-			
+
 			paymentDTOs.add(Mapper.mapPaymentToPaymentResponse(p));
 		}
-
 		return paymentDTOs;
+	}
+
+	@Override
+	public int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
+			String startDate, String endDate) throws Exception {
+
+		return paymentDAO.getPaymentHistoryCount(userId, agencyId, packageId, status, startDate, endDate);
 	}
 
 }

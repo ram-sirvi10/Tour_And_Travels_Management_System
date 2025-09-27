@@ -18,7 +18,7 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
 %>
 <jsp:include page="header.jsp" />
 
-
+<button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
 <style>
 .profile-upload-wrapper {
     display: flex;
@@ -82,12 +82,31 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
     <div class="main-content">
         <%-- Success/Error Messages --%>
         <% if (successMessage != null) { %>
-            <div class="alert alert-success"><%= successMessage %></div>
+           <div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div class="toast show align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000" data-bs-autohide="true">
+    <div class="d-flex">
+      <div class="toast-body">
+         <div class="alert alert-success"><%= successMessage %></div>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
         <% } %>
-        <% if (errorMessage != null) { %>
-            <div class="alert alert-danger"><%= errorMessage %></div>
-        <% } %>
-
+    <% 
+    
+ if (errorMessage != null && !errorMessage.isEmpty()) { %>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div class="toast show align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000" data-bs-autohide="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <%= errorMessage %>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+<% } %>
      <%-- VIEW PROFILE --%>
 <% if("viewProfile".equals(actionType)) { %>
     <div class="d-flex justify-content-center align-items-center vh-100">
@@ -106,7 +125,12 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
                 <div class="d-flex gap-2">
     <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=updateProfile" class="btn btn-outline-primary btn-lg">Edit Profile</a>
     <a href="<%=request.getContextPath()%>/template/user/profileManagement.jsp?button=changePassword" class="btn btn-outline-secondary btn-lg">Change Password</a>
-    <a href="<%=request.getContextPath()%>/auth?button=logout" class="btn btn-danger btn-lg">Logout</a>
+  <a href="<%=request.getContextPath()%>/auth?button=logout" class="btn btn-danger btn-lg"
+   onclick="event.preventDefault(); 
+            fetch(this.href, {method:'POST'}).then(()=>{window.location='<%=request.getContextPath()%>/login.jsp'});">
+    Logout
+</a>
+
 </div>
 
             </div>

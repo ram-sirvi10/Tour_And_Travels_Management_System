@@ -43,4 +43,15 @@ public class TravelerServiceImpl implements ITravelerService {
 		return travelerDAO.getTravelerCount(travelerId, bookingId, userId, packageId, agencyId, paymentId,
 				bookingStatus, paymentStatus, keyword, startDate, endDate);
 	}
+	
+	public boolean isTravelerAlreadyBooked(String email, int packageId)  {
+	    try {
+			return travelerDAO.isTravelerAlreadyBooked(email, packageId);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    return false;
+	}
+
 }

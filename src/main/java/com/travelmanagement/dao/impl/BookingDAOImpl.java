@@ -1,8 +1,11 @@
 package com.travelmanagement.dao.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +82,8 @@ public class BookingDAOImpl implements IBookingDAO {
 
 	@Override
 	public List<Booking> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-			String keyword, String startDate, String endDate, int limit, int offset) throws Exception {
+			String startDate, String endDate, int limit, int offset) throws Exception {
+
 		List<Booking> bookings = new ArrayList<>();
 		String sql = "SELECT * FROM bookings WHERE 1=1";
 
@@ -89,9 +93,17 @@ public class BookingDAOImpl implements IBookingDAO {
 			sql += " AND package_id = ?";
 		if (status != null && !status.isEmpty())
 			sql += " AND status = ?";
-		if (startDate != null && endDate != null)
-			sql += " AND booking_date BETWEEN ? AND ?";
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(booking_date)  BETWEEN ? AND ?";
+		} else if (startDate != null && !startDate.isEmpty()) {
+			sql += " AND  DATE(booking_date)  >= ?";
+		} else if (endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(booking_date)  <= ?";
+		}
+
 		sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
 		preparedStatement = connection.prepareStatement(sql);
 
 		int index = 1;
@@ -101,12 +113,23 @@ public class BookingDAOImpl implements IBookingDAO {
 			preparedStatement.setInt(index++, packageId);
 		if (status != null && !status.isEmpty())
 			preparedStatement.setString(index++, status);
-		if (startDate != null && endDate != null) {
-			preparedStatement.setDate(index++, java.sql.Date.valueOf(startDate));
-			preparedStatement.setDate(index++, java.sql.Date.valueOf(endDate));
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (startDate != null && !startDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
 		}
+
 		preparedStatement.setInt(index++, limit);
 		preparedStatement.setInt(index++, offset);
+
 		resultSet = preparedStatement.executeQuery();
 
 		while (resultSet.next()) {
@@ -118,7 +141,9 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
 			if (resultSet.getTimestamp("created_at") != null)
-				booking.setCreated_at((resultSet.getTimestamp("created_at").toLocalDateTime()));
+				booking.setCreated_at(resultSet.getTimestamp("created_at").toLocalDateTime());
+			
+			
 			bookings.add(booking);
 		}
 
@@ -127,7 +152,8 @@ public class BookingDAOImpl implements IBookingDAO {
 
 	@Override
 	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-			String keyword, String startDate, String endDate) throws Exception {
+			String startDate, String endDate) throws Exception {
+
 		int count = 0;
 		String sql = "SELECT COUNT(*) AS total FROM bookings WHERE 1=1";
 
@@ -139,9 +165,14 @@ public class BookingDAOImpl implements IBookingDAO {
 			sql += " AND no_of_travellers = ?";
 		if (status != null && !status.isEmpty())
 			sql += " AND status = ?";
-	
-		if (startDate != null && endDate != null)
-			sql += " AND booking_date BETWEEN ? AND ?";
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(booking_date)  BETWEEN ? AND ?";
+		} else if (startDate != null && !startDate.isEmpty()) {
+			sql += " AND DATE(booking_date)  >= ?";
+		} else if (endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(booking_date)  <= ?";
+		}
 
 		preparedStatement = connection.prepareStatement(sql);
 
@@ -154,10 +185,18 @@ public class BookingDAOImpl implements IBookingDAO {
 			preparedStatement.setInt(index++, noOfTravellers);
 		if (status != null && !status.isEmpty())
 			preparedStatement.setString(index++, status);
-		
-		if (startDate != null && endDate != null) {
-			preparedStatement.setDate(index++, java.sql.Date.valueOf(startDate));
-			preparedStatement.setDate(index++, java.sql.Date.valueOf(endDate));
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (startDate != null && !startDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
 		}
 
 		resultSet = preparedStatement.executeQuery();
@@ -172,21 +211,25 @@ public class BookingDAOImpl implements IBookingDAO {
 	public boolean cancelBooking(int bookingId) throws Exception {
 		return updateBookingStatus(bookingId, "CANCELLED");
 	}
+
 	@Override
 	public List<Integer> getPendingBookingsInLast10Minutes() throws Exception {
-	    List<Integer> bookingIds = new ArrayList<>();
-	    String sql = "SELECT booking_id FROM bookings " +
-	                 "WHERE status = 'PENDING' " +
-	                 "AND created_at >= (NOW() - INTERVAL 10 MINUTE)";
+		List<Integer> bookingIds = new ArrayList<>();
+		String sql = "SELECT booking_id FROM bookings " + "WHERE status = 'PENDING' "
+				+ "AND created_at >= (NOW() - INTERVAL 10 MINUTE)";
 
-	    preparedStatement = connection.prepareStatement(sql);
-	    resultSet = preparedStatement.executeQuery();
+		preparedStatement = connection.prepareStatement(sql);
+		resultSet = preparedStatement.executeQuery();
 
-	    while (resultSet.next()) {
-	        bookingIds.add(resultSet.getInt("booking_id"));
-	    }
+		while (resultSet.next()) {
+			bookingIds.add(resultSet.getInt("booking_id"));
+		}
 
-	    return bookingIds;
+		return bookingIds;
 	}
+	
+	
+	
+	
 
 }

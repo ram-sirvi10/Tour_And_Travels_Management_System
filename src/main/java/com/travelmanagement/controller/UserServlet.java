@@ -3,7 +3,10 @@ package com.travelmanagement.controller;
 import java.io.IOException;
 import java.util.List;
 
+import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 
 import jakarta.servlet.ServletException;
@@ -12,14 +15,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class UserServlet
  */
 @WebServlet("/user")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
-maxFileSize = 1024 * 1024 * 5, // 5 MB
-maxRequestSize = 1024 * 1024 * 10 // 10 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
 )
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -62,6 +66,10 @@ public class UserServlet extends HttpServlet {
 			case "changePassword":
 				changePassword(request, response);
 				break;
+			case "viewProfile":
+				request.getRequestDispatcher("template/user/profileManagement.jsp").forward(request, response);
+				;
+				return;
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + action);
 			}
@@ -81,7 +89,7 @@ public class UserServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void updateProfile(HttpServletRequest request, HttpServletResponse response) {
@@ -92,17 +100,37 @@ public class UserServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void dashboard(HttpServletRequest request, HttpServletResponse response) {
-		PackageServiceImpl serviceImpl =  new PackageServiceImpl();
+		PackageServiceImpl serviceImpl = new PackageServiceImpl();
+		BookingServiceImpl bookingServiceImpl = new BookingServiceImpl();
+		PackageServiceImpl packageService = new PackageServiceImpl();
+		HttpSession session = request.getSession();
+		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
 		try {
-			List<PackageResponseDTO> packageResponseDTO = serviceImpl.searchPackages(null, null, null, null, null, null,null,null,true ,8, 0,false);
+			List<PackageResponseDTO> packageResponseDTO = serviceImpl.searchPackages(null, null, null, null, null, null,
+					null, true, 8, 0, false);
 			request.setAttribute("packages", packageResponseDTO);
+			List<BookingResponseDTO> bookingResponseDTO = bookingServiceImpl.getAllBookings(user.getUserId(), null,
+					null, "CONFIRMED", null, null, 5, 0);
+			for (BookingResponseDTO booking : bookingResponseDTO) {
+				
+				PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+				if (pkg != null) {
+					booking.setPackageName(pkg.getTitle());
+					booking.setPackageImage(pkg.getImageurl());
+					booking.setDuration(pkg.getDuration());
+					booking.setAmount(pkg.getPrice() * booking.getNoOfTravellers());
+					booking.setDepartureDateAndTime(pkg.getDepartureDate());
+				}
+			}
+			
+			request.setAttribute("bookings", bookingResponseDTO);
 			request.getRequestDispatcher("template/user/userDashboard.jsp").forward(request, response);
+			return;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

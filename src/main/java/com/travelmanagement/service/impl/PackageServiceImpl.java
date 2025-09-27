@@ -169,11 +169,11 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, Integer totalSeats, String departureDate, Boolean isActive, int limit,
+			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit,
 			int offset, Boolean isAgencyView) throws Exception {
 
 		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo,
-				totalSeats, departureDate, isActive, limit, offset, isAgencyView);
+				totalSeats,  isActive, limit, offset, isAgencyView);
 
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
@@ -185,11 +185,22 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats, String departureDate, Boolean isActive, Boolean isAgencyView)
+			String dateTo, Integer totalSeats,  Boolean isActive, Boolean isAgencyView)
 			throws Exception {
 
-		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, departureDate,
+		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, 
 				isActive, isAgencyView);
 	}
+	
+	
+	public boolean adjustSeatsOptimistic(int packageId, int seatsToBook) throws Exception {
+	    PackageResponseDTO pkg = getPackageById(packageId);
+	    if (pkg == null) return false;
+
+	    int updatedRows = packageDAO.updateSeatsOptimistic(packageId, seatsToBook, pkg.getVersion());
+	    return updatedRows > 0;
+	}
+
+
 
 }

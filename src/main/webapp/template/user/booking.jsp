@@ -3,6 +3,7 @@
 <%@ page import="java.util.Map"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
+<button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
 
 <%
 PackageResponseDTO pkg = (PackageResponseDTO) request.getAttribute("package");
@@ -24,10 +25,18 @@ if (travelersCount > availableSeats) {
 String errorMessage = (String) request.getAttribute("errorMessage");
 %>
 <% if (errorMessage != null && !errorMessage.isEmpty()) { %>
-<div style="color: red; font-weight: bold; margin: 10px 0;">
-    <%= errorMessage %>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  <div class="toast show align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000" data-bs-autohide="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <%= errorMessage %>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
 </div>
 <% } %>
+
 
 <h2 class="mb-4">Booking Form</h2>
 

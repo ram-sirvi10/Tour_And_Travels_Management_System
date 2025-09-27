@@ -16,6 +16,15 @@ public class BookingResponseDTO {
 	private int duration;
 	private double amount;
 	private LocalDateTime created_at;
+	private LocalDateTime departureDateAndTime;
+
+	public LocalDateTime getDepartureDateAndTime() {
+		return departureDateAndTime;
+	}
+
+	public void setDepartureDateAndTime(LocalDateTime departureDateAndTime) {
+		this.departureDateAndTime = departureDateAndTime;
+	}
 
 	public String getPackageName() {
 		return packageName;

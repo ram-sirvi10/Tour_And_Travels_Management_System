@@ -1,5 +1,7 @@
 package com.travelmanagement.dto.responseDTO;
 
+import java.time.LocalDateTime;
+
 public class PackageResponseDTO {
 	private int packageId;
 	private String title;
@@ -13,7 +15,26 @@ public class PackageResponseDTO {
 	private String imageurl;
 	private int totalSeats;
 	
+private int version;
+	
+private LocalDateTime departureDate;
 
+public LocalDateTime getDepartureDate() {
+	return departureDate;
+}
+
+public void setDepartureDate(LocalDateTime departureDate) {
+	this.departureDate = departureDate;
+}
+
+	
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
 	public int getTotalSeats() {
 		return totalSeats;
 	}
