@@ -107,6 +107,8 @@ ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ;
 ALTER TABLE travel_packages
 ADD COLUMN departure_date TIMESTAMP not null;
 
-ALTER TABLE travel_packages
-ADD COLUMN version INT NOT NULL DEFAULT 0;
+-- ALTER TABLE travel_packages
+-- DROP COLUMN version ;
 
+ALTER TABLE travel_packages
+ADD COLUMN last_booking_date  TIMESTAMP NOT NULL;

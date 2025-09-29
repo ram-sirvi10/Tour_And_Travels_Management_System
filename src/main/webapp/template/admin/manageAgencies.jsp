@@ -55,26 +55,27 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 		<jsp:include page="sidebar.jsp" />
 		<div class="main-content">
 			<jsp:include page="header.jsp" />
-<%
-String errorMessage = (String) request.getAttribute("errorMessage");
-if (errorMessage != null && !errorMessage.isEmpty()) {
-%>
-<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
-	<div class="toast show align-items-center text-bg-danger border-0"
-		role="alert" aria-live="assertive" aria-atomic="true"
-		data-bs-delay="3000" data-bs-autohide="true">
-		<div class="d-flex">
-			<div class="toast-body">
-				<%=errorMessage%>
+			<%
+			String errorMessage = (String) request.getAttribute("errorMessage");
+			if (errorMessage != null && !errorMessage.isEmpty()) {
+			%>
+			<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+				<div class="toast show align-items-center text-bg-danger border-0"
+					role="alert" aria-live="assertive" aria-atomic="true"
+					data-bs-delay="3000" data-bs-autohide="true">
+					<div class="d-flex">
+						<div class="toast-body">
+							<%=errorMessage%>
+						</div>
+						<button type="button"
+							class="btn-close btn-close-white me-2 m-auto"
+							data-bs-dismiss="toast" aria-label="Close"></button>
+					</div>
+				</div>
 			</div>
-			<button type="button" class="btn-close btn-close-white me-2 m-auto"
-				data-bs-dismiss="toast" aria-label="Close"></button>
-		</div>
-	</div>
-</div>
-<%
-}
-%>
+			<%
+			}
+			%>
 			<h2>Manage Agencies</h2>
 
 			<!-- Search & Filters -->
@@ -208,7 +209,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 									type="hidden" name="pageSize" value="<%=pageSize%>">
 
 								<button type="submit" name="action" value="approve"
-									class="btn btn-sm btn-success">Approve</button>
+									class="btn btn-sm btn-success"
+									onclick="return confirm('Are you sure you want to approve this agency?');">Approve</button>
 							</form>
 							<form method="post" action="<%=request.getContextPath()%>/admin"
 								style="display: inline;">
@@ -219,7 +221,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 									type="hidden" name="status" value="<%=statusParam%>"> <input
 									type="hidden" name="pageSize" value="<%=pageSize%>">
 								<button type="submit" name="action" value="reject"
-									class="btn btn-sm btn-danger">Reject</button>
+									class="btn btn-sm btn-danger"
+									onclick="return confirm('Are you sure you want to reject this agency?');">Reject</button>
 							</form> <%
  } else {
  %>
@@ -273,13 +276,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					%>
 				</tbody>
 			</table>
-
-
-
-
-			<%
-
-			%>
 
 			<!-- Page Size Selector -->
 			<div class="row mb-3">

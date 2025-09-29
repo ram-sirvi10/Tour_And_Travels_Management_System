@@ -86,52 +86,128 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 <div class="row g-4">
 	<%
 	List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
+	java.time.LocalDateTime now = java.time.LocalDateTime.now();
 	if (bookings != null && !bookings.isEmpty()) {
 		for (BookingResponseDTO booking : bookings) {
+			java.time.LocalDateTime departure = booking.getDepartureDateAndTime();
+			
+			String statusClass = "bg-danger";
+			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+			    statusClass = "bg-success";
+			} else if ("PENDING".equalsIgnoreCase(booking.getStatus())) {
+			    statusClass = "bg-warning text-dark";
+			}
+			
+
 	%>
-	<div class="col-md-6">
-		<div class="card shadow-sm">
-			<div class="row g-0">
-				<div class="col-md-4">
-					<img src="<%=booking.getPackageImage()%>"
-						class="img-fluid rounded-start"
-						alt="<%=booking.getPackageName()%>">
-				</div>
-				<div class="col-md-8">
-					<div class="card-body">
-						<h5 class="card-title fw-bold"><%=booking.getPackageName()%></h5>
-						<p class="mb-1">
-							<i class="fas fa-clock"></i>
-							<%=booking.getDuration()%>
-							Days
-						</p>
-						<p class="mb-1">
-							<i class="fas fa-users"></i>
-							<%=booking.getNoOfTravellers()%>
-							Travelers
-						</p>
-						<p class="mb-1">
-							<i class="fas fa-dollar-sign"></i> $<%=booking.getAmount()%></p>
 
-						<%
-						String statusClass = "bg-danger";
-						if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-							statusClass = "bg-success";
-						} else if ("PENDING".equalsIgnoreCase(booking.getStatus())) {
-							statusClass = "bg-warning text-dark";
-						}
-						%>
-						<span class="badge <%=statusClass%>"><%=booking.getStatus()%></span>
+<div class="col-md-6">
+    <div class="card shadow-sm mb-4">
+        <div class="row g-0">
+            <!-- Image Column -->
+            <div class="col-md-4">
+                <img src="<%=booking.getPackageImage()%>"
+                     class="img-fluid rounded-start h-100 object-fit-cover"
+                     alt="<%=booking.getPackageName()%>">
+            </div>
+            <!-- Content Column -->
+            <div class="col-md-8">
+                <div class="card-body d-flex flex-column justify-content-between h-100">
+                    <div>
+                        <!-- Countdown / Departure -->
+                        <% if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) { %>
+                            <div class="mb-2 text-center">
+                                <h6 class="mb-1">Departure In:</h6>
+                                <span id="countdown-<%=booking.getBookingId()%>"
+                                      class="fw-bold fs-6 text-primary"></span>
+                            </div>
+                        <% } else { %>
+                            <h6 class="mb-1">
+                                Departure Date : <%= departure != null ? departure.toLocalDate() : "Not Mentioned" %>
+                            </h6>
+                        <% } %>
 
-						<a
-							href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
-							class="btn btn-sm btn-primary float-end">View Travelers</a>
+                        <h5 class="card-title fw-bold"><%=booking.getPackageName()%></h5>
+                        <p class="mb-1"><i class="fas fa-clock"></i> <%=booking.getDuration()%> Days</p>
+                        <p class="mb-1"><i class="fas fa-users"></i> <%=booking.getNoOfTravellers()%> Travelers</p>
+                        <p class="mb-1"><i class="fas fa-dollar-sign"></i> $<%=booking.getAmount()%></p>
+                        <p class="mb-1"><i class="fas fa-calendar"></i> Booking Date: <%=booking.getBookingDate()%></p>
+                        <span class="badge <%=statusClass%>"><%=booking.getStatus()%></span>
+                    </div>
 
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    <!-- Action Buttons -->
+                    <div class="mt-3 d-flex gap-2">
+                        <a href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
+                           class="btn btn-sm btn-primary flex-grow-1">View Travelers</a>
+
+                        <% if (( "PENDING".equalsIgnoreCase(booking.getStatus()) 
+                               || "CONFIRMED".equalsIgnoreCase(booking.getStatus()) )
+                            && departure != null
+                            && departure.isAfter(now)) {
+                        %>
+                            <form method="post" action="<%=request.getContextPath()%>/booking" class="flex-grow-1">
+                                <input type="hidden" name="button" value="cancelBooking">
+                                <input type="hidden" name="bookingId" value="<%=booking.getBookingId()%>">
+                                <button type="submit" class="btn btn-sm btn-danger w-100">Cancel Booking</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const departureStr = "<%=departure != null ? departure.toString() : ""%>";
+    if (!departureStr) return; // No departure date
+
+    // Convert to JS Date using ISO format
+    const departure = new Date("<%=departure != null ? departure.toString().replace(' ', 'T') : ""%>");
+    const countdownEl = document.getElementById("countdown-<%=booking.getBookingId()%>");
+
+    const interval = setInterval(() => {
+        const now = new Date();
+        if (now >= departure || isNaN(departure.getTime())) {
+            countdownEl.innerText = "Departed";
+
+            // Show toast only once
+            if (!countdownEl.dataset.alertShown) {
+                const toastHtml = `
+                <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+                    <div class="toast show align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Your trip for <%=booking.getPackageName()%> has started today!
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.insertAdjacentHTML('beforeend', toastHtml);
+                countdownEl.dataset.alertShown = "true";
+            }
+
+            clearInterval(interval);
+            return;
+        }
+
+        const diff = departure - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        countdownEl.innerText = days + "d " + hours + "h " + minutes + "m " + seconds + "s to go";
+    }, 1000);
+})();
+</script>
+
+
+ 
+
+
 	<%
 	}
 	} else {
@@ -159,8 +235,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				+ "&pageSize=" + pageSizeParam;
 		%>
 
-		<li class="page-item <%=currentPage == 1 ? "disabled" : ""%>">
-			<a class="page-link"
+		<li class="page-item <%=currentPage == 1 ? "disabled" : ""%>"><a
+			class="page-link"
 			href="booking?button=bookingHistroy&page=<%=currentPage - 1%>&<%=queryParams%>">Previous</a>
 		</li>
 
@@ -175,12 +251,13 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 		}
 		%>
 
-		<li
-			class="page-item <%=currentPage == totalPages ? "disabled" : ""%>">
+		<li class="page-item <%=currentPage == totalPages ? "disabled" : ""%>">
 			<a class="page-link"
 			href="booking?button=bookingHistroy&page=<%=currentPage + 1%>&<%=queryParams%>">Next</a>
 		</li>
 	</ul>
 </nav>
+
+
 
 <%@ include file="footer.jsp"%>

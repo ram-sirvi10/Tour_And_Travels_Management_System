@@ -17,7 +17,6 @@ public class BookingResponseDTO {
 	private double amount;
 	private LocalDateTime created_at;
 	private LocalDateTime departureDateAndTime;
-
 	public LocalDateTime getDepartureDateAndTime() {
 		return departureDateAndTime;
 	}

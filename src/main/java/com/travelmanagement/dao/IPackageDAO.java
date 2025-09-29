@@ -19,7 +19,7 @@ public interface IPackageDAO {
 	boolean adjustSeats(int packageId, int seatsChange) throws Exception;
 
 
-	int updateSeatsOptimistic(int packageId, int seatsToBook, int version) throws Exception;
+//	int updateSeatsOptimistic(int packageId, int seatsToBook, int version) throws Exception;
 
 	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
 			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;

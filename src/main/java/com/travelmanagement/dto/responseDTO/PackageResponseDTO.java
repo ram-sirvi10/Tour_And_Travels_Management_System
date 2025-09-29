@@ -1,5 +1,6 @@
 package com.travelmanagement.dto.responseDTO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class PackageResponseDTO {
@@ -10,24 +11,32 @@ public class PackageResponseDTO {
 	private double price;
 	private String location;
 	private int duration;
-
 	private boolean isActive;
 	private String imageurl;
 	private int totalSeats;
-	
-private int version;
-	
-private LocalDateTime departureDate;
 
-public LocalDateTime getDepartureDate() {
-	return departureDate;
-}
+	private int version;
 
-public void setDepartureDate(LocalDateTime departureDate) {
-	this.departureDate = departureDate;
-}
+	private LocalDateTime departureDate;
 
-	
+	private LocalDateTime lastBookingDate;
+
+	public LocalDateTime getLastBookingDate() {
+		return lastBookingDate;
+	}
+
+	public void setLastBookingDate(LocalDateTime lastBookingDate) {
+		this.lastBookingDate = lastBookingDate;
+	}
+
+	public LocalDateTime getDepartureDate() {
+		return departureDate;
+	}
+
+	public void setDepartureDate(LocalDateTime departureDate) {
+		this.departureDate = departureDate;
+	}
+
 	public int getVersion() {
 		return version;
 	}
@@ -35,6 +44,7 @@ public void setDepartureDate(LocalDateTime departureDate) {
 	public void setVersion(int version) {
 		this.version = version;
 	}
+
 	public int getTotalSeats() {
 		return totalSeats;
 	}
@@ -51,7 +61,6 @@ public void setDepartureDate(LocalDateTime departureDate) {
 		this.imageurl = imageurl;
 	}
 
-	
 	public int getPackageId() {
 		return packageId;
 	}
@@ -108,8 +117,6 @@ public void setDepartureDate(LocalDateTime departureDate) {
 		this.duration = duration;
 	}
 
-	
-
 	public boolean getIsActive() {
 		return isActive;
 	}
@@ -120,6 +127,6 @@ public void setDepartureDate(LocalDateTime departureDate) {
 
 	public void setPackageId(Package[] packages) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

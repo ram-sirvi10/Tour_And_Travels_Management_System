@@ -3,6 +3,7 @@
 <%@ page
 	import="java.util.*, com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
+<%@ page import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 
 <button type="button" class="btn btn-secondary mb-3"
 	onclick="window.history.back();">Back</button>
@@ -13,7 +14,7 @@ if (user == null) {
 	response.sendRedirect(request.getContextPath() + "/login.jsp");
 	return;
 }
-
+Map<Integer, BookingResponseDTO> bookingMap = (Map<Integer, BookingResponseDTO>) request.getAttribute("bookingMap");
 List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
 String keyword = request.getAttribute("keyword") != null ? (String) request.getAttribute("keyword") : "";
 String title = request.getAttribute("title") != null ? (String) request.getAttribute("title") : "";
@@ -88,8 +89,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 
 	<div class="col-md-2">
 		<label for="dateTo" class="form-label"> To </label> <input type="date"
-			name="dateTo" class="form-control"
-			value="<%=dateTo%>" id="dateTo">
+			name="dateTo" class="form-control" value="<%=dateTo%>" id="dateTo">
 	</div>
 
 
@@ -126,6 +126,39 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				src="<%=pkg.getImageurl() != null ? pkg.getImageurl() : "images/default.jpg"%>"
 				class="card-img-top" alt="<%=pkg.getTitle()%>">
 			<div class="card-body">
+				<%
+				java.time.LocalDateTime lastBookingDate = pkg.getLastBookingDate(); // <-- yeh field use karna hoga
+				%>
+
+				<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
+					<small class="d-block fw-bold">Last Booking Till:</small> <small
+						class="d-block"><%=lastBookingDate != null ? lastBookingDate.toLocalDate() + " " + lastBookingDate.toLocalTime() : "N/A"%></small>
+					<small class="d-block text-danger"
+						id="lastbooking-countdown-<%=pkg.getPackageId()%>"></small>
+				</div>
+
+				<script>
+        const lastBooking<%=pkg.getPackageId()%> = new Date("<%=lastBookingDate != null ? lastBookingDate.toString().replace(" ", "T") : ""%>");
+        const elLast<%=pkg.getPackageId()%> = document.getElementById("lastbooking-countdown-<%=pkg.getPackageId()%>");
+        if (!isNaN(lastBooking<%=pkg.getPackageId()%>.getTime())) {
+            const intervalLast<%=pkg.getPackageId()%> = setInterval(() => {
+                const now = new Date();
+                if (now >= lastBooking<%=pkg.getPackageId()%>) {
+                    elLast<%=pkg.getPackageId()%>.innerText = "Booking Closed";
+                    clearInterval(intervalLast<%=pkg.getPackageId()%>);
+                    return;
+                }
+                const diff = lastBooking<%=pkg.getPackageId()%> - now;
+                const d = Math.floor(diff / (1000*60*60*24));
+                const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+                const s = Math.floor((diff % (1000*60)) / 1000);
+                elLast<%=pkg.getPackageId()%>.innerText = d+"d "+h+"h "+m+"m "+s+"s left";
+            }, 1000);
+        }
+    </script>
+
+
 				<h5 class="card-title fw-bold"><%=pkg.getTitle()%></h5>
 				<p class="text-muted mb-1">
 					<i class="fas fa-map-marker-alt"></i>
@@ -195,7 +228,14 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 								<%=pkg.getDescription()%></p>
 							<p>
 								<strong>Departure Date:</strong>
-								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate() : "Not specified"%></p>
+
+								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
+
+
+							<p>
+								<strong>Departure Time:</strong>
+
+								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
 						</div>
 					</div>
 				</div>

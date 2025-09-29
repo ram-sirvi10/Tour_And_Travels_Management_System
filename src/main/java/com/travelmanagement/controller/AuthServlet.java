@@ -15,6 +15,8 @@ import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
+import com.travelmanagement.util.EmailUtil;
+import com.travelmanagement.util.OTPUtil;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -72,6 +74,32 @@ public class AuthServlet extends HttpServlet {
 		}
 		try {
 			switch (button) {
+
+			case "sendOTPUser":
+				handleSendOTP(request, response, "user");
+				request.setAttribute("showOtp", true);
+				request.getRequestDispatcher("registerUser.jsp").forward(request, response);
+				break;
+			case "verifyOTPUser":
+				boolean verified = handleVerifyOTP(request, "user");
+				request.setAttribute("showOtp", true);
+				if (verified)
+					request.setAttribute("message", "OTP verified!");
+				request.getRequestDispatcher("registerUser.jsp").forward(request, response);
+				break;
+			case "sendOTPAgency":
+				handleSendOTP(request, response, "agency");
+				request.setAttribute("showOtp", true);
+				request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
+				break;
+			case "verifyOTPAgency":
+				boolean verifiedAgency = handleVerifyOTP(request, "agency");
+				request.setAttribute("showOtp", true);
+				if (verifiedAgency)
+					request.setAttribute("message", "OTP verified!");
+				request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
+				break;
+
 			case "registerAsUser":
 				handleRegisterAsUser(request, response);
 				break;
@@ -97,18 +125,86 @@ public class AuthServlet extends HttpServlet {
 		}
 	}
 
+	private void handleSendOTP(HttpServletRequest request, HttpServletResponse response, String type)
+			throws IOException, ServletException {
+
+		String email = request.getParameter("email");
+		if (email == null || email.isEmpty()) {
+			request.setAttribute("showOtp", true);
+			request.setAttribute("error", "Email is required to send OTP.");
+			return;
+		}
+
+		HttpSession session = request.getSession();
+		String otp = OTPUtil.generateOTP(session);
+
+		switch (otp) {
+		case "WAIT":
+			request.setAttribute("error", "Please wait 1 minute before requesting another OTP.");
+			return;
+		case "LIMIT":
+			request.setAttribute("error", "You have reached maximum OTP requests for today.");
+			return;
+		default:
+			boolean sent = EmailUtil.sendOTP(email, otp);
+			if (sent) {
+				request.setAttribute("message", "OTP sent successfully to " + email);
+				request.setAttribute("showOtp", true);
+			} else {
+				request.setAttribute("error", "Failed to send OTP. Please try again.");
+			}
+		}
+	}
+
+	private boolean handleVerifyOTP(HttpServletRequest request, String type) {
+		String inputOtp = request.getParameter("otp");
+		HttpSession session = request.getSession();
+
+		String result = OTPUtil.verifyOTP(session, inputOtp);
+
+		switch (result) {
+		case "SUCCESS":
+			request.setAttribute("message", "OTP verified successfully!");
+			session.setAttribute(type + "OtpVerified", true); 
+			return true;
+		case "EXPIRED":
+			request.setAttribute("error", "OTP expired. Please request a new one.");
+			break;
+		case "INVALID":
+			request.setAttribute("error", "Invalid OTP. Please try again.");
+			request.setAttribute("showOtp", true);
+			break;
+		case "ATTEMPTS_EXCEEDED":
+			request.setAttribute("error", "Too many wrong attempts. Please request a new OTP.");
+			break;
+		case "NO_OTP":
+			request.setAttribute("error", "No OTP found. Please request again.");
+			break;
+		}
+		return false;
+	}
+
 	private void handleRegisterAsUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (!request.getContentType().startsWith("multipart/")) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
 			return;
 		}
+
+		Boolean otpVerified = (Boolean) request.getSession().getAttribute("userOtpVerified");
+		if (otpVerified == null || !otpVerified) {
+			request.setAttribute("showOtp", true);
+			request.setAttribute("error", "Please verify OTP before registering.");
+			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
+			return;
+		}
+
 		RegisterRequestDTO dto = new RegisterRequestDTO();
 		dto.setUsername(request.getParameter("name"));
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirmPassword"));
 		Map<String, String> errors = authService.validateRegisterDto(dto);
-		
+
 		String imageUrl = null;
 		try {
 			Part filePart = request.getPart("profileImage");
@@ -140,6 +236,14 @@ public class AuthServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Form must be multipart/form-data");
 			return;
 		}
+		Boolean otpVerified = (Boolean) request.getSession().getAttribute("agencyOtpVerified");
+		if (otpVerified == null || !otpVerified) {
+			request.setAttribute("showOtp", true);
+			request.setAttribute("error", "Please verify OTP before registering.");
+			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
+			return;
+		}
+
 		AgencyRegisterRequestDTO dto = new AgencyRegisterRequestDTO();
 		dto.setAgencyName(request.getParameter("agency_name"));
 		dto.setOwnerName(request.getParameter("owner_name"));
@@ -154,7 +258,6 @@ public class AuthServlet extends HttpServlet {
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
 
-		
 		String imageUrl = null;
 		try {
 			Part filePart = request.getPart("profileImage");

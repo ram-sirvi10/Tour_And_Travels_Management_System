@@ -2,6 +2,7 @@ package com.travelmanagement.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
-import com.travelmanagement.util.Mapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -96,11 +96,10 @@ public class BookingServlet extends HttpServlet {
 		int currentPage = 1;
 
 		String status = request.getParameter("status");
-		String startDate = request.getParameter("startDate"); 
+		String startDate = request.getParameter("startDate");
 		String endDate = request.getParameter("endDate");
 		LocalDate start = null, end = null;
-	
-		
+
 		try {
 			if (startDate != null && !startDate.isEmpty())
 				start = LocalDate.parse(startDate);
@@ -125,14 +124,26 @@ public class BookingServlet extends HttpServlet {
 
 			int offset = (currentPage - 1) * pageSize;
 
-			List<PaymentResponseDTO> payments = paymentService.getPaymentHistory(user.getUserId(), null, null, status,
-					start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize, offset);
+			List<PaymentResponseDTO> paymentList = paymentService.getPaymentHistory(user.getUserId(), null, null,
+					status, start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize,
+					offset);
+			for (PaymentResponseDTO payment : paymentList) {
+
+				BookingResponseDTO booking = bookingService.getBookingById(payment.getBookingId());
+				if (booking != null) {
+					PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+					if (pkg != null) {
+						payment.setPackageName(pkg.getTitle());
+					}
+				}
+
+			}
 
 			int totalRecords = paymentService.getPaymentHistoryCount(user.getUserId(), null, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null);
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-			request.setAttribute("payments", payments);
+			request.setAttribute("payments", paymentList);
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);
 			request.setAttribute("pageSize", pageSize);
@@ -274,6 +285,46 @@ public class BookingServlet extends HttpServlet {
 			return;
 		}
 
+		PackageResponseDTO pkg = packageService.getPackageById(packageId);
+		if (pkg == null || !pkg.getIsActive()) {
+			request.setAttribute("errorMessage", "Package not found or inactive.");
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
+
+		if (noOfTravellers > pkg.getTotalSeats()) {
+			request.setAttribute("errorMessage", "Not enough seats available!");
+			request.setAttribute("package", pkg);
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
+
+//		boolean seatsAdjusted = false;
+//		int retries = 3;
+//		while (retries-- > 0) {
+//			int rowsAffected = packageService.updateSeatsOptimistic(packageId, noOfTravellers, pkg.getVersion());
+//			if (rowsAffected > 0) {
+//				seatsAdjusted = true;
+//				break;
+//			} else {
+//
+//				pkg = packageService.getPackageById(packageId);
+//				if (noOfTravellers > pkg.getTotalSeats()) {
+//					request.setAttribute("errorMessage", "Not enough seats available. Try again.");
+//					request.setAttribute("package", pkg);
+//					request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//					return;
+//				}
+//			}
+//		}
+//
+//		if (!seatsAdjusted) {
+//			request.setAttribute("errorMessage", "Booking failed due to concurrent bookings. Please try again.");
+//			request.setAttribute("package", pkg);
+//			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//			return;
+//		}
+
 		bookingDTO.setUserId(userId);
 		bookingDTO.setPackageId(packageId);
 		bookingDTO.setNumberOfTravelers(noOfTravellers);
@@ -326,24 +377,6 @@ public class BookingServlet extends HttpServlet {
 		}
 
 		bookingDTO.setTravelers(travelersDTO);
-
-		if (bookingDTO.getNumberOfTravelers() > packageResponseDTO.getTotalSeats()) {
-			request.setAttribute("errorMessage", "Not enough seats available!");
-			request.setAttribute("package", packageResponseDTO);
-			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-			return;
-		}
-		System.out.println("Create booking ====");
-		System.out.println("Total travller =  " + noOfTravellers);
-		System.out.println("total available seats = " + packageResponseDTO.getTotalSeats());
-		boolean seatsAdjusted = packageService.adjustSeatsOptimistic(bookingDTO.getPackageId(),
-				bookingDTO.getNumberOfTravelers());
-		if (!seatsAdjusted) {
-			request.setAttribute("errorMessage", "Not enough seats available. Please try again.");
-			request.setAttribute("package", packageResponseDTO);
-			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-			return;
-		}
 		int createdBookingId = bookingService.createBooking(bookingDTO);
 
 		if (createdBookingId > 0) {
@@ -489,6 +522,7 @@ public class BookingServlet extends HttpServlet {
 					booking.setPackageImage(pkg.getImageurl());
 					booking.setDuration(pkg.getDuration());
 					booking.setAmount(pkg.getPrice() * booking.getNoOfTravellers());
+					booking.setDepartureDateAndTime(pkg.getDepartureDate());
 				}
 			}
 
@@ -500,7 +534,7 @@ public class BookingServlet extends HttpServlet {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("errorMessage", "Unable to fetch booking history. Please check your filters.");
+			request.setAttribute("errorMessage", "Unable to fetch booking history. Please retry.");
 			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
 		}
 	}

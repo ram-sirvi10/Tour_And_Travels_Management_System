@@ -107,6 +107,10 @@ public class PackageDAOImpl implements IPackageDAO {
 				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
 			}
 			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			if (resultSet.getTimestamp("last_booking_date") != null) {
+				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+
+			}
 			list.add(pkg);
 		}
 
@@ -139,8 +143,9 @@ public class PackageDAOImpl implements IPackageDAO {
 			if (resultSet.getTimestamp("departure_date") != null) {
 				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
 			}
-			pkg.setVersion(resultSet.getInt("version"));
-
+			if (resultSet.getTimestamp("last_booking_date") != null) {
+				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+			}
 			return pkg;
 		}
 
@@ -181,10 +186,9 @@ public class PackageDAOImpl implements IPackageDAO {
 			sql.append(" AND is_active = ?");
 		}
 
-		// For normal users, always apply 10-day future rule
 		if (isAgencyView == null || !isAgencyView) {
-			sql.append(" AND DATE(departure_date) >= CURDATE() + INTERVAL 10 DAY");
-			sql.append(" AND totalseats > 0"); // Only show packages with available seats
+			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
+			sql.append(" AND totalseats > 0");
 		}
 
 		sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
@@ -238,8 +242,13 @@ public class PackageDAOImpl implements IPackageDAO {
 			pkg.setTotalSeats(resultSet.getInt("totalseats"));
 			if (resultSet.getString("imageurl") != null) {
 				pkg.setImageurl(resultSet.getString("imageurl"));
-			}if (resultSet.getTimestamp("departure_date") != null) {
+			}
+			if (resultSet.getTimestamp("departure_date") != null) {
 				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
+			}
+			if (resultSet.getTimestamp("last_booking_date") != null) {
+				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+
 			}
 			list.add(pkg);
 		}
@@ -299,10 +308,9 @@ public class PackageDAOImpl implements IPackageDAO {
 			sql.append(" AND is_active = ?");
 		}
 
-		// Normal users see only packages departing after 10 days
 		if (isAgencyView == null || !isAgencyView) {
-			sql.append(" AND DATE(departure_date) >= CURDATE() + INTERVAL 10 DAY");
-			sql.append(" AND totalseats > 0"); // Only available seats
+			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
+			sql.append(" AND totalseats > 0");
 		}
 
 		connection = DatabaseConfig.getConnection();
@@ -345,21 +353,21 @@ public class PackageDAOImpl implements IPackageDAO {
 		return count;
 	}
 
-	@Override
-	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
-		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats - ?, version = version + 1 "
-				+ "WHERE package_id = ? AND version = ? AND totalseats >= ?";
-		try {
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setInt(1, seatsToBook);
-			preparedStatement.setInt(2, packageId);
-			preparedStatement.setInt(3, currentVersion);
-			preparedStatement.setInt(4, seatsToBook);
-			return preparedStatement.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
+//	@Override
+//	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
+//		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats - ?, version = version + 1 "
+//				+ "WHERE package_id = ? AND version = ? AND totalseats >= ?";
+//		try {
+//			preparedStatement = connection.prepareStatement(sql);
+//			preparedStatement.setInt(1, seatsToBook);
+//			preparedStatement.setInt(2, packageId);
+//			preparedStatement.setInt(3, currentVersion);
+//			preparedStatement.setInt(4, seatsToBook);
+//			return preparedStatement.executeUpdate();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return 0;
+//	}
 
 }

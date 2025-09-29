@@ -146,6 +146,7 @@ public class Mapper {
 		dto.setTotalSeats(pkg.getTotalSeats());
 		dto.setVersion(pkg.getVersion());
 		dto.setDepartureDate(pkg.getDepartureDate());
+		dto.setLastBookingDate(pkg.getLastBookingDate());
 		return dto;
 	}
 

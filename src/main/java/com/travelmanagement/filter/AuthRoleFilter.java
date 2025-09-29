@@ -95,9 +95,9 @@ public class AuthRoleFilter implements Filter {
 		HttpSession session = req.getSession(false);
 
 	
-	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-	        res.setHeader("Pragma", "no-cache"); 
-	        res.setDateHeader("Expires", 0); 
+//	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+//	        res.setHeader("Pragma", "no-cache"); 
+//	        res.setDateHeader("Expires", 0); 
 		
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;

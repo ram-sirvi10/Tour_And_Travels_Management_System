@@ -17,9 +17,17 @@ public class Packages {
 	private LocalDate updatedAt;
 	private int totalSeats;
 	private String imageurl;
-
+	private LocalDateTime lastBookingDate;
 	private int version;
 	private LocalDateTime departureDate;
+
+	public LocalDateTime getLastBookingDate() {
+		return lastBookingDate;
+	}
+
+	public void setLastBookingDate(LocalDateTime lastBookingDate) {
+		this.lastBookingDate = lastBookingDate;
+	}
 
 	public LocalDateTime getDepartureDate() {
 		return departureDate;
@@ -52,6 +60,7 @@ public class Packages {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
+	
 
 	public int getPackageId() {
 		return packageId;

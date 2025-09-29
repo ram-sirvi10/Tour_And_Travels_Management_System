@@ -1,5 +1,14 @@
 package com.travelmanagement.controller;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.service.impl.PackageServiceImpl;
@@ -9,10 +18,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
 
 @WebServlet("/package")
 public class PackageServlet extends HttpServlet {
@@ -95,8 +100,9 @@ public class PackageServlet extends HttpServlet {
 					totalSeats,  isActive, false);
 
 			int totalPages = (int) Math.ceil((double) totalPackages / limit);
+		
 
-			
+		
 			request.setAttribute("packages", packages);
 			request.setAttribute("currentPage", page);
 			request.setAttribute("totalPages", totalPages);
