@@ -17,6 +17,15 @@ public class BookingResponseDTO {
 	private double amount;
 	private LocalDateTime created_at;
 	private LocalDateTime departureDateAndTime;
+	private LocalDateTime lastBookingDate;
+	public LocalDateTime getLastBookingDate() {
+		return lastBookingDate;
+	}
+
+	public void setLastBookingDate(LocalDateTime lastBookingDate) {
+		this.lastBookingDate = lastBookingDate;
+	}
+
 	public LocalDateTime getDepartureDateAndTime() {
 		return departureDateAndTime;
 	}

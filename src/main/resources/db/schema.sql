@@ -65,7 +65,7 @@ CREATE TABLE payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_id INT NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('SUCCESSFUL', 'FAILED') DEFAULT 'FAILED',
+    status ENUM('SUCCESSFUL', 'FAILED','REFUNDED') DEFAULT 'FAILED',
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
@@ -112,3 +112,9 @@ ADD COLUMN departure_date TIMESTAMP not null;
 
 ALTER TABLE travel_packages
 ADD COLUMN last_booking_date  TIMESTAMP NOT NULL;
+
+ALTER TABLE  payments  
+CHANGE COLUMN `status` `status` ENUM('SUCCESSFUL', 'FAILED', 'REFUNDED') NULL DEFAULT 'FAILED' ;
+
+ALTER TABLE  bookings  
+CHANGE COLUMN `status` `status` ENUM('CONFIRMED', 'PENDING', 'CANCELLED','COMPLETE') DEFAULT 'PENDING' ;

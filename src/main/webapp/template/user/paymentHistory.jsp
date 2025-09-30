@@ -46,6 +46,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					<%="SUCCESSFUL".equals(request.getParameter("status")) ? "selected" : ""%>>Successful</option>
 				<option value="FAILED"
 					<%="FAILED".equals(request.getParameter("status")) ? "selected" : ""%>>Failed</option>
+					<option value="REFUNDED"
+					<%="REFUNDED".equals(request.getParameter("status")) ? "selected" : ""%>>REFUNDED</option>
 			</select>
 		</div>
 

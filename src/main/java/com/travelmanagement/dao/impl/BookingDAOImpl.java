@@ -63,6 +63,7 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setBookingDate(resultSet.getDate("booking_date").toLocalDate());
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
+			
 			if (resultSet.getTimestamp("created_at") != null)
 				booking.setCreated_at((resultSet.getTimestamp("created_at").toLocalDateTime()));
 			return booking;

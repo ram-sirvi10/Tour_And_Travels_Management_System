@@ -9,12 +9,14 @@
 <body>
 <jsp:include page="navbar.jsp" />
 <%
-Object obj = session.getAttribute("user");
+Object user = session.getAttribute("user");
+Object agency = session.getAttribute("agency");
+
 %>
 <header>
   <h1>Tour & Travel Management System</h1>
   <p>Book your dream destinations with ease and comfort</p>
-  <%if(obj==null){ %>
+  <%if(user==null&&agency==null){ %>
   <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a><%} else{%>
   <a href="login.jsp" class="btn-started">🚀 Get Started</a>
   <%} %>
@@ -52,7 +54,7 @@ Object obj = session.getAttribute("user");
   <p>Discover exciting travel packages and start your adventure today.</p>
   
  
-  <a href="login.jsp?role=agency" class="btn-started">🏢 Login as Agency</a>
+  
 </section>
 
 <div class="footer">

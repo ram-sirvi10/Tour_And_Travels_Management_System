@@ -10,8 +10,8 @@ import com.razorpay.Utils;
 
 public class PaymentGatewayUtil {
 
-    private static final String RAZORPAY_KEY_ID = "rzp_test_RNQiHnsfjn3up2";
-    private static final String RAZORPAY_KEY_SECRET = "jfg3IcV54jtIEomhJgct0SZm";
+	   private static final String RAZORPAY_KEY_ID = "rzp_test_RNQiHnsfjn3up2";
+	    private static final String RAZORPAY_KEY_SECRET = "jfg3IcV54jtIEomhJgct0SZm";
 
  
     public static Order createOrder(double amount, String currency, String receipt) throws RazorpayException {

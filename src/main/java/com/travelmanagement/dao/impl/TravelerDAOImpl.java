@@ -264,26 +264,24 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	}
 
 	public boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception {
-	    boolean exists = false;
-	    try {
-	        String sql = "SELECT COUNT(*) AS total "
-	                   + "FROM travelers t "
-	                   + "JOIN bookings b ON t.booking_id = b.booking_id "
-	                   + "WHERE t.email = ? AND b.package_id = ?";
+		boolean exists = false;
+		try {
+			String sql = "SELECT COUNT(*) AS total " + "FROM travelers t "
+					+ "JOIN bookings b ON t.booking_id = b.booking_id "
+					+ "WHERE t.email = ? AND b.package_id = ? and b.status != ?";
 
-	        preparedStatement = connection.prepareStatement(sql);
-	        preparedStatement.setString(1, email);
-	        preparedStatement.setInt(2, packageId);
-
-	        resultSet = preparedStatement.executeQuery();
-	        if (resultSet.next() && resultSet.getInt("total") > 0) {
-	            exists = true;
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return exists;
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, email);
+			preparedStatement.setInt(2, packageId);
+			preparedStatement.setString(3, "CANCELLED");
+			resultSet = preparedStatement.executeQuery();
+			if (resultSet.next() && resultSet.getInt("total") > 0) {
+				exists = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return exists;
 	}
 
-	
 }

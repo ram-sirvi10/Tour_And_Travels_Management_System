@@ -84,6 +84,7 @@ public class AuthServlet extends HttpServlet {
 				boolean verified = handleVerifyOTP(request, "user");
 				request.setAttribute("showOtp", true);
 				if (verified)
+					request.setAttribute("showOtp", false);
 					request.setAttribute("message", "OTP verified!");
 				request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 				break;

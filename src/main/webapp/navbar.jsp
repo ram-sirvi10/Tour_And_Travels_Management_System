@@ -174,7 +174,7 @@ h2 {
 	background: linear-gradient(90deg, #ff6f61, #ff3b2e);
 	color: white;
 	padding: 16px 32px;
-	margin-bottom : 10px;
+	margin-bottom: 10px;
 	border-radius: 50px;
 	font-weight: bold;
 	animation: pulse 2s infinite;
@@ -195,28 +195,46 @@ keyframes pulse { 0%{
 70
 
 
+
+
 %
 {
 box-shadow
 
 
+
+
 :
 
 
-0
 
 
 0
 
 
+
+
 0
+
+
+
+
+0
+
+
 
 
 20px
 
 
+
+
 rgba
+
+
 (
+
+
 
 
 255
@@ -228,12 +246,16 @@ rgba
 0
 
 
+
+
 )
+
+
 ;
-
-
 }
 100
+
+
 
 
 %
@@ -241,23 +263,39 @@ rgba
 box-shadow
 
 
+
+
 :
 
 
-0
 
 
 0
 
 
-0
 
 
 0
+
+
+
+
+0
+
+
+
+
+0
+
+
 
 
 rgba
+
+
 (
+
+
 
 
 255
@@ -269,10 +307,12 @@ rgba
 0
 
 
+
+
 )
+
+
 ;
-
-
 }
 }
 
@@ -380,6 +420,9 @@ button:hover, input[type=submit]:hover {
 </style>
 <%
 Object obj = session.getAttribute("user");
+if (obj == null) {
+	obj = session.getAttribute("agency");
+}
 String label = obj != null ? "My Account" : "Login";
 %>
 <nav>
