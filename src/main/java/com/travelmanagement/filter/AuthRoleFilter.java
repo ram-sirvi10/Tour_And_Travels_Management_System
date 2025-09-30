@@ -5,8 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.travelmanagement.dao.impl.AgencyDAOImpl;
+import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.User;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -84,16 +88,58 @@ public class AuthRoleFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		HttpSession session = req.getSession(false);
 
+	
+//	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+//	        res.setHeader("Pragma", "no-cache"); 
+//	        res.setDateHeader("Expires", 0); 
+		
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
 
 		if (user == null && agency == null) {
 			res.sendRedirect(req.getContextPath() + "/login.jsp?error=notLoggedIn");
+			return;
+		}
+
+		boolean isActive = true;
+		if (user != null) {
+			UserDAOImpl userDAO = new UserDAOImpl();
+			User latestUser;
+			try {
+				latestUser = userDAO.getUserById(user.getUserId());
+				if (latestUser == null || !latestUser.isActive()) {
+					isActive = false;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} else if (agency != null) {
+			AgencyDAOImpl agencyDAO = new AgencyDAOImpl();
+			Agency latestAgency;
+			try {
+				latestAgency = agencyDAO.getAgencyById(agency.getAgencyId());
+				if (latestAgency == null || !latestAgency.isActive()) {
+					isActive = false;
+				}
+			} catch (Exception e) {
+			
+				e.printStackTrace();
+			}
+
+		}
+
+		if (!isActive) {
+			if (session != null) {
+				session.invalidate();
+			}
+			res.sendRedirect(req.getContextPath() + "/login.jsp?error=inactive");
 			return;
 		}
 
@@ -107,8 +153,8 @@ public class AuthRoleFilter implements Filter {
 		adminAccess.put(context + "/admin",
 				List.of("dashboard", "manageUsers", "manageAgencies", "userAction", "agencyAction", "pendingAgencies",
 						"deletedAgencies", "deletedUsers", "updateProfile", "changePassword"));
-		adminAccess.put(context + "/agency", List.of("dashboard"));
-		adminAccess.put(context + "/user", List.of("dashboard"));
+//		adminAccess.put(context + "/agency", List.of("dashboard"));
+//		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
 		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage"));
@@ -117,9 +163,9 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword"));
+		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword","viewProfile"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy"));
+				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {

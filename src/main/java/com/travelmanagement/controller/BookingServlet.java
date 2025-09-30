@@ -1,6 +1,8 @@
 package com.travelmanagement.controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +12,14 @@ import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
+import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
+import com.travelmanagement.service.impl.TravelerServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -31,6 +36,7 @@ public class BookingServlet extends HttpServlet {
 	private BookingServiceImpl bookingService = new BookingServiceImpl();
 	private PackageServiceImpl packageService = new PackageServiceImpl();
 	private PaymentServiceImpl paymentService = new PaymentServiceImpl();
+	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -59,6 +65,16 @@ public class BookingServlet extends HttpServlet {
 			case "viewBookingForm":
 				viewBookingForm(request, response);
 				break;
+			case "bookingHistroy":
+				showBookingHistory(request, response);
+				break;
+			case "viewTravelers":
+				showTravelersList(request, response);
+				break;
+			case "paymentHistory":
+				showPaymentHistory(request, response);
+				break;
+
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + button);
 			}
@@ -70,11 +86,82 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
+	private void showPaymentHistory(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		HttpSession session = request.getSession();
+		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
+		int pageSize = 10;
+		int currentPage = 1;
+
+		String status = request.getParameter("status");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+		LocalDate start = null, end = null;
+
+		try {
+			if (startDate != null && !startDate.isEmpty())
+				start = LocalDate.parse(startDate);
+			if (endDate != null && !endDate.isEmpty())
+				end = LocalDate.parse(endDate);
+		} catch (Exception e) {
+
+		}
+
+		if (start != null && end != null && start.isAfter(end)) {
+			request.setAttribute("errorMessage", "Start date cannot be after end date.");
+			start = null;
+			end = null;
+		}
+		try {
+			if (request.getParameter("pageSize") != null) {
+				pageSize = Integer.parseInt(request.getParameter("pageSize"));
+			}
+			if (request.getParameter("page") != null) {
+				currentPage = Integer.parseInt(request.getParameter("page"));
+			}
+
+			int offset = (currentPage - 1) * pageSize;
+
+			List<PaymentResponseDTO> paymentList = paymentService.getPaymentHistory(user.getUserId(), null, null,
+					status, start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize,
+					offset);
+			for (PaymentResponseDTO payment : paymentList) {
+
+				BookingResponseDTO booking = bookingService.getBookingById(payment.getBookingId());
+				if (booking != null) {
+					PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+					if (pkg != null) {
+						payment.setPackageName(pkg.getTitle());
+					}
+				}
+
+			}
+
+			int totalRecords = paymentService.getPaymentHistoryCount(user.getUserId(), null, null, status,
+					start != null ? start.toString() : null, end != null ? end.toString() : null);
+			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
+			request.setAttribute("payments", paymentList);
+			request.setAttribute("currentPage", currentPage);
+			request.setAttribute("totalPages", totalPages);
+			request.setAttribute("pageSize", pageSize);
+
+			request.getRequestDispatcher("template/user/paymentHistory.jsp").forward(request, response);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("errorMessage", "Unable to fetch payment history.");
+			request.getRequestDispatcher("template/user/paymentHistory.jsp").forward(request, response);
+		}
+	}
+
 	private void viewBookingForm(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String packageIdParam = request.getParameter("packageId");
 		if (packageIdParam == null || packageIdParam.isEmpty()) {
-			request.setAttribute("errorMessage", "Package ID is missing!");
+			request.setAttribute("errorMessage", "Package  is missing!");
 			request.getRequestDispatcher("template/user/packages.jsp").forward(request, response);
 			return;
 		}
@@ -83,7 +170,7 @@ public class BookingServlet extends HttpServlet {
 		try {
 			packageId = Integer.parseInt(packageIdParam);
 		} catch (NumberFormatException e) {
-			request.setAttribute("errorMessage", "Invalid Package ID!");
+			request.setAttribute("errorMessage", "Invalid Package !");
 			request.getRequestDispatcher("template/user/packages.jsp").forward(request, response);
 			return;
 		}
@@ -106,9 +193,7 @@ public class BookingServlet extends HttpServlet {
 	}
 
 	private void createBooking(HttpServletRequest request, HttpServletResponse response) throws Exception {
-	
 
-		
 		HttpSession session = request.getSession();
 		UserResponseDTO sessionUser = (UserResponseDTO) session.getAttribute("user");
 		BookingRequestDTO bookingDTO = new BookingRequestDTO();
@@ -175,6 +260,14 @@ public class BookingServlet extends HttpServlet {
 		}
 
 		String noOfTravellersParam = request.getParameter("noOfTravellers");
+
+		if (bookingService.hasExistingBooking(userId, packageId)) {
+			request.setAttribute("errorMessage", "You have already booked this package.");
+			request.setAttribute("package", packageResponseDTO);
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
+
 		if (noOfTravellersParam == null || noOfTravellersParam.isEmpty()) {
 			request.setAttribute("package", packageResponseDTO);
 			request.setAttribute("errorMessage", "No of travellers is missing!");
@@ -191,6 +284,46 @@ public class BookingServlet extends HttpServlet {
 			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
 			return;
 		}
+
+		PackageResponseDTO pkg = packageService.getPackageById(packageId);
+		if (pkg == null || !pkg.getIsActive()) {
+			request.setAttribute("errorMessage", "Package not found or inactive.");
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
+
+		if (noOfTravellers > pkg.getTotalSeats()) {
+			request.setAttribute("errorMessage", "Not enough seats available!");
+			request.setAttribute("package", pkg);
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
+
+//		boolean seatsAdjusted = false;
+//		int retries = 3;
+//		while (retries-- > 0) {
+//			int rowsAffected = packageService.updateSeatsOptimistic(packageId, noOfTravellers, pkg.getVersion());
+//			if (rowsAffected > 0) {
+//				seatsAdjusted = true;
+//				break;
+//			} else {
+//
+//				pkg = packageService.getPackageById(packageId);
+//				if (noOfTravellers > pkg.getTotalSeats()) {
+//					request.setAttribute("errorMessage", "Not enough seats available. Try again.");
+//					request.setAttribute("package", pkg);
+//					request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//					return;
+//				}
+//			}
+//		}
+//
+//		if (!seatsAdjusted) {
+//			request.setAttribute("errorMessage", "Booking failed due to concurrent bookings. Please try again.");
+//			request.setAttribute("package", pkg);
+//			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//			return;
+//		}
 
 		bookingDTO.setUserId(userId);
 		bookingDTO.setPackageId(packageId);
@@ -221,18 +354,20 @@ public class BookingServlet extends HttpServlet {
 					&& !request.getParameter("travelerAge" + i).isEmpty()
 							? Integer.parseInt(request.getParameter("travelerAge" + i))
 							: 0);
+
 			travelersDTO.add(traveler);
 		}
 		String isBookingSubmitParam = request.getParameter("isBookingSubmit");
 		boolean isBookingSubmit = "true".equals(isBookingSubmitParam);
 
 		if (!isBookingSubmit) {
-		  
-		    request.setAttribute("package", packageResponseDTO);
-		    request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-		    return;
+
+			request.setAttribute("package", packageResponseDTO);
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
 		}
-		Map<String, String> errors = authService.validateTravelers(travelersDTO);
+
+		Map<String, String> errors = authService.validateTravelers(travelersDTO, bookingDTO.getPackageId());
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("package", packageResponseDTO);
@@ -242,20 +377,13 @@ public class BookingServlet extends HttpServlet {
 		}
 
 		bookingDTO.setTravelers(travelersDTO);
-
-		if (bookingDTO.getNumberOfTravelers() > packageResponseDTO.getTotalSeats()) {
-			request.setAttribute("errorMessage", "Not enough seats available!");
-			request.setAttribute("package", packageResponseDTO);
-			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-			return;
-		}
-		System.out.println("Create booking ====");
-		System.out.println("Total travller =  " + noOfTravellers);
-		System.out.println("total available seats = " + packageResponseDTO.getTotalSeats());
 		int createdBookingId = bookingService.createBooking(bookingDTO);
 
 		if (createdBookingId > 0) {
 			packageService.adjustSeats(bookingDTO.getPackageId(), -bookingDTO.getNumberOfTravelers());
+//			BookingScheduler scheduler = BookingScheduler.getInstance();
+//		  scheduler.scheduleAutoCancel(createdBookingId);
+
 			double totalAmount = packageResponseDTO.getPrice() * bookingDTO.getNumberOfTravelers();
 			request.setAttribute("bookingId", createdBookingId);
 			request.setAttribute("amount", totalAmount);
@@ -274,6 +402,7 @@ public class BookingServlet extends HttpServlet {
 
 	private void processPayment(HttpServletRequest request, HttpServletResponse response, boolean confirm)
 			throws Exception {
+
 		HttpSession session = request.getSession();
 		String bookingIdParam = request.getParameter("bookingId");
 		String amountParam = request.getParameter("amount");
@@ -286,45 +415,22 @@ public class BookingServlet extends HttpServlet {
 			return;
 		}
 
-		int bookingId;
-		double amount;
+		int bookingId = Integer.parseInt(bookingIdParam);
+		double amount = Double.parseDouble(amountParam);
 
-		try {
-			bookingId = Integer.parseInt(bookingIdParam);
-		} catch (NumberFormatException e) {
-			request.setAttribute("errorMessage", "Invalid Booking ID!");
-			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
-			return;
-		}
+		BookingResponseDTO bookingResponseDTO = bookingService.getBookingById(bookingId);
 
-		BookingResponseDTO bookingResponseDTO;
-		try {
-			bookingResponseDTO = bookingService.getBookingById(bookingId);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (bookingResponseDTO == null) {
 			request.setAttribute("errorMessage", "Invalid Booking!");
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
 		}
 
-		try {
-			amount = Double.parseDouble(amountParam);
-		} catch (NumberFormatException e) {
-			request.setAttribute("errorMessage", "Invalid Amount!");
+		if (!confirm && !"PENDING".equals(bookingResponseDTO.getStatus())) {
+
+			request.setAttribute("message", "Booking already cancelled.");
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
-		}
-		try {
-			double amountToPay = packageService.getPackageById(bookingResponseDTO.getPackageId()).getPrice()
-					* bookingResponseDTO.getNoOfTravellers();
-			if (amountToPay != amount) {
-				request.setAttribute("errorMessage", "Invalid Amount!");
-				request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
-				return;
-			}
-		} catch (Exception e) {
-			
-			e.printStackTrace();
 		}
 
 		PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
@@ -339,10 +445,9 @@ public class BookingServlet extends HttpServlet {
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
 		} else if (!confirm && success) {
+			if ("PENDING".equals(bookingResponseDTO.getStatus())) {
 
-			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-			if (booking != null) {
-				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+				packageService.adjustSeats(bookingResponseDTO.getPackageId(), bookingResponseDTO.getNoOfTravellers());
 				bookingService.cancelBooking(bookingId);
 			}
 			request.setAttribute("message", "Payment rejected. Booking cancelled.");
@@ -352,6 +457,171 @@ public class BookingServlet extends HttpServlet {
 			request.setAttribute("message", "Payment processing failed. Please try again.");
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
+		}
+	}
+
+	private void showBookingHistory(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		HttpSession session = request.getSession();
+		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
+		int pageSize = 10;
+		int currentPage = 1;
+		String status = request.getParameter("status");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+
+		try {
+
+			if (request.getParameter("pageSize") != null) {
+				int ps = Integer.parseInt(request.getParameter("pageSize"));
+				if (ps > 0)
+					pageSize = ps;
+			}
+			if (request.getParameter("page") != null) {
+				int pg = Integer.parseInt(request.getParameter("page"));
+				if (pg > 0)
+					currentPage = pg;
+			}
+
+			if (startDate != null && startDate.isEmpty())
+				startDate = null;
+			if (endDate != null && endDate.isEmpty())
+				endDate = null;
+
+			int offset = (currentPage - 1) * pageSize;
+			LocalDate start = null, end = null;
+			try {
+				if (startDate != null && !startDate.isEmpty())
+					start = LocalDate.parse(startDate);
+				if (endDate != null && !endDate.isEmpty())
+					end = LocalDate.parse(endDate);
+			} catch (Exception e) {
+
+			}
+
+			if (start != null && end != null && start.isAfter(end)) {
+				request.setAttribute("errorMessage", "Start date cannot be after end date.");
+				start = null;
+				end = null;
+			}
+
+			List<BookingResponseDTO> bookings = bookingService.getAllBookings(user.getUserId(), null, null, status,
+					start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize, offset);
+			int totalRecords = bookingService.getAllBookingsCount(user.getUserId(), null, null, status,
+					start != null ? start.toString() : null, end != null ? end.toString() : null);
+
+			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+			totalPages = (totalPages == 0) ? 1 : totalPages;
+
+			for (BookingResponseDTO booking : bookings) {
+				PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+				if (pkg != null) {
+					booking.setPackageName(pkg.getTitle());
+					booking.setPackageImage(pkg.getImageurl());
+					booking.setDuration(pkg.getDuration());
+					booking.setAmount(pkg.getPrice() * booking.getNoOfTravellers());
+					booking.setDepartureDateAndTime(pkg.getDepartureDate());
+				}
+			}
+
+			request.setAttribute("bookings", bookings);
+			request.setAttribute("currentPage", currentPage);
+			request.setAttribute("totalPages", totalPages);
+			request.setAttribute("pageSize", pageSize);
+			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("errorMessage", "Unable to fetch booking history. Please retry.");
+			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+		}
+	}
+
+	private void showTravelersList(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		HttpSession session = request.getSession();
+		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+
+		if (user == null) {
+			response.sendRedirect(request.getContextPath() + "/login.jsp");
+			return;
+		}
+
+		String bookingIdParam = request.getParameter("bookingId");
+		String keyword = request.getParameter("keyword") != null ? request.getParameter("keyword").trim() : "";
+		int pageSize = 10;
+		int currentPage = 1;
+
+		try {
+			if (request.getParameter("pageSize") != null) {
+				pageSize = Integer.parseInt(request.getParameter("pageSize"));
+				if (!(pageSize == 10 || pageSize == 20 || pageSize == 30 || pageSize == 50)) {
+					pageSize = 10;
+				}
+			}
+		} catch (NumberFormatException e) {
+			pageSize = 10;
+		}
+
+		try {
+			if (request.getParameter("page") != null) {
+				currentPage = Integer.parseInt(request.getParameter("page"));
+				if (currentPage < 1)
+					currentPage = 1;
+			}
+		} catch (NumberFormatException e) {
+			currentPage = 1;
+		}
+
+		if (bookingIdParam == null || bookingIdParam.isEmpty()) {
+			request.setAttribute("errorMessage", "Booking ID is required!");
+			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			return;
+		}
+
+		int bookingId;
+		try {
+			bookingId = Integer.parseInt(bookingIdParam);
+		} catch (NumberFormatException e) {
+			request.setAttribute("errorMessage", "Invalid Booking ID!");
+			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			return;
+		}
+
+		try {
+
+			int totalRecords = travelerService.getTravelerCount(null, bookingId, user.getUserId(), null, null, null,
+					null, null, keyword, null, null);
+
+			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+			if (currentPage > totalPages && totalPages > 0)
+				currentPage = totalPages;
+
+			int offset = (currentPage - 1) * pageSize;
+
+			List<TravelerResponseDTO> travelers = travelerService.getAllTravelers(null, bookingId, user.getUserId(),
+					null, null, null, null, null, keyword, null, null, pageSize, offset);
+
+			PackageResponseDTO pkg = packageService
+					.getPackageById(bookingService.getBookingById(bookingId).getPackageId());
+			String packageName = pkg != null ? pkg.getTitle() : "";
+
+			request.setAttribute("travelers", travelers);
+			request.setAttribute("packageName", packageName);
+			request.setAttribute("keyword", keyword);
+			request.setAttribute("currentPage", currentPage);
+			request.setAttribute("totalPages", totalPages);
+			request.setAttribute("pageSize", pageSize);
+
+			request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("errorMessage", "Unable to fetch travelers: " + e.getMessage());
+			request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
 		}
 	}
 

@@ -1,5 +1,10 @@
 package com.travelmanagement.util;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
@@ -10,6 +15,7 @@ import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.Booking;
@@ -19,6 +25,26 @@ import com.travelmanagement.model.Traveler;
 import com.travelmanagement.model.User;
 
 public class Mapper {
+	
+	
+	public static LocalDate parseAnyDate(String dateStr) throws Exception{
+
+		String[] dateFormats = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd",
+				"dd.MM.yyyy", "yyyy.MM.dd", "dd MMM yyyy", "MMM dd, yyyy" };
+
+		for (String format : dateFormats) {
+			try {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+				LocalDate localDate = LocalDate.parse(dateStr, formatter);
+				return localDate;
+			} catch (DateTimeParseException e) {
+			}
+		}
+
+		throw new IllegalArgumentException("Date format not recognized: " + dateStr);
+	}
+	
+	
 	public static User mapRegisterDtoToUser(RegisterRequestDTO dto) {
 		User user = new User();
 		user.setUserId(dto.getUserId());
@@ -118,6 +144,9 @@ public class Mapper {
 		dto.setIsActive(pkg.isActive());
 		dto.setImageurl(pkg.getImageurl());
 		dto.setTotalSeats(pkg.getTotalSeats());
+		dto.setVersion(pkg.getVersion());
+		dto.setDepartureDate(pkg.getDepartureDate());
+		dto.setLastBookingDate(pkg.getLastBookingDate());
 		return dto;
 	}
 
@@ -138,14 +167,32 @@ public class Mapper {
 		bookingDTO.setBookingId(booking.getBookingId());
 		bookingDTO.setPackageId(booking.getPackageId());
 		bookingDTO.setStatus(booking.getStatus());
+		bookingDTO.setCreated_at(booking.getCreated_at());
 		return bookingDTO;
 	}
+
 	public static Payment mapPaymentRequestDTOToPayment(PaymentRequestDTO dto) {
 		Payment payment = new Payment();
 		payment.setAmount(dto.getAmount());
 		payment.setBookingId(dto.getBookingId());
 		payment.setStatus(dto.getStatus());
+		
+		
+	
+		
 		return payment;
+
+	}
+
+	public static PaymentResponseDTO mapPaymentToPaymentResponse(Payment payment) {
+		PaymentResponseDTO dto = new PaymentResponseDTO();
+		
+		dto.setPaymentId(payment.getPaymentId());
+		dto.setBookingId(payment.getBookingId());
+		dto.setAmount(payment.getAmount());
+		dto.setStatus(payment.getStatus());
+		dto.setPaymentDate(payment.getPaymentDate());
+		return dto;
 
 	}
 

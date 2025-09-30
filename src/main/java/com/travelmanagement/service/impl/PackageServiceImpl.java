@@ -183,9 +183,12 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, int limit, int offset) throws Exception {
-		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo, limit,
-				offset);
+			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit,
+			int offset, Boolean isAgencyView) throws Exception {
+
+		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo,
+				totalSeats,  isActive, limit, offset, isAgencyView);
+
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
 			dtoList.add(Mapper.toResponseDTO(pkg));
@@ -193,6 +196,39 @@ public class PackageServiceImpl implements IPackageService {
 
 		return dtoList;
 	}
+
+
+	@Override
+	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+			String dateTo, Integer totalSeats,  Boolean isActive, Boolean isAgencyView)
+			throws Exception {
+
+		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, 
+				isActive, isAgencyView);
+	}
+	
+	
+//	public boolean adjustSeatsOptimistic(int packageId, int seatsToBook) throws Exception {
+//	    PackageResponseDTO pkg = getPackageById(packageId);
+//	    if (pkg == null) return false;
+//
+//	    int updatedRows =
+//	    return updatedRows > 0;
+//	}
+
+//	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
+//		// TODO Auto-generated method stub
+//		try {
+//			return  packageDAO.updateSeatsOptimistic(packageId, noOfTravellers,version);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return 0;
+//	}
+
+	
+
 
 
 }

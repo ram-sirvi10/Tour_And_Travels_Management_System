@@ -105,7 +105,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 			sql += " AND DATE(p.payment_date) >= ?";
 		} else if (endDate != null) {
 			sql += " AND DATE(p.payment_date) <= ?";
-		}sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+		}sql += " ORDER BY p.payment_date DESC LIMIT ? OFFSET ?";
 
 		preparedStatement = connection.prepareStatement(sql);
 

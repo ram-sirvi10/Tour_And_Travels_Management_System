@@ -162,7 +162,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 			if (paymentStatus != null && !paymentStatus.isEmpty())
 				preparedStatement.setString(index++, paymentStatus);
 			if (keyword != null && !keyword.isEmpty()) {
-				String k = "%" + keyword + "%";
+				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
@@ -243,7 +243,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 			if (paymentStatus != null && !paymentStatus.isEmpty())
 				preparedStatement.setString(index++, paymentStatus);
 			if (keyword != null && !keyword.isEmpty()) {
-				String k = "%" + keyword + "%";
+				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
@@ -263,4 +263,27 @@ public class TravelerDAOImpl implements ITravelerDAO {
 		return count;
 	}
 
+	public boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception {
+	    boolean exists = false;
+	    try {
+	        String sql = "SELECT COUNT(*) AS total "
+	                   + "FROM travelers t "
+	                   + "JOIN bookings b ON t.booking_id = b.booking_id "
+	                   + "WHERE t.email = ? AND b.package_id = ?";
+
+	        preparedStatement = connection.prepareStatement(sql);
+	        preparedStatement.setString(1, email);
+	        preparedStatement.setInt(2, packageId);
+
+	        resultSet = preparedStatement.executeQuery();
+	        if (resultSet.next() && resultSet.getInt("total") > 0) {
+	            exists = true;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return exists;
+	}
+
+	
 }

@@ -1,6 +1,7 @@
 package com.travelmanagement.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Packages {
 
@@ -11,12 +12,38 @@ public class Packages {
 	private double price;
 	private String location;
 	private int duration;
-
 	private boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 	private int totalSeats;
 	private String imageurl;
+	private LocalDateTime lastBookingDate;
+	private int version;
+	private LocalDateTime departureDate;
+
+	public LocalDateTime getLastBookingDate() {
+		return lastBookingDate;
+	}
+
+	public void setLastBookingDate(LocalDateTime lastBookingDate) {
+		this.lastBookingDate = lastBookingDate;
+	}
+
+	public LocalDateTime getDepartureDate() {
+		return departureDate;
+	}
+
+	public void setDepartureDate(LocalDateTime departureDate) {
+		this.departureDate = departureDate;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
 
 	public int getTotalSeats() {
 		return totalSeats;
@@ -33,6 +60,7 @@ public class Packages {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
+	
 
 	public int getPackageId() {
 		return packageId;

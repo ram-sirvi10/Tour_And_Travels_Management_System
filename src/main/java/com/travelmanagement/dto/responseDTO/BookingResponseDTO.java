@@ -1,6 +1,7 @@
 package com.travelmanagement.dto.responseDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class BookingResponseDTO {
 
@@ -10,6 +11,59 @@ public class BookingResponseDTO {
 	private LocalDate bookingDate;
 	private String status;
 	private int noOfTravellers;
+	private String packageName;
+	private String packageImage;
+	private int duration;
+	private double amount;
+	private LocalDateTime created_at;
+	private LocalDateTime departureDateAndTime;
+	public LocalDateTime getDepartureDateAndTime() {
+		return departureDateAndTime;
+	}
+
+	public void setDepartureDateAndTime(LocalDateTime departureDateAndTime) {
+		this.departureDateAndTime = departureDateAndTime;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public LocalDateTime getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(LocalDateTime created_at) {
+		this.created_at = created_at;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getPackageImage() {
+		return packageImage;
+	}
+
+	public void setPackageImage(String packageImage) {
+		this.packageImage = packageImage;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(double amount) {
+		this.amount = amount;
+	}
 
 	public int getNoOfTravellers() {
 		return noOfTravellers;
@@ -58,6 +112,5 @@ public class BookingResponseDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 
 }

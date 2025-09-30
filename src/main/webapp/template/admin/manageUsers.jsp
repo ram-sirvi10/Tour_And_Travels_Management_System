@@ -5,7 +5,7 @@
 <%
 UserResponseDTO admin = (UserResponseDTO) session.getAttribute("user");
 if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
-	 response.sendRedirect(request.getContextPath() + "/login.jsp");
+	response.sendRedirect("login.jsp");
 	return;
 }
 
@@ -41,16 +41,6 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
 
 </head>
 <body>
-<% 
-    String errorMessage = (String) request.getAttribute("errorMessage");
-    if (errorMessage != null && !errorMessage.isEmpty()) {
-%>
-    <div style="color: red; font-weight: bold; margin: 10px 0;">
-        <%= errorMessage %>
-    </div>
-<% 
-    }
-%>
 
 <div class="dashboard-container">
     <jsp:include page="sidebar.jsp" />
@@ -178,10 +168,10 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
 
     <label for="pageSize">Records per page:</label>
     <select name="pageSize" id="pageSize" onchange="this.form.submit()">
+        <option value="5" <%= pageSize==5 ? "selected" : "" %>>5</option>
         <option value="10" <%= pageSize==10 ? "selected" : "" %>>10</option>
         <option value="20" <%= pageSize==20 ? "selected" : "" %>>20</option>
-        <option value="30" <%= pageSize==30 ? "selected" : "" %>>30</option>
-        <option value="40" <%= pageSize==40 ? "selected" : "" %>>40</option>
+        <option value="50" <%= pageSize==50 ? "selected" : "" %>>50</option>
     </select>
 </form>
 

@@ -20,4 +20,6 @@ public interface ITravelerDAO {
 	int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId, Integer agencyId,
 			Integer paymentId, String bookingStatus, String paymentStatus, String keyword, String startDate,
 			String endDate) throws Exception;
+
+	boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception;
 }

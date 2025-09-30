@@ -1,5 +1,7 @@
 package com.travelmanagement.dto.requestDTO;
 
+import java.time.LocalDateTime;
+
 public class PackageRegisterDTO {
 
 	private String packageId;
@@ -12,6 +14,25 @@ public class PackageRegisterDTO {
 	private String isActive;
 	private int totalSeats;
 	private String imageurl;
+	private LocalDateTime departureDate;
+
+	private LocalDateTime lastBookingDate;
+
+	public LocalDateTime getLastBookingDate() {
+		return lastBookingDate;
+	}
+
+	public void setLastBookingDate(LocalDateTime lastBookingDate) {
+		this.lastBookingDate = lastBookingDate;
+	}
+
+	public LocalDateTime getDepartureDate() {
+		return departureDate;
+	}
+
+	public void setDepartureDate(LocalDateTime departureDate) {
+		this.departureDate = departureDate;
+	}
 
 	public int getTotalSeats() {
 		return totalSeats;
@@ -28,7 +49,6 @@ public class PackageRegisterDTO {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
-
 
 	public String getPackageId() {
 		return packageId;

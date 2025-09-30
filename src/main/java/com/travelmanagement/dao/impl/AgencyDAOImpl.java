@@ -101,10 +101,10 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	public Agency getAgencyById(int id) throws Exception {
 		Agency agency = null;
 		try {
-			String sql = "SELECT * FROM travelAgency WHERE agency_id=? AND is_delete=?";
+			String sql = "SELECT * FROM travelAgency WHERE agency_id=? ";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, id);
-			preparedStatement.setBoolean(2, false);
+//			preparedStatement.setBoolean(2, false);
 			 resultSet = preparedStatement.executeQuery();
 
 			if (resultSet.next()) {
@@ -122,6 +122,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				agency.setPassword(resultSet.getString("password"));
 				agency.setActive(resultSet.getBoolean("is_active"));
 				agency.setDelete(resultSet.getBoolean("is_delete"));
+				agency.setStatus(resultSet.getString("status"));
 				if (resultSet.getString("imageurl") != null)
 					agency.setImageurl(resultSet.getString("imageurl"));
 				if (resultSet.getDate("created_at") != null)

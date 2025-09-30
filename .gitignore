@@ -1,0 +1,9 @@
+ # Eclipse specific files
+.project
+.classpath
+.settings/
+.metadata/
+/build/
+
+# Logs
+*.log

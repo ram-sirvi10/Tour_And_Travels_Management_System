@@ -18,8 +18,15 @@ public interface IPackageDAO {
 
 	Packages getPackageById(int packageId) throws Exception;
 
-	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, int limit, int offset) throws Exception;
-
 	boolean adjustSeats(int packageId, int seatsChange) throws Exception;
+
+
+//	int updateSeatsOptimistic(int packageId, int seatsToBook, int version) throws Exception;
+
+	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
+			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
+
+	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+			String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset, Boolean isAgencyView)
+			throws Exception;
 }

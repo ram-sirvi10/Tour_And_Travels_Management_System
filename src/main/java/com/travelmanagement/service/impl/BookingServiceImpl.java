@@ -61,8 +61,6 @@ public class BookingServiceImpl implements IBookingService {
 		return bookingDAO.cancelBooking(bookingId);
 	}
 
-	
-
 	@Override
 	public boolean updateBookingStatus(int bookingId, String status) throws Exception {
 		Booking booking = bookingDAO.getBookingById(bookingId);
@@ -75,9 +73,9 @@ public class BookingServiceImpl implements IBookingService {
 
 	@Override
 	public List<BookingResponseDTO> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers,
-			String status, String keyword, String startDate, String endDate, int limit, int offset) throws Exception {
+			String status,  String startDate, String endDate, int limit, int offset) throws Exception {
 
-		List<Booking> bookings = bookingDAO.getAllBookings(userId, packageId, noOfTravellers, status, keyword,
+		List<Booking> bookings = bookingDAO.getAllBookings(userId, packageId, noOfTravellers, status, 
 				startDate, endDate, limit, offset);
 		List<BookingResponseDTO> bookingResponseDTOs = new ArrayList<>();
 
@@ -90,7 +88,31 @@ public class BookingServiceImpl implements IBookingService {
 
 	@Override
 	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-			String keyword, String startDate, String endDate) throws Exception {
-		return bookingDAO.getAllBookingsCount(userId, packageId, noOfTravellers, status, keyword, startDate, endDate);
+			 String startDate, String endDate) throws Exception {
+		return bookingDAO.getAllBookingsCount(userId, packageId, noOfTravellers, status, startDate, endDate);
 	}
+
+	public List<Integer> getPendingBookingsInLast10Minutes() {
+
+		try {
+			return bookingDAO.getPendingBookingsInLast10Minutes();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public boolean hasExistingBooking(int userId, int packageId) throws Exception {
+	    List<BookingResponseDTO> existingBookings = getAllBookings(
+	        userId, packageId, null, null,  null, null, 100, 0
+	    );
+
+	    for (BookingResponseDTO b : existingBookings) {
+	        if ("PENDING".equals(b.getStatus()) || "SUCCESSFUL".equals(b.getStatus())) {
+	            return true; 
+	        }
+	    }
+	    return false;
+	}
+
 }
