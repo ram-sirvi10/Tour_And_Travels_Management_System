@@ -1,15 +1,15 @@
 package com.travelmanagement.dto.requestDTO;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class BookingRequestDTO {
 	private int userId;
 	private int packageId;
-	private Date bookingDate;
+	private LocalDateTime bookingDate;
 	private int numberOfTravelers;
 	private List<TravelerRequestDTO> travelers;
-
+	private String status;
 	public int getUserId() {
 		return userId;
 	}
@@ -22,16 +22,24 @@ public class BookingRequestDTO {
 		return packageId;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	public void setPackageId(int packageId) {
 		this.packageId = packageId;
 	}
 
-	public Date getBookingDate() {
+	public LocalDateTime getBookingDate() {
 		return bookingDate;
 	}
 
-	public void setBookingDate(Date bookingDate) {
-		this.bookingDate = bookingDate;
+	public void setBookingDate(LocalDateTime localDate) {
+		this.bookingDate = localDate;
 	}
 
 	public int getNumberOfTravelers() {

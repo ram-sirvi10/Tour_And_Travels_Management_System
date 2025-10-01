@@ -22,4 +22,6 @@ public interface IBookingDAO {
 
 	List<Integer> getPendingBookingsInLast10Minutes() throws Exception;
 
+	void decrementTravelerCount(int bookingId) throws Exception;
+
 }

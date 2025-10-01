@@ -165,7 +165,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 										}
 										%>
 										<%
-										if ( userBooking!=null&& !"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
+										if ( userBooking==null||!"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
 										%>
 										<form action="<%=request.getContextPath()%>/booking"
 											method="post" class="mt-auto">

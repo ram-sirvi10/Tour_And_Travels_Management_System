@@ -5,8 +5,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
@@ -21,6 +24,7 @@ import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
+import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -62,11 +66,14 @@ public class BookingServlet extends HttpServlet {
 			case "paymentReject":
 				processPayment(request, response, false);
 				break;
-//			case "verifyPayment":
-//				verifyPayment(request, response);
-//				break;
+			case "verifyPayment":
+				verifyPayment(request, response);
+				break;
 			case "cancelBooking":
 				cancelBooking(request, response);
+				break;
+			case "cancelTraveler":
+				cancelTraveler(request, response);
 				break;
 			case "viewBookingForm":
 				viewBookingForm(request, response);
@@ -92,6 +99,107 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
+	private void cancelTraveler(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			int travelerId = Integer.parseInt(request.getParameter("travelerId"));
+			int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+			TravelerResponseDTO traveler = travelerService.getTravelerById(travelerId);
+			if (traveler == null || traveler.getBookingId() != bookingId) {
+				request.setAttribute("errorMessage", "Invalid traveler or booking mismatch!");
+				showTravelersList(request, response);
+				return;
+			}
+
+			if ("CANCELLED".equalsIgnoreCase(traveler.getStatus())) {
+				request.setAttribute("errorMessage", "Traveler already cancelled!");
+				showTravelersList(request, response);
+				return;
+			}
+
+			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+			if (booking == null) {
+//				request.setAttribute("errorMessage", "Booking not found!");
+//				showTravelersList(request, response);
+
+				request.getSession().setAttribute("errorMessage", "Booking not found!");
+				response.sendRedirect(
+						request.getContextPath() + "/booking?button=viewTravelers&bookingId=" + bookingId);
+
+				return;
+			}
+
+			HttpSession session = request.getSession();
+			UserResponseDTO userResponseDTO = (UserResponseDTO) session.getAttribute("user");
+			int loggedInUserId = userResponseDTO.getUserId();
+			if (booking.getUserId() != loggedInUserId) {
+//				request.setAttribute("errorMessage", "Unauthorized cancellation attempt!");
+//				showTravelersList(request, response);
+//				return;
+				request.getSession().setAttribute("errorMessage", "Unauthorized cancellation attempt!");
+				response.sendRedirect(
+						request.getContextPath() + "/booking?button=viewTravelers&bookingId=" + bookingId);
+				return;
+			}
+
+			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+			if (pkg == null) {
+//				request.setAttribute("errorMessage", "Package not found!");
+//				showTravelersList(request, response);
+
+				request.getSession().setAttribute("errorMessage", "Package not found!");
+				response.sendRedirect(
+						request.getContextPath() + "/booking?button=viewTravelers&bookingId=" + bookingId);
+
+				return;
+			}
+
+			LocalDateTime now = LocalDateTime.now();
+			if (pkg.getLastBookingDate().isBefore(now)) {
+//				request.setAttribute("errorMessage", "Cannot cancel traveler for past booking!");
+//				showTravelersList(request, response);
+
+				request.getSession().setAttribute("errorMessage", "Cannot cancel traveler for past booking!");
+				response.sendRedirect(
+						request.getContextPath() + "/booking?button=viewTravelers&bookingId=" + bookingId);
+
+				return;
+			}
+
+			long daysDiff = Duration
+					.between(now.toLocalDate().atStartOfDay(), pkg.getLastBookingDate().toLocalDate().atStartOfDay())
+					.toDays();
+
+			double travelerAmount = pkg.getPrice();
+			double amountAfterGST = travelerAmount / 1.18;
+			double refundPercent = (daysDiff >= 7) ? 100 : (daysDiff >= 3) ? 50 : (daysDiff >= 1) ? 25 : 0;
+
+			double refundAmount = (amountAfterGST * refundPercent) / 100;
+
+			travelerService.updateTravelerStatus(travelerId, null, "CANCELLED");
+			bookingService.decrementTravelerCount(bookingId);
+			packageService.adjustSeats(pkg.getPackageId(), 1);
+			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+			paymentDTO.setAmount(refundAmount);
+			paymentDTO.setBookingId(bookingId);
+			paymentDTO.setStatus("REFUNDED");
+			paymentService.addPayment(paymentDTO);
+
+//			request.setAttribute("successMessage",
+//					"Traveler cancelled successfully! Refund: " + String.format("%.2f", refundAmount));
+//			showTravelersList(request, response);
+
+			request.getSession().setAttribute("successMessage",
+					"Traveler cancelled successfully! Refund: " + String.format("%.2f", refundAmount));
+			response.sendRedirect(request.getContextPath() + "/booking?button=viewTravelers&bookingId=" + bookingId);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("errorMessage", "Something went wrong while cancelling traveler.");
+			showTravelersList(request, response);
+		}
+	}
+
 	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -101,16 +209,21 @@ public class BookingServlet extends HttpServlet {
 			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
 
 			if (booking == null) {
-				request.setAttribute("errorMessage", "Booking not found!");
-				showBookingHistory(request, response);
+//				request.setAttribute("errorMessage", "Booking not found!");
+//				showBookingHistory(request, response);
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+
+				request.getSession().setAttribute("errorMessage", "Booking not found!");
+				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
 				return;
 			}
 			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
 			if (pkg == null) {
-				request.setAttribute("errorMessage", "Unavailable Package cannot delete booking !");
-				showBookingHistory(request, response);
+//				request.setAttribute("errorMessage", "Unavailable Package cannot delete booking !");
+//				showBookingHistory(request, response);
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+				request.getSession().setAttribute("errorMessage", "Unavailable Package cannot delete booking !");
+				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
 				return;
 			}
 
@@ -118,9 +231,12 @@ public class BookingServlet extends HttpServlet {
 			LocalDateTime lastBookingDate = pkg.getLastBookingDate();
 
 			if (lastBookingDate.isBefore(now)) {
-				request.setAttribute("errorMessage", "Cannot cancel past bookings!");
-				showBookingHistory(request, response);
+//				request.setAttribute("errorMessage", "Cannot cancel past bookings!");
+//				showBookingHistory(request, response);
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+				request.getSession().setAttribute("errorMessage", "Cannot cancel past bookings!");
+				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+
 				return;
 			}
 
@@ -146,27 +262,35 @@ public class BookingServlet extends HttpServlet {
 			double refundAmount = (amountAfterGST * refundPercent) / 100;
 			System.out.println("Refundable Amount -> " + refundAmount);
 			bookingService.updateBookingStatus(bookingId, "CANCELLED");
+			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
 			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
 				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
 			}
 
-			request.setAttribute("successMessage",
-					"Your booking is canceled! Refund: " + String.format("%.2f", refundAmount));
 			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
 			paymentDTO.setAmount(refundAmount);
 			paymentDTO.setBookingId(bookingId);
 			paymentDTO.setStatus("REFUNDED");
 			paymentService.addPayment(paymentDTO);
-			showBookingHistory(request, response);
+
+//			request.setAttribute("successMessage",
+//					"Your booking is canceled! Refund: " + String.format("%.2f", refundAmount));
+//			showBookingHistory(request, response);
 //			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-//			return;
+
+			request.getSession().setAttribute("successMessage",
+					"Your booking is canceled! Refund: " + String.format("%.2f", refundAmount));
+			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+			return;
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("errorMessage", "Something went wrong while canceling booking.");
+//			request.setAttribute("errorMessage", "Something went wrong while canceling booking.");
 //			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-//			return;
-			showBookingHistory(request, response);
+//			showBookingHistory(request, response);
+			request.getSession().setAttribute("errorMessage", "Something went wrong while canceling booking.");
+			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+			return;
 		}
 	}
 
@@ -244,6 +368,7 @@ public class BookingServlet extends HttpServlet {
 	private void viewBookingForm(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String packageIdParam = request.getParameter("packageId");
+		HttpSession session = request.getSession();
 		if (packageIdParam == null || packageIdParam.isEmpty()) {
 			request.setAttribute("errorMessage", "Package  is missing!");
 			request.getRequestDispatcher("template/user/packages.jsp").forward(request, response);
@@ -265,8 +390,10 @@ public class BookingServlet extends HttpServlet {
 				request.getRequestDispatcher("template/user/packages.jsp").forward(request, response);
 				return;
 			}
-			request.setAttribute("package", packageResponseDTO);
-			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//			request.setAttribute("package", packageResponseDTO);
+//			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			session.setAttribute("package", packageResponseDTO);
+			response.sendRedirect("template/user/booking.jsp");
 			return;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -455,8 +582,11 @@ public class BookingServlet extends HttpServlet {
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("package", packageResponseDTO);
-			request.setAttribute("package", packageResponseDTO);
+
 			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+//			session.setAttribute("errors", errors);
+//			session.setAttribute("package", packageResponseDTO);
+//			response.sendRedirect("template/user/booking.jsp");
 			return;
 		}
 
@@ -470,7 +600,7 @@ public class BookingServlet extends HttpServlet {
 
 			double totalAmount = packageResponseDTO.getPrice() * bookingDTO.getNumberOfTravelers();
 
-			// Razorpay Order Create
+//			 Razorpay Order Create
 //			Order order = PaymentGatewayUtil.createOrder(totalAmount, "INR", "for booking " + createdBookingId);
 //			request.setAttribute("razorpayOrderId", order.get("id"));
 //			request.setAttribute("razorpayKey", "rzp_test_RNQiHnsfjn3up2");
@@ -625,11 +755,13 @@ public class BookingServlet extends HttpServlet {
 			request.setAttribute("totalPages", totalPages);
 			request.setAttribute("pageSize", pageSize);
 			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			return;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.setAttribute("errorMessage", "Unable to fetch booking history. Please retry.");
 			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			return;
 		}
 	}
 
@@ -688,7 +820,7 @@ public class BookingServlet extends HttpServlet {
 		try {
 
 			int totalRecords = travelerService.getTravelerCount(null, bookingId, user.getUserId(), null, null, null,
-					null, null, keyword, null, null);
+					keyword);
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 			if (currentPage > totalPages && totalPages > 0)
@@ -697,14 +829,13 @@ public class BookingServlet extends HttpServlet {
 			int offset = (currentPage - 1) * pageSize;
 
 			List<TravelerResponseDTO> travelers = travelerService.getAllTravelers(null, bookingId, user.getUserId(),
-					null, null, null, null, null, keyword, null, null, pageSize, offset);
+					null, null, null, keyword, pageSize, offset);
 
 			PackageResponseDTO pkg = packageService
 					.getPackageById(bookingService.getBookingById(bookingId).getPackageId());
-			String packageName = pkg != null ? pkg.getTitle() : "";
 
+			request.setAttribute("package", pkg);
 			request.setAttribute("travelers", travelers);
-			request.setAttribute("packageName", packageName);
 			request.setAttribute("keyword", keyword);
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);
@@ -719,39 +850,39 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
-//	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		try {
-//			String body = request.getReader().lines().reduce("", (acc, line) -> acc + line);
-//			JSONObject json = new JSONObject(body);
-//
-//			Map<String, String> params = new HashMap<>();
-//			params.put("razorpay_order_id", json.getString("razorpay_order_id"));
-//			params.put("razorpay_payment_id", json.getString("razorpay_payment_id"));
-//			params.put("razorpay_signature", json.getString("razorpay_signature"));
-//
-//			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
-//
-//			int bookingId = (int) request.getSession().getAttribute("bookingId");
-//			double amount = (double) request.getSession().getAttribute("amount");
-//
-//			if (isValid) {
-//				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-//				paymentDTO.setBookingId(bookingId);
-//				paymentDTO.setAmount(amount);
-//				paymentDTO.setStatus("SUCCESSFUL");
-//				paymentService.addPayment(paymentDTO);
-//
-//				bookingService.updateBookingStatus(bookingId, "CONFIRMED");
-//
-//				response.getWriter().print("Payment Successful & Verified!");
-//			} else {
-//				response.getWriter().print("Payment Failed!");
-//			}
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			response.getWriter().print("Payment verification failed: " + e.getMessage());
-//		}
-//	}
+	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		try {
+			String body = request.getReader().lines().reduce("", (acc, line) -> acc + line);
+			JSONObject json = new JSONObject(body);
+
+			Map<String, String> params = new HashMap<>();
+			params.put("razorpay_order_id", json.getString("razorpay_order_id"));
+			params.put("razorpay_payment_id", json.getString("razorpay_payment_id"));
+			params.put("razorpay_signature", json.getString("razorpay_signature"));
+
+			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
+
+			int bookingId = (int) request.getSession().getAttribute("bookingId");
+			double amount = (double) request.getSession().getAttribute("amount");
+
+			if (isValid) {
+				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+				paymentDTO.setBookingId(bookingId);
+				paymentDTO.setAmount(amount);
+				paymentDTO.setStatus("SUCCESSFUL");
+				paymentService.addPayment(paymentDTO);
+
+				bookingService.updateBookingStatus(bookingId, "CONFIRMED");
+
+				response.getWriter().print("Payment Successful & Verified!");
+			} else {
+				response.getWriter().print("Payment Failed!");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.getWriter().print("Payment verification failed: " + e.getMessage());
+		}
+	}
 
 }

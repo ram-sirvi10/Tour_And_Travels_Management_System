@@ -16,6 +16,7 @@ import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
+import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.Booking;
@@ -203,5 +204,16 @@ public class Mapper {
 		traveler.setAge(dto.getAge());
 		traveler.setMobile(dto.getMobile());
 		return traveler;
+	}
+	public static TravelerResponseDTO mapTravelerToTravelerResponseDTO(Traveler traveler) {
+		TravelerResponseDTO dto = new TravelerResponseDTO();
+		dto.setId(traveler.getId());
+		dto.setBookingId(traveler.getBookingId());
+		dto.setName(traveler.getName());
+		dto.setEmail(traveler.getEmail());
+		dto.setMobile(traveler.getMobile());
+		dto.setAge(traveler.getAge());
+		dto.setStatus(traveler.getStatus());
+		return dto;
 	}
 }

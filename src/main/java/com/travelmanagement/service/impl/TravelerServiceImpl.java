@@ -8,29 +8,26 @@ import com.travelmanagement.dao.impl.TravelerDAOImpl;
 import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
 import com.travelmanagement.model.Traveler;
 import com.travelmanagement.service.ITravelerService;
+import com.travelmanagement.util.Mapper;
 
 public class TravelerServiceImpl implements ITravelerService {
 	private ITravelerDAO travelerDAO = new TravelerDAOImpl();
 
+	
+	
 	@Override
 	public List<TravelerResponseDTO> getAllTravelers(Integer travelerId, Integer bookingId, Integer userId,
-			Integer packageId, Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus,
-			String keyword, String startDate, String endDate, int limit, int offset) throws Exception {
+			Integer packageId, Integer agencyId, String bookingStatus, 
+			String keyword, int limit, int offset) throws Exception {
 
 		List<Traveler> travelers = travelerDAO.getAllTravelers(travelerId, bookingId, userId, packageId, agencyId,
-				paymentId, bookingStatus, paymentStatus, keyword, startDate, endDate, limit, offset);
+				 bookingStatus,  keyword, limit, offset);
 
 		List<TravelerResponseDTO> travelerDTOs = new ArrayList<>();
 		if (travelers != null) {
 			for (Traveler t : travelers) {
-				TravelerResponseDTO dto = new TravelerResponseDTO();
-				dto.setId(t.getId());
-				dto.setBookingId(t.getBookingId());
-				dto.setName(t.getName());
-				dto.setEmail(t.getEmail());
-				dto.setMobile(t.getMobile());
-				dto.setAge(t.getAge());
-				travelerDTOs.add(dto);
+			
+				travelerDTOs.add(Mapper.mapTravelerToTravelerResponseDTO(t));
 			}
 		}
 		return travelerDTOs;
@@ -38,10 +35,10 @@ public class TravelerServiceImpl implements ITravelerService {
 
 	@Override
 	public int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
-			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-			String startDate, String endDate) throws Exception {
-		return travelerDAO.getTravelerCount(travelerId, bookingId, userId, packageId, agencyId, paymentId,
-				bookingStatus, paymentStatus, keyword, startDate, endDate);
+			Integer agencyId, String bookingStatus, String keyword
+			) throws Exception {
+		return travelerDAO.getTravelerCount(travelerId, bookingId, userId, packageId, agencyId, 
+				bookingStatus,  keyword);
 	}
 	
 	public boolean isTravelerAlreadyBooked(String email, int packageId)  {
@@ -53,5 +50,26 @@ public class TravelerServiceImpl implements ITravelerService {
 		}
 	    return false;
 	}
+
+	@Override
+	public void updateTravelerStatus(Integer travelerId, Integer bookingId ,String status) throws Exception {
+	    travelerDAO.updateTravelerStatus(travelerId, bookingId, status);
+	}
+
+	@Override
+	public TravelerResponseDTO getTravelerById(int travelerId) {
+	    try {
+	        Traveler traveler = travelerDAO.getTravelerById(travelerId); 
+	        if (traveler != null) {
+	           
+				return Mapper.mapTravelerToTravelerResponseDTO(traveler);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	
+
 
 }

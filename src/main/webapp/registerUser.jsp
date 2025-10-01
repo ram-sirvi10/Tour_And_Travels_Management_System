@@ -61,21 +61,25 @@
 		</div>
 
 		<h2 class="mb-3">Register User</h2>
+
 		<%
 		Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
+		Boolean showOtp = (Boolean) request.getAttribute("showOtp");
+		boolean lockFields = showOtp != null && showOtp; // lock fields after OTP sent
 		%>
 
 		<form action="<%=request.getContextPath()%>/auth" method="post"
 			enctype="multipart/form-data"
 			class="border p-4 rounded shadow-sm bg-light">
 
-		
+			<!-- Profile Image -->
 			<label class="form-label">Profile Image:</label>
 			<div class="profile-upload-wrapper">
 				<input type="file" name="profileImage" accept="image/*"
-					id="profileImageInput" style="display: none;">
+					id="profileImageInput" style="display: none;"
+					<%=lockFields ? "disabled" : ""%>>
 				<div class="profile-preview" id="profilePreview"
-					onclick="document.getElementById('profileImageInput').click();">
+					onclick="if(!<%=lockFields%>) document.getElementById('profileImageInput').click();">
 					<i class="bi bi-camera" style="font-size: 30px; color: #888;"></i>
 					<span>Click to upload</span>
 				</div>
@@ -88,10 +92,11 @@
 			}
 			%>
 
-		
+			<!-- Name -->
 			<label class="form-label">Name:</label> <input type="text"
 				name="name" class="form-control mb-2"
-				value="<%=request.getParameter("name") != null ? request.getParameter("name") : ""%>">
+				value="<%=request.getParameter("name") != null ? request.getParameter("name") : ""%>"
+				<%=lockFields ? "readonly" : ""%>>
 			<%
 			if (errors != null && errors.get("username") != null) {
 			%>
@@ -100,10 +105,11 @@
 			}
 			%>
 
-		
+			<!-- Email -->
 			<label class="form-label">Email:</label> <input type="email"
 				name="email" class="form-control mb-2"
-				value="<%=request.getParameter("email") != null ? request.getParameter("email") : ""%>">
+				value="<%=request.getParameter("email") != null ? request.getParameter("email") : ""%>"
+				<%=lockFields ? "readonly" : ""%>>
 			<%
 			if (errors != null && errors.get("email") != null) {
 			%>
@@ -112,45 +118,10 @@
 			}
 			%>
 
-		
-			<button type="submit" name="button" value="sendOTPUser">Send
-				OTP</button>
-
-			<%
-			Boolean showOtp = (Boolean) request.getAttribute("showOtp");
-			if (showOtp != null && showOtp) {
-			%>
-			<div class="mt-3">
-				<input type="text" name="otp" placeholder="Enter OTP" >
-				<button type="submit" name="button" value="verifyOTPUser">Verify
-					OTP</button>
-			</div>
-			<%
-			}
-			%>
-
-			<%
-			if (request.getAttribute("message") != null) {
-			%>
-			<div class="alert alert-success mt-2"><%=request.getAttribute("message")%></div>
-			<%
-			}
-			%>
-
-			<%
-			if (request.getAttribute("error") != null) {
-			%>
-			<div class="alert alert-danger mt-2"><%=request.getAttribute("error")%></div>
-			<%
-			}
-			%>
-
-			
-
-
 			<!-- Password -->
 			<label class="form-label">Password:</label> <input type="password"
-				name="password" class="form-control mb-2">
+				name="password" class="form-control mb-2"
+				<%=lockFields ? "readonly" : ""%>>
 			<%
 			if (errors != null && errors.get("password") != null) {
 			%>
@@ -161,7 +132,8 @@
 
 			<!-- Confirm Password -->
 			<label class="form-label">Confirm Password:</label> <input
-				type="password" name="confirmPassword" class="form-control mb-2">
+				type="password" name="confirmPassword" class="form-control mb-2"
+				<%=lockFields ? "readonly" : ""%>>
 			<%
 			if (errors != null && errors.get("confirmPassword") != null) {
 			%>
@@ -170,12 +142,41 @@
 			}
 			%>
 
-			<!-- Register Button (Only show after OTP verified) -->
+			<!-- Register Button -->
 			<%
-			if (session.getAttribute("userOtpVerified") != null) {
+			if (!lockFields) {
 			%>
 			<button type="submit" name="button" value="registerAsUser"
-			class="btn btn-dark w-100 mt-3">Register</button>
+				class="btn btn-dark w-100 mt-3">Register</button>
+			<%
+			}
+			%>
+
+			<!-- OTP Section -->
+			<%
+			if (lockFields) {
+			%>
+			<div class="mt-3">
+				<input type="text" name="otp" placeholder="Enter OTP"
+					class="form-control mb-2">
+				<button type="submit" name="button" value="verifyOTPAndRegisterUser"
+					class="btn btn-primary w-100">Verify OTP & Complete
+					Registration</button>
+			</div>
+			<%
+			}
+			%>
+
+			<%-- Success/Error Messages --%>
+			<%
+			if (request.getAttribute("message") != null) {
+			%>
+			<div class="alert alert-success mt-2"><%=request.getAttribute("message")%></div>
+			<%
+			}
+			if (request.getAttribute("error") != null) {
+			%>
+			<div class="alert alert-danger mt-2"><%=request.getAttribute("error")%></div>
 			<%
 			}
 			%>
@@ -183,22 +184,19 @@
 	</div>
 
 	<script>
-		const input = document.getElementById('profileImageInput');
-		const preview = document.getElementById('profilePreview');
-		input
-				.addEventListener(
-						'change',
-						function() {
-							if (this.files && this.files[0]) {
-								const reader = new FileReader();
-								reader.onload = function(e) {
-									preview.innerHTML = '<img src="'+e.target.result+'" alt="Profile" class="preview-img">';
-								}
-								reader.readAsDataURL(this.files[0]);
-							} else {
-								preview.innerHTML = '<i class="bi bi-camera" style="font-size: 30px; color: #888;"></i><span>Click to upload</span>';
-							}
-						});
-	</script>
+const input = document.getElementById('profileImageInput');
+const preview = document.getElementById('profilePreview');
+input.addEventListener('change', function() {
+    if(this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="'+e.target.result+'" alt="Profile" class="preview-img">';
+        }
+        reader.readAsDataURL(this.files[0]);
+    } else {
+        preview.innerHTML = '<i class="bi bi-camera" style="font-size: 30px; color: #888;"></i><span>Click to upload</span>';
+    }
+});
+</script>
 </body>
 </html>

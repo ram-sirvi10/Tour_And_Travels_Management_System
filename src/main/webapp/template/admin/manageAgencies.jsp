@@ -10,11 +10,11 @@ if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
 }
 
 List<AgencyResponseDTO> agenciesList = (List<AgencyResponseDTO>) request.getAttribute("agenciesList");
-String currentList = (String) request.getAttribute("listType");
-System.err.println(currentList);
-int currentPage = (Integer) request.getAttribute("currentPage");
-int totalPages = (Integer) request.getAttribute("totalPages");
-int pageSize = (Integer) request.getAttribute("pageSize");
+
+String currentList = request.getAttribute("listType") != null ? (String) request.getAttribute("listType") : "Manage Agencies";
+int currentPage = request.getAttribute("currentPage") != null ? (Integer) request.getAttribute("currentPage") : 1;
+int totalPages = request.getAttribute("totalPages") != null ? (Integer) request.getAttribute("totalPages") : 1;
+int pageSize = request.getAttribute("pageSize") != null ? (Integer) request.getAttribute("pageSize") : 5;
 
 int windowSize = 3;
 int startPage = ((currentPage - 1) / windowSize) * windowSize + 1;

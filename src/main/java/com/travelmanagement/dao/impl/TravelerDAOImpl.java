@@ -68,6 +68,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				t.setEmail(resultSet.getString("email"));
 				t.setMobile(resultSet.getString("mobile"));
 				t.setAge(resultSet.getInt("age"));
+				t.setStatus(resultSet.getString("status"));
 				return t;
 			}
 
@@ -110,16 +111,41 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	}
 
 	@Override
+	public void updateTravelerStatus(Integer travelerId, Integer bookingId, String status) throws Exception {
+		try {
+			String sql = "UPDATE travelers SET status = ? WHERE 1=1 ";
+			if (travelerId != null) {
+				sql += "AND  traveler_id = ? ";
+			}
+			if (bookingId != null) {
+				sql += " AND booking_id =? ";
+			}
+			preparedStatement = connection.prepareStatement(sql);
+			int index = 1;
+			preparedStatement.setString(index++, status);
+			if (travelerId != null) {
+				preparedStatement.setInt(index++, travelerId);
+			}
+			if (bookingId != null) {
+				preparedStatement.setInt(index++, bookingId);
+
+			}
+			preparedStatement.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
 	public List<Traveler> getAllTravelers(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
-			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-			String startDate, String endDate, int limit, int offset) throws Exception {
+			Integer agencyId, String bookingStatus, String keyword, int limit, int offset) throws Exception {
 		List<Traveler> travelers = new ArrayList<>();
 		try {
-			String sql = "SELECT t.*, b.status AS booking_status, pay.status AS payment_status " + "FROM travelers t "
-					+ "JOIN bookings b ON t.booking_id = b.booking_id "
+			String sql = "SELECT DISTINCT t.traveler_id, t.booking_id, t.name, t.email, t.mobile, t.age, t.status, b.status AS booking_status"
+					+ " FROM travelers t " + "JOIN bookings b ON t.booking_id = b.booking_id "
 					+ "JOIN travel_packages p ON b.package_id = p.package_id "
-					+ "JOIN travelAgency a ON p.agency_id = a.agency_id "
-					+ "LEFT JOIN payments pay ON b.booking_id = pay.booking_id " + "WHERE 1=1 ";
+					+ "JOIN travelAgency a ON p.agency_id = a.agency_id " + "WHERE 1=1 ";
 
 			if (travelerId != null)
 				sql += "AND t.traveler_id = ? ";
@@ -131,17 +157,14 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				sql += "AND p.package_id = ? ";
 			if (agencyId != null)
 				sql += "AND a.agency_id = ? ";
-			if (paymentId != null)
-				sql += "AND pay.payment_id = ? ";
+
 			if (bookingStatus != null && !bookingStatus.isEmpty())
 				sql += "AND b.status = ? ";
-			if (paymentStatus != null && !paymentStatus.isEmpty())
-				sql += "AND pay.status = ? ";
+
 			if (keyword != null && !keyword.isEmpty())
 				sql += "AND (t.name LIKE ? OR t.email LIKE ? OR t.mobile LIKE ?) ";
-			if (startDate != null && endDate != null)
-				sql += "AND b.booking_date BETWEEN ? AND ? ";
-			sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+
+			sql += " LIMIT ? OFFSET ?";
 			preparedStatement = connection.prepareStatement(sql);
 
 			int index = 1;
@@ -155,22 +178,17 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				preparedStatement.setInt(index++, packageId);
 			if (agencyId != null)
 				preparedStatement.setInt(index++, agencyId);
-			if (paymentId != null)
-				preparedStatement.setInt(index++, paymentId);
+
 			if (bookingStatus != null && !bookingStatus.isEmpty())
 				preparedStatement.setString(index++, bookingStatus);
-			if (paymentStatus != null && !paymentStatus.isEmpty())
-				preparedStatement.setString(index++, paymentStatus);
+
 			if (keyword != null && !keyword.isEmpty()) {
 				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 			}
-			if (startDate != null && endDate != null) {
-				preparedStatement.setString(index++, startDate);
-				preparedStatement.setString(index++, endDate);
-			}
+
 			preparedStatement.setInt(index++, limit);
 			preparedStatement.setInt(index++, offset);
 			resultSet = preparedStatement.executeQuery();
@@ -182,6 +200,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				t.setEmail(resultSet.getString("email"));
 				t.setMobile(resultSet.getString("mobile"));
 				t.setAge(resultSet.getInt("age"));
+				t.setStatus(resultSet.getString("status"));
 				travelers.add(t);
 			}
 		} catch (Exception e) {
@@ -192,15 +211,13 @@ public class TravelerDAOImpl implements ITravelerDAO {
 
 	@Override
 	public int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
-			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-			String startDate, String endDate) throws Exception {
+			Integer agencyId, String bookingStatus, String keyword) throws Exception {
 		int count = 0;
 		try {
-			String sql = "SELECT COUNT(*) AS total " + "FROM travelers t "
+			String sql = "SELECT COUNT(DISTINCT t.traveler_id) AS total " + "FROM travelers t "
 					+ "JOIN bookings b ON t.booking_id = b.booking_id "
 					+ "JOIN travel_packages p ON b.package_id = p.package_id "
-					+ "JOIN travelAgency a ON p.agency_id = a.agency_id "
-					+ "LEFT JOIN payments pay ON b.booking_id = pay.booking_id " + "WHERE 1=1 ";
+					+ "JOIN travelAgency a ON p.agency_id = a.agency_id " + "WHERE 1=1 ";
 
 			if (travelerId != null)
 				sql += "AND t.traveler_id = ? ";
@@ -212,16 +229,10 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				sql += "AND p.package_id = ? ";
 			if (agencyId != null)
 				sql += "AND a.agency_id = ? ";
-			if (paymentId != null)
-				sql += "AND pay.payment_id = ? ";
 			if (bookingStatus != null && !bookingStatus.isEmpty())
 				sql += "AND b.status = ? ";
-			if (paymentStatus != null && !paymentStatus.isEmpty())
-				sql += "AND pay.status = ? ";
 			if (keyword != null && !keyword.isEmpty())
 				sql += "AND (t.name LIKE ? OR t.email LIKE ? OR t.mobile LIKE ?) ";
-			if (startDate != null && endDate != null)
-				sql += "AND b.booking_date BETWEEN ? AND ? ";
 
 			preparedStatement = connection.prepareStatement(sql);
 
@@ -236,21 +247,15 @@ public class TravelerDAOImpl implements ITravelerDAO {
 				preparedStatement.setInt(index++, packageId);
 			if (agencyId != null)
 				preparedStatement.setInt(index++, agencyId);
-			if (paymentId != null)
-				preparedStatement.setInt(index++, paymentId);
+
 			if (bookingStatus != null && !bookingStatus.isEmpty())
 				preparedStatement.setString(index++, bookingStatus);
-			if (paymentStatus != null && !paymentStatus.isEmpty())
-				preparedStatement.setString(index++, paymentStatus);
+
 			if (keyword != null && !keyword.isEmpty()) {
 				String k = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
 				preparedStatement.setString(index++, k);
-			}
-			if (startDate != null && endDate != null) {
-				preparedStatement.setString(index++, startDate);
-				preparedStatement.setString(index++, endDate);
 			}
 
 			resultSet = preparedStatement.executeQuery();

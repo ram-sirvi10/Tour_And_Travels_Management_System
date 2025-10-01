@@ -3,7 +3,8 @@
 <%@ page
 	import="java.util.*, com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
-<%@ page import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
+<%@ page
+	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 
 <button type="button" class="btn btn-secondary mb-3"
 	onclick="window.history.back();">Back</button>
@@ -127,7 +128,46 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				class="card-img-top" alt="<%=pkg.getTitle()%>">
 			<div class="card-body">
 				<%
-				java.time.LocalDateTime lastBookingDate = pkg.getLastBookingDate(); // <-- yeh field use karna hoga
+				java.time.LocalDateTime lastBookingDate = pkg.getLastBookingDate();
+				%>
+
+				
+
+				<%-- If user has booked this package --%>
+				<%
+				BookingResponseDTO userBooking = (BookingResponseDTO) bookingMap.get(pkg.getPackageId());
+				if (userBooking != null) {
+					java.time.LocalDateTime departure = userBooking.getDepartureDateAndTime();
+				%>
+				<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
+					<small class="d-block">Booked: $<%=userBooking.getAmount()%></small>
+					<small class="d-block">Status: <%=userBooking.getStatus()%></small>
+					<small class="d-block"
+						id="carousel-countdown-<%=pkg.getPackageId()%>"></small>
+				</div>
+
+				<script>
+                                    const countdownCarousel<%=pkg.getPackageId()%> = () => {
+                                        const departure = new Date("<%=departure%>");
+                                        const now = new Date();
+                                        const el = document.getElementById("carousel-countdown-<%=pkg.getPackageId()%>");
+                                        if (isNaN(departure) || now >= departure) {
+                                            el.innerText = "Departed";
+                                            return;
+                                        }
+                                        const diff = departure - now;
+                                        const days = Math.floor(diff / (1000*60*60*24));
+                                        const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                                        const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+                                        const seconds = Math.floor((diff % (1000*60)) / 1000);
+                                        el.innerText = days + "d " + hours + "h " + minutes + "m " + seconds + "s to go";
+                                    };
+                                    setInterval(countdownCarousel<%=pkg.getPackageId()%>, 1000);
+                                    countdownCarousel<%=pkg.getPackageId()%>();
+                                </script>
+				<%
+				} else {
+				lastBookingDate = pkg.getLastBookingDate();
 				%>
 
 				<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
@@ -157,7 +197,9 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
             }, 1000);
         }
     </script>
-
+				<%
+				}
+				%>
 
 				<h5 class="card-title fw-bold"><%=pkg.getTitle()%></h5>
 				<p class="text-muted mb-1">
@@ -173,7 +215,17 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				<p class="mb-1">
 					<i class="fas fa-chair"></i> Available Seats:
 					<%=pkg.getTotalSeats()%></p>
-				<p class="card-text text-truncate"><%=pkg.getDescription()%></p>
+				<p>
+								<strong>Departure Date:</strong>
+
+								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
+
+
+							<p>
+								<strong>Departure Time:</strong>
+
+								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
+						
 
 				<form action="<%=request.getContextPath()%>/booking" method="post">
 					<input type="hidden" name="packageId"
@@ -182,8 +234,21 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 						data-bs-toggle="modal"
 						data-bs-target="#packageModal<%=pkg.getPackageId()%>">View
 						Details</button>
+
+					<%
+					if (userBooking == null || !"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
+					%>
+
 					<button type="submit" name="button" value="viewBookingForm"
 						class="btn btn-primary w-100 mt-2">Book Now</button>
+					<%
+					}else{
+					%>
+					<p class="btn btn-primary w-100 mt-2" >Already Booked</p>
+					<%} %>
+
+
+
 				</form>
 			</div>
 		</div>
@@ -240,7 +305,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					</div>
 				</div>
 				<div class="modal-footer">
-					<form action="<%=request.getContextPath()%>/booking" method="post">
+					<form action="<%=request.getContextPath()%>/booking" method="get">
 						<input type="hidden" name="packageId"
 							value="<%=pkg.getPackageId()%>">
 						<button type="submit" name="button" value="viewBookingForm"

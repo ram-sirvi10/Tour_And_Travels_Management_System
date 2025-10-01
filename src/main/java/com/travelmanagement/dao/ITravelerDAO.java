@@ -14,12 +14,13 @@ public interface ITravelerDAO {
 	boolean deleteTraveler(int travelerId) throws Exception;
 
 	List<Traveler> getAllTravelers(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
-			Integer agencyId, Integer paymentId, String bookingStatus, String paymentStatus, String keyword,
-			String startDate, String endDate, int limit, int offset) throws Exception;
+			Integer agencyId,  String bookingStatus, String keyword,
+			 int limit, int offset) throws Exception;
 
 	int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId, Integer agencyId,
-			Integer paymentId, String bookingStatus, String paymentStatus, String keyword, String startDate,
-			String endDate) throws Exception;
+			 String bookingStatus,  String keyword) throws Exception;
 
 	boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception;
+
+	void updateTravelerStatus(Integer travelerId, Integer bookingId, String status) throws Exception;
 }

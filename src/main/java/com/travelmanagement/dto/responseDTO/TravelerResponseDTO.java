@@ -2,59 +2,67 @@ package com.travelmanagement.dto.responseDTO;
 
 public class TravelerResponseDTO {
 
-    private int id;           // Traveler ID
-    private int bookingId;    // Associated Booking ID
-    private String name;      // Traveler name
-    private String email;     // Traveler email
-    private String mobile;    // Traveler mobile number
-    private int age;          // Traveler age
+	private int id;
+	private int bookingId;
+	private String name;
+	private String email;
+	private String mobile;
+	private int age;
+	private String status;
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public int getBookingId() {
-        return bookingId;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public void setBookingId(int bookingId) {
-        this.bookingId = bookingId;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public int getBookingId() {
+		return bookingId;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setBookingId(int bookingId) {
+		this.bookingId = bookingId;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String getMobile() {
-        return mobile;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public int getAge() {
-        return age;
-    }
+	public String getMobile() {
+		return mobile;
+	}
 
-    public void setAge(int age) {
-        this.age = age;
-    }
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
 }

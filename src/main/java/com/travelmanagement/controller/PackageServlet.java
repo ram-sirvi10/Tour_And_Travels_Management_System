@@ -10,7 +10,10 @@ import java.util.Map;
 
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.service.IBookingService;
 import com.travelmanagement.service.IPackageService;
+import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 
 import jakarta.servlet.ServletException;
@@ -18,6 +21,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/package")
 public class PackageServlet extends HttpServlet {
@@ -53,11 +57,12 @@ public class PackageServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
-	
 	private void listPackages(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		try {
-		
+			HttpSession session = request.getSession();
+			IBookingService bookingService = new BookingServiceImpl();
+			UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
 			String keyword = trimOrNull(request.getParameter("keyword"));
 			String title = trimOrNull(request.getParameter("title"));
 			String location = trimOrNull(request.getParameter("location"));
@@ -67,9 +72,8 @@ public class PackageServlet extends HttpServlet {
 
 			Integer agencyId = parseIntSafe(request.getParameter("agencyId"));
 			Integer totalSeats = parseIntSafe(request.getParameter("totalSeats"));
-			Boolean isActive = true; 
+			Boolean isActive = true;
 
-			
 			int page = parseIntSafe(request.getParameter("page"), 1);
 			int limit = parseIntSafe(request.getParameter("pageSize"), 10);
 			if (limit <= 0)
@@ -92,17 +96,37 @@ public class PackageServlet extends HttpServlet {
 				start = null;
 				end = null;
 			}
-	System.out.println(start);
+			System.out.println(start);
 			List<PackageResponseDTO> packages = packageService.searchPackages(title, agencyId, location, keyword,
-					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats,  isActive, limit, offset, false);
+					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
+					limit, offset, false);
 
-			int totalPackages = packageService.countPackages(title, agencyId, location, keyword,start != null ? start.toString() : null, end != null ? end.toString() : null,
-					totalSeats,  isActive, false);
+			int totalPackages = packageService.countPackages(title, agencyId, location, keyword,
+					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
+					false);
 
 			int totalPages = (int) Math.ceil((double) totalPackages / limit);
-		
 
-		
+			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(user.getUserId(), null, null,
+					"CONFIRMED", null, null, 100, 0);
+
+			LocalDateTime now = LocalDateTime.now();
+			List<BookingResponseDTO> upcomingBookings = new ArrayList<>();
+			Map<Integer, BookingResponseDTO> bookingMap = new HashMap<>();
+
+			for (BookingResponseDTO booking : allBookings) {
+				PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+				if (pkg != null && pkg.getDepartureDate() != null && pkg.getDepartureDate().isAfter(now)) {
+					booking.setPackageName(pkg.getTitle());
+					booking.setPackageImage(pkg.getImageurl());
+					booking.setDuration(pkg.getDuration());
+					booking.setAmount(pkg.getPrice() * booking.getNoOfTravellers());
+					booking.setDepartureDateAndTime(pkg.getDepartureDate());
+					upcomingBookings.add(booking);
+					bookingMap.put(booking.getPackageId(), booking);
+				}
+			}
+			request.setAttribute("bookingMap", bookingMap);
 			request.setAttribute("packages", packages);
 			request.setAttribute("currentPage", page);
 			request.setAttribute("totalPages", totalPages);

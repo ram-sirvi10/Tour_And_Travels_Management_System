@@ -1,13 +1,12 @@
 package com.travelmanagement.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Booking {
 	private int bookingId;
 	private int userId;
 	private int packageId;
-	private LocalDate bookingDate;
+	private LocalDateTime bookingDate;
 	private String status;
 	private int noOfTravellers;
 	private LocalDateTime created_at;
@@ -52,11 +51,11 @@ public class Booking {
 		this.packageId = packageId;
 	}
 
-	public LocalDate getBookingDate() {
+	public LocalDateTime getBookingDate() {
 		return bookingDate;
 	}
 
-	public void setBookingDate(LocalDate bookingDate) {
+	public void setBookingDate(LocalDateTime bookingDate) {
 		this.bookingDate = bookingDate;
 	}
 

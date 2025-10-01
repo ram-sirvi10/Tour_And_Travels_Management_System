@@ -25,6 +25,28 @@
     String emailValue = request.getParameter("email") != null ? request.getParameter("email") : "";
 %>
 
+<%
+String errorMessage = (String) session.getAttribute("errorMessage");
+session.removeAttribute("errorMessage");
+if (errorMessage == null) {
+	errorMessage = (String) request.getAttribute("errorMessage");
+}
+if (errorMessage != null && !errorMessage.isEmpty()) {
+%>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div class="toast show align-items-center text-bg-danger border-0"
+		role="alert" aria-live="assertive" aria-atomic="true"
+		data-bs-delay="3000" data-bs-autohide="true">
+		<div class="d-flex">
+			<div class="toast-body"><%=errorMessage%></div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+<%
+}
+%>
 <div class="container">
     <h2><%= heading %></h2>
 

@@ -72,7 +72,15 @@
 			Reserved. Designed by YourTeam.</div>
 	</div>
 </footer>
+<script>
 
+window.addEventListener("pageshow", function(event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+
+        window.location.reload();
+    }
+});
+</script>
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

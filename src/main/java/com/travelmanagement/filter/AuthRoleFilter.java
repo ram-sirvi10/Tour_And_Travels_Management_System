@@ -165,7 +165,7 @@ public class AuthRoleFilter implements Filter {
 		Map<String, List<String>> userAccess = new HashMap<>();
 		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword","viewProfile"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory","cancelBooking"));
+				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory","cancelBooking","cancelTraveler"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {

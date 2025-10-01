@@ -46,27 +46,27 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					<%="SUCCESSFUL".equals(request.getParameter("status")) ? "selected" : ""%>>Successful</option>
 				<option value="FAILED"
 					<%="FAILED".equals(request.getParameter("status")) ? "selected" : ""%>>Failed</option>
-					<option value="REFUNDED"
+				<option value="REFUNDED"
 					<%="REFUNDED".equals(request.getParameter("status")) ? "selected" : ""%>>REFUNDED</option>
 			</select>
 		</div>
 
 		<div class="col-md-2">
-		<label for="startDate" class="form-label"> From </label> <input
-			type="date" name="startDate" class="form-control"
-			placeholder="Start Date"
-			value="<%=request.getParameter("startDate") != null ? request.getParameter("startDate") : ""%>"
-			id="startDate"
-			onchange="document.getElementById('endDate').min = this.value;">
-	</div>
+			<label for="startDate" class="form-label"> From </label> <input
+				type="date" name="startDate" class="form-control"
+				placeholder="Start Date"
+				value="<%=request.getParameter("startDate") != null ? request.getParameter("startDate") : ""%>"
+				id="startDate"
+				onchange="document.getElementById('endDate').min = this.value;">
+		</div>
 
-	<div class="col-md-2">
-		<label for="endDate" class="form-label"> To </label> <input
-			type="date" name="endDate" class="form-control"
-			placeholder="End Date"
-			value="<%=request.getParameter("endDate") != null ? request.getParameter("endDate") : ""%>"
-			id="endDate">
-	</div>
+		<div class="col-md-2">
+			<label for="endDate" class="form-label"> To </label> <input
+				type="date" name="endDate" class="form-control"
+				placeholder="End Date"
+				value="<%=request.getParameter("endDate") != null ? request.getParameter("endDate") : ""%>"
+				id="endDate">
+		</div>
 
 
 		<div class="col-md-2">
@@ -116,7 +116,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 						<td><%=p.getPackageName() != null ? p.getPackageName() : "-"%></td>
 						<td>$<%=p.getAmount()%></td>
 						<td><span
-							class="badge <%="SUCCESSFUL".equals(p.getStatus()) ? "bg-success" : "bg-danger"%>">
+							class="badge 
+        <%="SUCCESSFUL".equals(p.getStatus()) ? "bg-success" : "REFUNDED".equals(p.getStatus()) ? "bg-info" : "bg-danger"%>">
 								<%=p.getStatus()%>
 						</span></td>
 						<td><%=p.getPaymentDate() != null ? p.getPaymentDate() : "-"%></td>

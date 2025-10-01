@@ -7,7 +7,7 @@
 <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
 
 <%
-PackageResponseDTO pkg = (PackageResponseDTO) request.getAttribute("package");
+PackageResponseDTO pkg = (PackageResponseDTO) session.getAttribute("package");
 int availableSeats = (pkg != null) ? pkg.getTotalSeats() : 0;
 
 Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
@@ -123,6 +123,14 @@ String errorMessage = (String) request.getAttribute("errorMessage");
 </div>
 
 <script>
+
+window.addEventListener("pageshow", function(event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+
+        window.location.reload();
+    }
+});
+
 function changeTravelers(count) {
     const form = document.forms[0];
     form.isBookingSubmit.value = "false"; 

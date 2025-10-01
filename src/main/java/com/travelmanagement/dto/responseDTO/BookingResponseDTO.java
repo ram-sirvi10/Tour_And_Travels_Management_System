@@ -1,6 +1,5 @@
 package com.travelmanagement.dto.responseDTO;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class BookingResponseDTO {
@@ -8,7 +7,7 @@ public class BookingResponseDTO {
 	private int bookingId;
 	private int userId;
 	private int packageId;
-	private LocalDate bookingDate;
+	private LocalDateTime bookingDate;
 	private String status;
 	private int noOfTravellers;
 	private String packageName;
@@ -106,11 +105,11 @@ public class BookingResponseDTO {
 		this.packageId = packageId;
 	}
 
-	public LocalDate getBookingDate() {
+	public LocalDateTime getBookingDate() {
 		return bookingDate;
 	}
 
-	public void setBookingDate(LocalDate bookingDate) {
+	public void setBookingDate(LocalDateTime bookingDate) {
 		this.bookingDate = bookingDate;
 	}
 

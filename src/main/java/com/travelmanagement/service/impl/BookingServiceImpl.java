@@ -114,5 +114,14 @@ public class BookingServiceImpl implements IBookingService {
 	    }
 	    return false;
 	}
+	
+	@Override
+	public void decrementTravelerCount(int bookingId) throws Exception {
+	    bookingDAO.decrementTravelerCount(bookingId);
+	    Booking booking = bookingDAO.getBookingById(bookingId);
+	    if (booking.getNoOfTravellers() <= 0) {
+	        bookingDAO.updateBookingStatus(bookingId, "CANCELLED");
+	    }
+	}
 
 }
