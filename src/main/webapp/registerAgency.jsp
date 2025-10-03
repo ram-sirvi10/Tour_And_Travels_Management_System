@@ -1,29 +1,52 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ page import="java.util.Map"%>
-
-<%
-String error = (String) request.getAttribute("error");
-String agencyName = request.getParameter("agency_name") != null ? request.getParameter("agency_name") : "";
-String ownerName = request.getParameter("owner_name") != null ? request.getParameter("owner_name") : "";
-String email = request.getParameter("email") != null ? request.getParameter("email") : "";
-String phone = request.getParameter("phone") != null ? request.getParameter("phone") : "";
-String city = request.getParameter("city") != null ? request.getParameter("city") : "";
-String state = request.getParameter("state") != null ? request.getParameter("state") : "";
-String country = request.getParameter("country") != null ? request.getParameter("country") : "";
-String pincode = request.getParameter("pincode") != null ? request.getParameter("pincode") : "";
-String regNumber = request.getParameter("registration_number") != null
-		? request.getParameter("registration_number")
-		: "";
-%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agency Registration</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-	rel="stylesheet" />
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+
 <style>
+body {
+    background: #f0f2f5;
+    font-family: Arial, sans-serif;
+}
+
+.registration-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 0; /* navbar space */
+}
+
+.registration-card {
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 900px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.registration-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.registration-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
 .profile-upload-wrapper {
 	display: flex;
 	flex-direction: column;
@@ -42,15 +65,12 @@ String regNumber = request.getParameter("registration_number") != null
 	justify-content: center;
 	cursor: pointer;
 	transition: border-color 0.3s, transform 0.2s;
+	margin-bottom: 10px;
 }
 
 .profile-preview:hover {
 	border-color: #0d6efd;
 	transform: scale(1.05);
-}
-
-.profile-preview i {
-	margin-bottom: 5px;
 }
 
 .preview-img {
@@ -59,222 +79,127 @@ String regNumber = request.getParameter("registration_number") != null
 	border-radius: 50%;
 	object-fit: cover;
 }
+
+.fade-alert {
+    transition: opacity 0.5s ease;
+}
+
+.error {
+	color: red;
+	font-size: 0.9em;
+}
 </style>
 </head>
 <body>
 
-	<jsp:include page="navbar.jsp" />
+<jsp:include page="navbar.jsp" />
 
-	<div class="container">
-		<div style="text-align: center; margin-bottom: 20px;">
-			<a href="registerUser.jsp" class="btn ">Register As User</a>
+<div class="registration-container">
+    <div class="registration-card">
 
-		</div>
-		<h2>Agency Registration</h2>
-		<%
-		if (error != null) {
-		%>
-		<div class="error"><%=error%></div>
-		<%
-		}
-		%>
-		<%
-		Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
-		%>
+        <div class="text-center mb-3">
+            <a href="registerUser.jsp" class="btn btn-outline-primary btn-sm">Register As User</a>
+        </div>
 
-		<form action="<%=request.getContextPath()%>/auth" method="post"
-			enctype="multipart/form-data">
+        <h2>Agency Registration</h2>
 
-			<label>Profile Image:</label>
-			<div class="profile-upload-wrapper">
-				<input type="file" name="profileImage" accept="image/*"
-					id="profileImageInput" style="display: none;">
+<%
+Map<String, String> errors = (Map<String, String>) request.getAttribute("errors");
+Boolean showOtp = (Boolean) request.getAttribute("showOtp");
+boolean lockFields = showOtp != null && showOtp;
+String errorMessage = (String) session.getAttribute("errorMessage");
+session.removeAttribute("errorMessage");
+if (errorMessage == null) errorMessage = (String) request.getAttribute("errorMessage");
+if (errorMessage != null && !errorMessage.isEmpty()) {
+%>
+<div class="alert alert-danger fade-alert text-center"><%=errorMessage%></div>
+<% } %>
 
+<form action="<%=request.getContextPath()%>/auth" method="post" enctype="multipart/form-data">
 
-				<div class="profile-preview" id="profilePreview"
-					onclick="document.getElementById('profileImageInput').click();">
-					<i class="bi bi-camera" style="font-size: 30px; color: #888;"></i>
-					<span>Click to upload</span>
-				</div>
-			</div>
-			<%
-			if (errors != null && errors.get("profileImage") != null) {
-			%>
-			<div class="error"><%=errors.get("profileImage")%></div>
-			<%
-			}
-			%>
+<div class="row g-3">
+    <!-- Left Column -->
+    <div class="col-md-6">
 
-			<input type="text" name="agency_name" placeholder="Agency Name"
-				value="<%=agencyName%>">
-			<%
-			if (errors != null && errors.get("agencyName") != null) {
-			%>
-			<div class="error"><%=errors.get("agencyName")%></div>
-			<%
-			}
-			%>
+        <!-- Profile Image -->
+        <label class="form-label">Profile Image:</label>
+        <div class="profile-upload-wrapper">
+            <input type="file" name="profileImage" accept="image/*" id="profileImageInput" style="display: none;" <%=lockFields ? "disabled" : ""%>>
+            <div class="profile-preview" id="profilePreview" onclick="if(!<%=lockFields%>) document.getElementById('profileImageInput').click();">
+                <i class="bi bi-camera" style="font-size: 30px; color: #888;"></i>
+                <span style="font-size:12px;">Click to upload</span>
+            </div>
+            <% if (errors != null && errors.get("profileImage") != null) { %>
+                <div class="error"><%=errors.get("profileImage")%></div>
+            <% } %>
+        </div>
 
-			<input type="text" name="owner_name" placeholder="Owner Name"
-				value="<%=ownerName%>">
-			<%
-			if (errors != null && errors.get("ownerName") != null) {
-			%>
-			<div class="error"><%=errors.get("ownerName")%></div>
-			<%
-			}
-			%>
+        <input type="text" name="agency_name" class="form-control mb-2" placeholder="Agency Name" value="<%=request.getParameter("agency_name") != null ? request.getParameter("agency_name") : ""%>" <%=lockFields ? "readonly" : ""%>>
+        <% if(errors != null && errors.get("agencyName") != null){ %><div class="error"><%=errors.get("agencyName")%></div><% } %>
 
-			<input type="email" name="email" placeholder="Email"
-				value="<%=email%>">
-			<%
-			if (errors != null && errors.get("email") != null) {
-			%>
-			<div class="error"><%=errors.get("email")%></div>
-			<%
-			}
-			%>
+        <input type="text" name="owner_name" class="form-control mb-2" placeholder="Owner Name" value="<%=request.getParameter("owner_name") != null ? request.getParameter("owner_name") : ""%>" <%=lockFields ? "readonly" : ""%>>
+        <% if(errors != null && errors.get("ownerName") != null){ %><div class="error"><%=errors.get("ownerName")%></div><% } %>
 
+        <input type="email" name="email" class="form-control mb-2" placeholder="Email" value="<%=request.getParameter("email") != null ? request.getParameter("email") : ""%>" <%=lockFields ? "readonly" : ""%>>
+        <% if(errors != null && errors.get("email") != null){ %><div class="error"><%=errors.get("email")%></div><% } %>
 
-			<button type="submit" name="button" value="sendOTPAgency">Send
-				OTP</button>
+    </div>
 
-			<%
-			Boolean showOtp = (Boolean) request.getAttribute("showOtp");
-			if (showOtp != null && showOtp) {
-			%>
-			<div class="mt-3">
-				<input type="text" name="otp" placeholder="Enter OTP" required>
-				<button type="submit" name="button" value="verifyOTPAgency">Verify
-					OTP</button>
-			</div>
-			<%
-			}
-			%>
+    <!-- Right Column -->
+    <div class="col-md-6">
+        <input type="text" name="country" class="form-control mb-2" placeholder="Country" value="<%=request.getParameter("country") != null ? request.getParameter("country") : ""%>" <%=lockFields ? "readonly" : ""%>>
 
-			<%
-			if (request.getAttribute("message") != null) {
-			%>
-			<div class="alert alert-success mt-2"><%=request.getAttribute("message")%></div>
-			<%
-			}
-			%>
+        <select id="state" name="state" class="form-select mb-2" <%=lockFields ? "disabled" : ""%>></select>
+        <% if(errors != null && errors.get("state") != null){ %><div class="error"><%=errors.get("state")%></div><% } %>
 
-			<%
-			if (request.getAttribute("error") != null) {
-			%>
-			<div class="alert alert-danger mt-2"><%=request.getAttribute("error")%></div>
-			<%
-			}
-			%>
+        <select id="city" name="city" class="form-select mb-2" <%=lockFields ? "disabled" : ""%>></select>
+        <% if(errors != null && errors.get("city") != null){ %><div class="error"><%=errors.get("city")%></div><% } %>
 
-			<!-- Register button will only enable if OTP is verified -->
-			<button type="submit" name="button" value="registerAsUser"
-				<%=(session.getAttribute("userOtpVerified") != null ? "" : "disabled")%>>
-				Register</button>
+        <input type="text" id="pincode" name="pincode" class="form-control mb-2" readonly value="<%=request.getParameter("pincode") != null ? request.getParameter("pincode") : ""%>">
+        <% if(errors != null && errors.get("pincode") != null){ %><div class="error"><%=errors.get("pincode")%></div><% } %>
 
+        <input type="password" name="password" class="form-control mb-2" placeholder="Password" <%=lockFields ? "readonly" : ""%>>
+        <% if(errors != null && errors.get("password") != null){ %><div class="error"><%=errors.get("password")%></div><% } %>
 
-			<input type="text" name="phone" placeholder="Phone"
-				value="<%=phone%>">
-			<%
-			if (errors != null && errors.get("phone") != null) {
-			%>
-			<div class="error"><%=errors.get("phone")%></div>
-			<%
-			}
-			%>
+        <input type="password" name="confirm_password" class="form-control mb-2" placeholder="Confirm Password" <%=lockFields ? "readonly" : ""%>>
+        <% if(errors != null && errors.get("confirmPassword") != null){ %><div class="error"><%=errors.get("confirmPassword")%></div><% } %>
 
-			<!-- Country/State/City Dropdown -->
-			<label>Country</label> <select id="country" name="country"
-				style="width: 300px;">
-				<option value="India" selected>India</option>
-			</select> <label>State</label> <select id="state" name="state"
-				style="width: 300px;">
-				<option value="">Select State</option>
-			</select>
-			<%
-			if (errors != null && errors.get("state") != null) {
-			%>
-			<div class="error"><%=errors.get("state")%></div>
-			<%
-			}
-			%>
+    </div>
+</div>
 
-			<label>City</label> <select id="city" name="city"
-				style="width: 300px;">
-				<option value="">Select City</option>
-			</select>
-			<%
-			if (errors != null && errors.get("city") != null) {
-			%>
-			<div class="error"><%=errors.get("city")%></div>
-			<%
-			}
-			%>
+<% if(!lockFields){ %>
+    <button type="submit" name="button" value="registerAsAgency" class="btn btn-dark w-100 mt-3">Register</button>
+<% } else { %>
+    <div class="mt-3">
+        <input type="text" name="otp" class="form-control mb-2" placeholder="Enter OTP">
+        <button type="submit" name="button" value="verifyOTPAndRegisterAgency" class="btn btn-primary w-100">Verify OTP & Complete Registration</button>
+    </div>
+<% } %>
 
-			<label>Pincode</label> <input type="text" id="pincode" name="pincode"
-				readonly value="<%=pincode%>">
-			<%
-			if (errors != null && errors.get("pincode") != null) {
-			%>
-			<div class="error"><%=errors.get("pincode")%></div>
-			<%
-			}
-			%>
+<% if(request.getAttribute("message") != null){ %>
+    <div class="alert alert-success mt-2 fade-alert"><%=request.getAttribute("message")%></div>
+<% } %>
+<% if(request.getAttribute("error") != null){ %>
+    <div class="alert alert-danger mt-2 fade-alert"><%=request.getAttribute("error")%></div>
+<% } %>
 
+</form>
+</div>
+</div>
 
-			<input type="text" name="registration_number"
-				placeholder="Registration Number" value="<%=regNumber%>">
-			<%
-			if (errors != null && errors.get("registrationNumber") != null) {
-			%>
-			<div class="error"><%=errors.get("registrationNumber")%></div>
-			<%
-			}
-			%>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-			<input type="password" name="password" placeholder="Password">
-			<%
-			if (errors != null && errors.get("password") != null) {
-			%>
-			<div class="error"><%=errors.get("password")%></div>
-			<%
-			}
-			%>
-
-			<input type="password" name="confirm_password"
-				placeholder="Confirm Password">
-			<%
-			if (errors != null && errors.get("confirmPassword") != null) {
-			%>
-			<div class="error"><%=errors.get("confirmPassword")%></div>
-			<%
-			}
-			%>
-
-			<button type="submit" name="button" value="registerAsAgency">Register</button>
-		</form>
-
-	</div>
-
-	<!-- Select2 for searchable dropdown -->
-
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script
-		src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-
-
-
-	<script>
+<script>
 $(document).ready(function() {
-    $('#state, #city').select2();
+    $('#state, #city').select2({width: '100%'});
 
     function fetchData(type, value) {
         let params = new URLSearchParams();
         params.append("type", type);
         params.append("value", value || "");
-
         return fetch("location", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -282,69 +207,55 @@ $(document).ready(function() {
         }).then(res => res.json());
     }
 
-    // Load states
     fetchData("states").then(data => {
         if(data.data && data.data.states) {
-            data.data.states.forEach(s => {
-                $('#state').append(new Option(s.name, s.name));
-            });
+            data.data.states.forEach(s => { $('#state').append(new Option(s.name, s.name)); });
         }
     });
 
-    // Load cities when state changes
     $('#state').on('change', function() {
         $('#city').empty().append(new Option("Select City", ""));
         let state = this.value;
-
         if(state) {
             fetchData("cities", state).then(data => {
                 if(Array.isArray(data.data)) {
-                    data.data.forEach(c => {
-                        $('#city').append(new Option(c, c));
-                    });
+                    data.data.forEach(c => { $('#city').append(new Option(c, c)); });
                 }
             });
         }
     });
 
-    // Load pincode when city changes
     $('#city').on('change', function() {
         let city = this.value;
         if(city) {
             fetchData("pincode", city).then(data => {
                 if(data[0] && data[0].Status === "Success") {
                     $('#pincode').val(data[0].PostOffice[0].Pincode);
-                } else {
-                    $('#pincode').val("Not Found");
-                }
+                } else { $('#pincode').val("Not Found"); }
             });
         }
     });
 });
 
-
-// for profile image
-
- const input = document.getElementById('profileImageInput');
-    const preview = document.getElementById('profilePreview');
-
-    input.addEventListener('change', function() {
-        if(this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = '<img src="'+e.target.result+'" alt="Profile" class="preview-img">';
-            }
-            reader.readAsDataURL(this.files[0]);
-        } else {
-            preview.innerHTML = '<i class="bi bi-camera" style="font-size: 30px; color: #888;"></i><span>Click to upload</span>';
+// Profile Image Preview
+const input = document.getElementById('profileImageInput');
+const preview = document.getElementById('profilePreview');
+input.addEventListener('change', function() {
+    if(this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="'+e.target.result+'" alt="Profile" class="preview-img">';
         }
-    });
+        reader.readAsDataURL(this.files[0]);
+    } else {
+        preview.innerHTML = '<i class="bi bi-camera" style="font-size:30px;color:#888;"></i><span>Click to upload</span>';
+    }
+});
 
+// Auto-hide alerts
+document.querySelectorAll('.fade-alert').forEach(alert => {
+    setTimeout(() => { alert.style.opacity = 0; setTimeout(() => { alert.style.display = 'none'; }, 500); }, 3000);
+});
 </script>
-
-
-
-
-
 </body>
 </html>

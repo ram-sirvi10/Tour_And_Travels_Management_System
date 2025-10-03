@@ -95,9 +95,9 @@ public class AuthRoleFilter implements Filter {
 		HttpSession session = req.getSession(false);
 
 	
-//	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-//	        res.setHeader("Pragma", "no-cache"); 
-//	        res.setDateHeader("Expires", 0); 
+	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+	        res.setHeader("Pragma", "no-cache"); 
+	        res.setDateHeader("Expires", 0); 
 		
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
@@ -165,7 +165,7 @@ public class AuthRoleFilter implements Filter {
 		Map<String, List<String>> userAccess = new HashMap<>();
 		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword","viewProfile"));
 		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory"));
+				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory","cancelBooking","cancelTraveler"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {

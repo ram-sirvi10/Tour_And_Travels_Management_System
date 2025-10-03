@@ -164,7 +164,9 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 										<%
 										}
 										%>
-
+										<%
+										if ( userBooking==null||!"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
+										%>
 										<form action="<%=request.getContextPath()%>/booking"
 											method="post" class="mt-auto">
 											<input type="hidden" name="packageId"
@@ -172,6 +174,9 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 											<button type="submit" name="button" value="viewBookingForm"
 												class="btn btn-primary w-100">Book Now</button>
 										</form>
+										<%
+										}
+										%>
 									</div>
 								</div>
 							</div>

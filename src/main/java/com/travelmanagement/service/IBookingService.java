@@ -22,4 +22,6 @@ public interface IBookingService {
 
 	int createBooking(BookingRequestDTO dto) throws Exception;
 
+	void decrementTravelerCount(int bookingId) throws Exception;
+
 }

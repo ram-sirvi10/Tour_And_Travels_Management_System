@@ -20,6 +20,15 @@ public class Packages {
 	private LocalDateTime lastBookingDate;
 	private int version;
 	private LocalDateTime departureDate;
+	private int totalBookings;
+
+	public int getTotalBookings() {
+		return totalBookings;
+	}
+
+	public void setTotalBookings(int totalBookings) {
+		this.totalBookings = totalBookings;
+	}
 
 	public LocalDateTime getLastBookingDate() {
 		return lastBookingDate;
@@ -60,7 +69,6 @@ public class Packages {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
-	
 
 	public int getPackageId() {
 		return packageId;

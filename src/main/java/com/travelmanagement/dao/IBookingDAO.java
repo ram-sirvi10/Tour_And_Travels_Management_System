@@ -22,4 +22,13 @@ public interface IBookingDAO {
 
 	List<Integer> getPendingBookingsInLast10Minutes() throws Exception;
 
+	void decrementTravelerCount(int bookingId) throws Exception;
+
+	int getTotalBookingsByPackage(int packageId) throws Exception;
+
+	double getRevenueByPackage(int packageId) throws Exception;
+	
 }
+
+
+

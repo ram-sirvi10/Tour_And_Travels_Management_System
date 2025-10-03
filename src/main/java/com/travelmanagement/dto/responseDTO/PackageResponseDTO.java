@@ -1,6 +1,5 @@
 package com.travelmanagement.dto.responseDTO;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class PackageResponseDTO {
@@ -14,6 +13,7 @@ public class PackageResponseDTO {
 	private boolean isActive;
 	private String imageurl;
 	private int totalSeats;
+
 
 	private int version;
 
@@ -129,4 +129,20 @@ public class PackageResponseDTO {
 		// TODO Auto-generated method stub
 
 	}
+
+	private int totalBookings;
+
+	public int getTotalBookings() {
+		return totalBookings;
+	}
+
+	public void setTotalBookings(int totalBookings) {
+		this.totalBookings = totalBookings;
+	}
+
+	public void setTotalRevenue(double totalRevenue) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -44,11 +44,13 @@ public class UserServiceImpl implements IUserService {
 		if (dbUser == null) {
 			throw new UserNotFoundException("User not found!");
 		}
-		if (!dbUser.isActive()) {
+		System.out.println(dbUser.isActive());
+		if (dbUser.isActive()!=true) {
+			System.out.println(dbUser.isActive());
 			throw new BadRequestException("Account is blocked! Please contact support.");
 		}
 		if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {
-			throw new BadRequestException("Invalid credentials!");
+			throw new BadRequestException("Invalid Password!");
 		}
 
 		return Mapper.mapUserToUserResponseDTO(dbUser);
@@ -102,11 +104,29 @@ public class UserServiceImpl implements IUserService {
 
 	@Override
 	public boolean delete(int id) throws Exception {
+		User user = userDAO.getUserById(id);
+		if (user == null) {
+			throw new UserNotFoundException("USER NOT FOUND ! ");
+		} else if (user.isDelete()) {
+			throw new UserNotFoundException("USER NOT FOUND ! ");
+		}
 		return userDAO.deleteUser(id);
 	}
 
 	@Override
 	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
+		User user = userDAO.getUserById(userId);
+		if (user == null) {
+			throw new UserNotFoundException("USER NOT FOUND ! ");
+		} else if (user.isDelete()) {
+			throw new UserNotFoundException("USER NOT FOUND ! ");
+		} else if (user.isActive() == active) {
+			String state = "ACTIVE";
+			if (!active) {
+				state = "INACTIVE";
+			}
+			throw new BadRequestException("USER ALREADY -> " + state);
+		}
 		return userDAO.updateUserActiveState(userId, active);
 	}
 

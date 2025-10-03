@@ -1,14 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ page import="java.util.List"%>
-
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%@ include file="header.jsp"%>
+
 <button type="button" class="btn btn-secondary"
 	onclick="window.history.back();">Back</button>
+
 <%
-String errorMessage = (String) request.getAttribute("errorMessage");
+String errorMessage = (String) session.getAttribute("errorMessage");
+session.removeAttribute("errorMessage");
+if (errorMessage == null) {
+	errorMessage = (String) request.getAttribute("errorMessage");
+}
 if (errorMessage != null && !errorMessage.isEmpty()) {
 %>
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
@@ -16,8 +21,33 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 		role="alert" aria-live="assertive" aria-atomic="true"
 		data-bs-delay="3000" data-bs-autohide="true">
 		<div class="d-flex">
+			<div class="toast-body"><%=errorMessage%></div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+<%
+}
+%>
+<%
+String successMessage = (String) session.getAttribute("successMessage");
+session.removeAttribute("successMessage");
+if (successMessage == null) {
+	successMessage = (String) request.getAttribute("successMessage");
+}
+%>
+
+<%
+if (successMessage != null && !successMessage.isEmpty()) {
+%>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div class="toast show align-items-center text-bg-success border-0"
+		role="alert" aria-live="assertive" aria-atomic="true"
+		data-bs-delay="3000" data-bs-autohide="true">
+		<div class="d-flex">
 			<div class="toast-body">
-				<%=errorMessage%>
+				<%=successMessage%>
 			</div>
 			<button type="button" class="btn-close btn-close-white me-2 m-auto"
 				data-bs-dismiss="toast" aria-label="Close"></button>
@@ -27,9 +57,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 <%
 }
 %>
-
 <h2 class="mb-4">My Booking History</h2>
-<form method="get" action="booking" class="row g-2 mb-3">
+<form method="post" action="booking" class="row g-2 mb-3">
 	<input type="hidden" name="button" value="bookingHistroy">
 
 	<div class="col-md-2">
@@ -43,9 +72,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				<%="CANCELLED".equals(request.getParameter("status")) ? "selected" : ""%>>Cancelled</option>
 		</select>
 	</div>
-
-
-
 
 	<div class="col-md-2">
 		<label for="startDate" class="form-label"> From </label> <input
@@ -64,7 +90,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 			id="endDate">
 	</div>
 
-
 	<div class="col-md-2">
 		<label for="pageSize">Records per page:</label> <select
 			name="pageSize" id="pageSize" onchange="this.form.submit()">
@@ -76,7 +101,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				<%="50".equals(request.getParameter("pageSize")) ? "selected" : ""%>>50</option>
 		</select>
 	</div>
-
 
 	<div class="col-md-1">
 		<button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -90,97 +114,102 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	if (bookings != null && !bookings.isEmpty()) {
 		for (BookingResponseDTO booking : bookings) {
 			java.time.LocalDateTime departure = booking.getDepartureDateAndTime();
-			
 			String statusClass = "bg-danger";
-			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-			    statusClass = "bg-success";
-			} else if ("PENDING".equalsIgnoreCase(booking.getStatus())) {
-			    statusClass = "bg-warning text-dark";
-			}
-			
-
+			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus()))
+		statusClass = "bg-success";
+			else if ("PENDING".equalsIgnoreCase(booking.getStatus()))
+		statusClass = "bg-warning text-dark";
 	%>
 
-<div class="col-md-6">
-    <div class="card shadow-sm mb-4">
-        <div class="row g-0">
-            <!-- Image Column -->
-            <div class="col-md-4">
-                <img src="<%=booking.getPackageImage()%>"
-                     class="img-fluid rounded-start h-100 object-fit-cover"
-                     alt="<%=booking.getPackageName()%>">
-            </div>
-            <!-- Content Column -->
-            <div class="col-md-8">
-                <div class="card-body d-flex flex-column justify-content-between h-100">
-                    <div>
-                        <!-- Countdown / Departure -->
-                        <% if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) { %>
-                            <div class="mb-2 text-center">
-                                <h6 class="mb-1">Departure In:</h6>
-                                <span id="countdown-<%=booking.getBookingId()%>"
-                                      class="fw-bold fs-6 text-primary"></span>
-                            </div>
-                        <% } else { %>
-                            <h6 class="mb-1">
-                                Departure Date : <%= departure != null ? departure.toLocalDate() : "Not Mentioned" %>
-                            </h6>
-                        <% } %>
+	<div class="col-md-6">
+		<div class="card shadow-sm mb-4">
+			<div class="row g-0">
+				<div class="col-md-4">
+					<img src="<%=booking.getPackageImage()%>"
+						class="img-fluid rounded-start h-100 object-fit-cover"
+						alt="<%=booking.getPackageName()%>">
+				</div>
+				<div class="col-md-8">
+					<div
+						class="card-body d-flex flex-column justify-content-between h-100">
+						<div>
+							<%
+							if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+							%>
+							<div class="mb-2 text-center">
+								<h6 class="mb-1">Departure In:</h6>
+								<span id="countdown-<%=booking.getBookingId()%>"
+									class="fw-bold fs-6 text-primary"></span>
+							</div>
+							<%
+							} else {
+							%>
+							<h6 class="mb-1">
+								Departure Date:
+								<%=departure != null ? departure.toLocalDate() : "Not Mentioned"%></h6>
+							<%
+							}
+							%>
 
-                        <h5 class="card-title fw-bold"><%=booking.getPackageName()%></h5>
-                        <p class="mb-1"><i class="fas fa-clock"></i> <%=booking.getDuration()%> Days</p>
-                        <p class="mb-1"><i class="fas fa-users"></i> <%=booking.getNoOfTravellers()%> Travelers</p>
-                        <p class="mb-1"><i class="fas fa-dollar-sign"></i> $<%=booking.getAmount()%></p>
-                        <p class="mb-1"><i class="fas fa-calendar"></i> Booking Date: <%=booking.getBookingDate()%></p>
-                        <span class="badge <%=statusClass%>"><%=booking.getStatus()%></span>
-                    </div>
+							<h5 class="card-title fw-bold"><%=booking.getPackageName()%></h5>
+							<p class="mb-1">
+								<i class="fas fa-clock"></i>
+								<%=booking.getDuration()%>
+								Days
+							</p>
+							<p class="mb-1">
+								<i class="fas fa-users"></i>
+								<%=booking.getNoOfTravellers()%>
+								Travelers
+							</p>
+							<p class="mb-1">
+								<i class="fas fa-dollar-sign"></i> $<%=booking.getAmount()%></p>
+							<p class="mb-1">
+								<i class="fas fa-calendar"></i> Booking Date:
+								<%=booking.getBookingDate() != null ? booking.getBookingDate().toLocalDate() : "N/A"%>
 
-                    <!-- Action Buttons -->
-                    <div class="mt-3 d-flex gap-2">
-                        <a href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
-                           class="btn btn-sm btn-primary flex-grow-1">View Travelers</a>
+								<span class="badge <%=statusClass%>"><%=booking.getStatus()%></span>
+						</div>
 
-                        <% if (( "PENDING".equalsIgnoreCase(booking.getStatus()) 
-                               || "CONFIRMED".equalsIgnoreCase(booking.getStatus()) )
-                            && departure != null
-                            && departure.isAfter(now)) {
-                        %>
-                            <form method="post" action="<%=request.getContextPath()%>/booking" class="flex-grow-1">
-                                <input type="hidden" name="button" value="cancelBooking">
-                                <input type="hidden" name="bookingId" value="<%=booking.getBookingId()%>">
-                                <button type="submit" class="btn btn-sm btn-danger w-100">Cancel Booking</button>
-                            </form>
-                        <% } %>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+						<div class="mt-3 d-flex gap-2">
+							<a
+								href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
+								class="btn btn-sm btn-primary flex-grow-1">View Travelers</a>
+		
 
-<script>
+							<%
+							if (("PENDING".equalsIgnoreCase(booking.getStatus()) || "CONFIRMED".equalsIgnoreCase(booking.getStatus()))
+									&& departure != null && departure.isAfter(now)) {
+							%>
+							<button type="button" class="btn btn-sm btn-danger flex-grow-1"
+								onclick="showCancelModal(<%=booking.getBookingId()%>, '<%=booking.getLastBookingDate()%>', <%=booking.getAmount()%>)">
+								Cancel Booking</button>
+							<%
+							}
+							%>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
 (function() {
     const departureStr = "<%=departure != null ? departure.toString() : ""%>";
-    if (!departureStr) return; // No departure date
-
-    // Convert to JS Date using ISO format
-    const departure = new Date("<%=departure != null ? departure.toString().replace(' ', 'T') : ""%>");
+    if (!departureStr) return;
+    const departure = new Date(departureStr.replace(' ', 'T'));
     const countdownEl = document.getElementById("countdown-<%=booking.getBookingId()%>");
 
     const interval = setInterval(() => {
         const now = new Date();
         if (now >= departure || isNaN(departure.getTime())) {
             countdownEl.innerText = "Departed";
-
-            // Show toast only once
             if (!countdownEl.dataset.alertShown) {
-                const toastHtml = `
-                <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+                const toastHtml = `<div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
                     <div class="toast show align-items-center text-bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
-                            <div class="toast-body">
-                                Your trip for <%=booking.getPackageName()%> has started today!
-                            </div>
+                            <div class="toast-body">Your trip for <%=booking.getPackageName()%> has started today!</div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                     </div>
@@ -188,25 +217,18 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
                 document.body.insertAdjacentHTML('beforeend', toastHtml);
                 countdownEl.dataset.alertShown = "true";
             }
-
             clearInterval(interval);
             return;
         }
-
         const diff = departure - now;
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
         countdownEl.innerText = days + "d " + hours + "h " + minutes + "m " + seconds + "s to go";
     }, 1000);
 })();
 </script>
-
-
- 
-
 
 	<%
 	}
@@ -217,6 +239,8 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	}
 	%>
 </div>
+
+<!-- Pagination -->
 <nav>
 	<ul class="pagination justify-content-center mt-3">
 		<%
@@ -258,6 +282,117 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	</ul>
 </nav>
 
+<!-- SINGLE CANCEL MODAL -->
+<div class="modal fade" id="cancelModal" tabindex="-1"
+	aria-labelledby="cancelModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="cancelModalLabel">Cancel Booking</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"
+					aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p id="totalAmount" style="margin: 0;"></p>
+				<p id="amountAfterGst" style="margin: 0;"></p>
+				<p id="cancellationFee" style="margin: 0;"></p>
+				<hr>
+				<p id="refundableAmount" style="margin: 0;"></p>
+			</div>
+			<div class="modal-footer">
+				<form id="confirmCancelForm" method="post"
+					action="<%=request.getContextPath()%>/booking">
+					<input type="hidden" name="button" value="cancelBooking"> <input
+						type="hidden" name="bookingId" id="modalBookingId">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-danger">Confirm
+						Cancel</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
 
+
+<!-- Include Bootstrap CSS and JS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount) {
+    console.log("Updating modal with:", { bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount }); // Debug the input values
+    const totalAmountEl = document.getElementById("totalAmount");
+    const amountAfterGstEl = document.getElementById("amountAfterGst");
+    const cancellationFeeEl = document.getElementById("cancellationFee");
+    const refundableAmountEl = document.getElementById("refundableAmount");
+    const bookingIdEl = document.getElementById("modalBookingId");
+
+  
+    if (totalAmountEl && amountAfterGstEl && cancellationFeeEl && refundableAmountEl && bookingIdEl) {
+        totalAmountEl.innerText = 'Total Amount: ₹'+totalAmount.toFixed(2);
+        amountAfterGstEl.innerText = 'Amount After GST Charges(18%): ₹'+amountAfterGST.toFixed(2);
+        cancellationFeeEl.innerText = 'Cancellation Charge: ₹'+cancelFee.toFixed(2);
+        refundableAmountEl.innerText = 'Refundable Amount: ₹'+refundAmount.toFixed(2);
+        bookingIdEl.value = bookingId;
+        console.log("Modal content updated successfully");
+        console.log("Modal body content:", document.getElementById("cancelModal").querySelector(".modal-body").innerHTML);
+    } else {
+        console.error("One or more modal elements not found:", {
+            totalAmountEl, amountAfterGstEl, cancellationFeeEl, refundableAmountEl, bookingIdEl
+        });
+    }
+}
+
+function showCancelModal(bookingId, lastBookingDateStr, amount) {
+    let totalAmount = Number(amount) || 0;
+    let lastBookingDate = new Date(lastBookingDateStr.replace(' ', 'T'));
+    if (isNaN(lastBookingDate.getTime())) {
+        console.error("Invalid lastBookingDate:", lastBookingDateStr);
+        return;
+    }
+    const now = new Date(); 
+    let daysDiff = Math.ceil((lastBookingDate - now) / (1000 * 60 * 60 * 24));
+
+    let refundPercent = 0;
+    if (daysDiff >= 7) refundPercent = 100;
+    else if (daysDiff >= 3) refundPercent = 50;
+    else if (daysDiff >= 1) refundPercent = 25;
+
+    let amountAfterGST = totalAmount / 1.18;
+    let refundAmount = (amountAfterGST * refundPercent) / 100;
+    let cancelFee = amountAfterGST - refundAmount;
+
+    console.log({
+        totalAmount: totalAmount.toFixed(2),
+        amountAfterGST: amountAfterGST.toFixed(2),
+        cancelFee: cancelFee.toFixed(2),
+        refundAmount: refundAmount.toFixed(2)
+    });
+
+    const modal = document.getElementById('cancelModal');
+    if (modal) {
+        const bootstrapModal = new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false });
+        bootstrapModal.show();
+        modal.addEventListener('shown.bs.modal', function() {
+            updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount);
+        }, { once: true }); 
+    } else {
+        console.error("Modal element not found!");
+    }
+}
+
+
+window.addEventListener("pageshow", function(event) {
+    if (event.persisted || (window.performance && window.performance.getEntriesByType("navigation")[0].type === "back_forward")) {
+
+        window.location.reload();
+    }
+});
+
+</script>
 
 <%@ include file="footer.jsp"%>

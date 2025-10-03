@@ -60,9 +60,10 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setBookingId(resultSet.getInt("booking_id"));
 			booking.setUserId(resultSet.getInt("user_id"));
 			booking.setPackageId(resultSet.getInt("package_id"));
-			booking.setBookingDate(resultSet.getDate("booking_date").toLocalDate());
+			booking.setBookingDate(resultSet.getTimestamp("booking_date").toLocalDateTime());
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
+
 			if (resultSet.getTimestamp("created_at") != null)
 				booking.setCreated_at((resultSet.getTimestamp("created_at").toLocalDateTime()));
 			return booking;
@@ -137,13 +138,12 @@ public class BookingDAOImpl implements IBookingDAO {
 			booking.setBookingId(resultSet.getInt("booking_id"));
 			booking.setUserId(resultSet.getInt("user_id"));
 			booking.setPackageId(resultSet.getInt("package_id"));
-			booking.setBookingDate(resultSet.getDate("booking_date").toLocalDate());
+			booking.setBookingDate(resultSet.getTimestamp("booking_date").toLocalDateTime());
 			booking.setStatus(resultSet.getString("status"));
 			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
 			if (resultSet.getTimestamp("created_at") != null)
 				booking.setCreated_at(resultSet.getTimestamp("created_at").toLocalDateTime());
-			
-			
+
 			bookings.add(booking);
 		}
 
@@ -227,9 +227,49 @@ public class BookingDAOImpl implements IBookingDAO {
 
 		return bookingIds;
 	}
-	
-	
-	
-	
+
+	@Override
+	public void decrementTravelerCount(int bookingId) throws Exception {
+		try {
+			preparedStatement = connection.prepareStatement(
+					"UPDATE bookings SET no_of_travellers = no_of_travellers - 1 WHERE booking_id = ?");
+			preparedStatement.setInt(1, bookingId);
+			preparedStatement.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public int getTotalBookingsByPackage(int packageId) throws Exception {
+		int totalBookings = 0;
+		String sql = "SELECT SUM(no_of_travellers) as totalBookings FROM bookings WHERE package_id = ?";
+		try (Connection conn =DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setInt(1, packageId);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				totalBookings = rs.getInt("totalBookings");
+			}
+		}
+		return totalBookings;
+	}
+
+	@Override
+	public double getRevenueByPackage(int packageId) throws Exception {
+		double totalRevenue = 0;
+		String sql = "SELECT SUM(amount) as revenue FROM payments p "
+				+ "JOIN bookings b ON p.booking_id = b.booking_id " + "WHERE b.package_id = ?";
+		try (Connection conn = DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setInt(1, packageId);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				totalRevenue = rs.getDouble("revenue");
+			}
+		}
+		return totalRevenue;
+	}
 
 }

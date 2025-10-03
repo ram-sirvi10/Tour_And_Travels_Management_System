@@ -55,7 +55,7 @@ CREATE TABLE bookings (
     user_id INT NOT NULL,
     package_id INT NOT NULL,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('CONFIRMED', 'PENDING', 'CANCELLED') DEFAULT 'PENDING',
+    status ENUM('CONFIRMED', 'PENDING', 'CANCELLED','COMPLETE') DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (package_id) REFERENCES travel_packages(package_id) ON DELETE CASCADE
 );
@@ -65,7 +65,7 @@ CREATE TABLE payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     booking_id INT NOT NULL,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('SUCCESSFUL', 'FAILED') DEFAULT 'FAILED',
+    status ENUM('SUCCESSFUL', 'FAILED','REFUNDED') DEFAULT 'FAILED',
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE
 );
@@ -100,3 +100,25 @@ ADD COLUMN imageurl VARCHAR(500) ;
 
 ALTER TABLE travel_packages
 ADD COLUMN totalseats int not null ;
+
+ALTER TABLE bookings
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ;
+
+ALTER TABLE travel_packages
+ADD COLUMN departure_date TIMESTAMP not null;
+
+-- ALTER TABLE travel_packages
+-- DROP COLUMN version ;
+
+ALTER TABLE travel_packages
+ADD COLUMN last_booking_date  TIMESTAMP NOT NULL;
+
+ALTER TABLE  payments  
+CHANGE COLUMN `status` `status` ENUM('SUCCESSFUL', 'FAILED', 'REFUNDED') NULL DEFAULT 'FAILED' ;
+
+ALTER TABLE  bookings  
+CHANGE COLUMN `status` `status` ENUM('CONFIRMED', 'PENDING', 'CANCELLED','COMPLETE') DEFAULT 'PENDING' ;
+
+ALTER TABLE travelers
+ADD COLUMN status ENUM('CONFIRMED','CANCELLED','COMPLETE') DEFAULT 'CONFIRMED' ;
+

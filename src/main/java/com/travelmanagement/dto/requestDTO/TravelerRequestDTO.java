@@ -5,6 +5,15 @@ public class TravelerRequestDTO {
 	private int age;
 	private String email;
 	private String mobile;
+	private String status;
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	public String getName() {
 		return name;

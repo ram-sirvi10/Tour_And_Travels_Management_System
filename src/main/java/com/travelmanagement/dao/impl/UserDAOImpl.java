@@ -70,11 +70,9 @@ public class UserDAOImpl implements IUserDAO {
 		User user = null;
 		try {
 //			connection = DatabaseConfig.getConnection();
-			String sql = "SELECT * FROM users WHERE user_id=? AND is_delete=?";
+			String sql = "SELECT * FROM users WHERE user_id=? ";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, id);
-
-			preparedStatement.setBoolean(2, false);
 			resultSet = preparedStatement.executeQuery();
 
 			if (resultSet.next()) {
