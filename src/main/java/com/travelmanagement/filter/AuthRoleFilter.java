@@ -170,7 +170,9 @@ public class AuthRoleFilter implements Filter {
 
 		boolean allowed = switch (role) {
 		case "ADMIN" -> checkAccess(path, button, adminAccess);
-		case "SUBADMIN" -> checkAccess(path, button, subAdminAccess);
+		case "SUBADMIN" -> path.startsWith(context + "/agency")
+        || checkAccess(path, button, subAdminAccess);
+
 		case "USER" -> checkAccess(path, button, userAccess);
 		default -> false;
 		};

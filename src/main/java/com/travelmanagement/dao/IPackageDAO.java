@@ -7,6 +7,8 @@ public interface IPackageDAO {
 	boolean addPackage(Packages pkg) throws Exception;
 
 	boolean updatePackage(Packages pkg) throws Exception;
+	
+	
 
 	boolean deletePackage(int packageId) throws Exception;
 

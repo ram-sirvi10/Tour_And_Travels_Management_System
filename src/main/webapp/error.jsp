@@ -107,25 +107,65 @@ keyframes float { 0%, 100% {
 50
 
 
+
+
+
+
+
+
 %
 {
 transform
 
 
+
+
+
+
+
+
 :
 
 
+
+
+
+
+
+
 translateY
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 -20px
 
 
+
+
+
+
+
+
 )
+
+
+
+
+
+
 ;
-
-
 }
 }
 @
@@ -137,35 +177,91 @@ keyframes fadeIn { 0% {
 100
 
 
+
+
+
+
+
+
 %
 {
 opacity
 
 
+
+
+
+
+
+
 :
 
 
+
+
+
+
+
+
 1
+
+
+
+
+
+
 ;
-
-
 transform
 
 
+
+
+
+
+
+
 :
 
 
+
+
+
+
+
+
 scale
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 1
 
 
+
+
+
+
+
+
 )
+
+
+
+
+
+
 ;
-
-
 }
 }
 /* Background circles */
@@ -201,7 +297,14 @@ scale
 keyframes floatCircle { 0% {
 	transform: translateY(0) translateX(0);
 }
+
 50
+
+
+
+
+
+
 
 
 %
@@ -209,32 +312,96 @@ keyframes floatCircle { 0% {
 transform
 
 
+
+
+
+
+
+
 :
 
 
+
+
+
+
+
+
 translateY
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 -50px
 
 
+
+
+
+
+
+
 )
 
 
+
+
+
+
+
+
 translateX
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 30px
 
 
+
+
+
+
+
+
 )
+
+
+
+
+
+
 ;
-
-
 }
 100
+
+
+
+
+
+
 
 
 %
@@ -242,37 +409,98 @@ translateX
 transform
 
 
+
+
+
+
+
+
 :
 
 
+
+
+
+
+
+
 translateY
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 0
 
 
+
+
+
+
+
+
 )
+
+
+
+
+
+
 
 
 translateX
+
+
+
+
+
+
 (
+
+
+
+
+
+
 
 
 0
 
 
+
+
+
+
+
+
 )
+
+
+
+
+
+
 ;
-
-
 }
 }
-@media (max-width: 576px) {
-  h1 { font-size: 5rem; }
-  h2 { font-size: 1.2rem; }
+@media ( max-width : 576px) {
+	h1 {
+		font-size: 5rem;
+	}
+	h2 {
+		font-size: 1.2rem;
+	}
 }
-
 </style>
 </head>
 <body>

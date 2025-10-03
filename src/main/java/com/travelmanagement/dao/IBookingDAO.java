@@ -24,4 +24,11 @@ public interface IBookingDAO {
 
 	void decrementTravelerCount(int bookingId) throws Exception;
 
+	int getTotalBookingsByPackage(int packageId) throws Exception;
+
+	double getRevenueByPackage(int packageId) throws Exception;
+	
 }
+
+
+

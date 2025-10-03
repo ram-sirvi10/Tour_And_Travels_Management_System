@@ -1,9 +1,11 @@
 package com.travelmanagement.controller;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
-import com.travelmanagement.model.Agency;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.util.ValidationUtil;
 
@@ -12,9 +14,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/agency")
 public class AgencyServlet extends HttpServlet {
@@ -34,6 +33,9 @@ public class AgencyServlet extends HttpServlet {
 		AgencyResponseDTO agency = (AgencyResponseDTO) request.getSession().getAttribute("agency");
 
 		try {
+			if (action == null)
+				action = "dashboard";
+
 			switch (action) {
 			case "dashboard":
 				dashboard(request, response, agency);
@@ -41,6 +43,10 @@ public class AgencyServlet extends HttpServlet {
 
 			case "addPackage":
 				addPackage(request, response, agency);
+				break;
+
+			case "updatePackage":
+				updatePackage(request, response, agency);
 				break;
 
 			case "deletePackage":
@@ -70,8 +76,10 @@ public class AgencyServlet extends HttpServlet {
 			throws Exception {
 		List<PackageResponseDTO> packages = packageService.getAllPackages(agency.getAgencyId());
 		request.setAttribute("packages", packages);
+		// Placeholder analytics
+		request.setAttribute("totalBookings", 0);
+		request.setAttribute("totalRevenue", 0.0);
 		request.getRequestDispatcher("template/agency/agencyDashboard.jsp").forward(request, response);
-		return;
 	}
 
 	// -------------------- Add Package --------------------
@@ -87,7 +95,6 @@ public class AgencyServlet extends HttpServlet {
 		dto.setIsActive(request.getParameter("isActive"));
 		dto.setAgencyId(String.valueOf(agency.getAgencyId()));
 
-		// Validate package data
 		if (!ValidationUtil.isValidName(dto.getTitle()) || !ValidationUtil.isValidPrice(dto.getPrice())
 				|| !ValidationUtil.isValidName(dto.getLocation())
 				|| !ValidationUtil.isValidName(dto.getDescription())) {
@@ -97,6 +104,21 @@ public class AgencyServlet extends HttpServlet {
 		}
 
 		packageService.createPackage(dto);
+		response.sendRedirect("agency?button=dashboard");
+	}
+
+	// -------------------- Update Package --------------------
+	private void updatePackage(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
+			throws Exception {
+		PackageRegisterDTO dto = new PackageRegisterDTO();
+		dto.setPackageId(request.getParameter("packageId"));
+		dto.setTitle(request.getParameter("title"));
+		dto.setDescription(request.getParameter("description"));
+		dto.setLocation(request.getParameter("location"));
+		dto.setPrice(request.getParameter("price"));
+		dto.setDuration(request.getParameter("duration"));
+		dto.setIsActive(request.getParameter("isActive"));
+//		packageService.updatePackage(dto);
 		response.sendRedirect("agency?button=dashboard");
 	}
 

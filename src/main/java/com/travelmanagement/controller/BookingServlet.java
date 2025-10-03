@@ -5,13 +5,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONObject;
-
-import com.razorpay.Order;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
@@ -25,7 +21,6 @@ import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
-import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -67,9 +62,9 @@ public class BookingServlet extends HttpServlet {
 			case "paymentReject":
 				processPayment(request, response, false);
 				break;
-			case "verifyPayment":
-				verifyPayment(request, response);
-				break;
+//			case "verifyPayment":
+//				verifyPayment(request, response);
+//				break;
 			case "cancelBooking":
 				cancelBooking(request, response);
 				break;
@@ -854,38 +849,38 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
-	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		try {
-			String body = request.getReader().lines().reduce("", (acc, line) -> acc + line);
-			JSONObject json = new JSONObject(body);
-			Map<String, String> params = new HashMap<>();
-			params.put("razorpay_order_id", json.getString("razorpay_order_id"));
-			params.put("razorpay_payment_id", json.getString("razorpay_payment_id"));
-			params.put("razorpay_signature", json.getString("razorpay_signature"));
-
-			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
-
-			int bookingId = (int) request.getSession().getAttribute("bookingId");
-			double amount = (double) request.getSession().getAttribute("amount");
-
-			if (isValid) {
-				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-				paymentDTO.setBookingId(bookingId);
-				paymentDTO.setAmount(amount);
-				paymentDTO.setStatus("SUCCESSFUL");
-				paymentService.addPayment(paymentDTO);
-
-				bookingService.updateBookingStatus(bookingId, "CONFIRMED");
-
-				response.getWriter().print("Payment Successful & Verified!");
-			} else {
-				response.getWriter().print("Payment Failed!");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.getWriter().print("Payment verification failed: " + e.getMessage());
-		}
-	}
+//	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//		try {
+//			String body = request.getReader().lines().reduce("", (acc, line) -> acc + line);
+//			JSONObject json = new JSONObject(body);
+//			Map<String, String> params = new HashMap<>();
+//			params.put("razorpay_order_id", json.getString("razorpay_order_id"));
+//			params.put("razorpay_payment_id", json.getString("razorpay_payment_id"));
+//			params.put("razorpay_signature", json.getString("razorpay_signature"));
+//
+//			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
+//
+//			int bookingId = (int) request.getSession().getAttribute("bookingId");
+//			double amount = (double) request.getSession().getAttribute("amount");
+//
+//			if (isValid) {
+//				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+//				paymentDTO.setBookingId(bookingId);
+//				paymentDTO.setAmount(amount);
+//				paymentDTO.setStatus("SUCCESSFUL");
+//				paymentService.addPayment(paymentDTO);
+//
+//				bookingService.updateBookingStatus(bookingId, "CONFIRMED");
+//
+//				response.getWriter().print("Payment Successful & Verified!");
+//			} else {
+//				response.getWriter().print("Payment Failed!");
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			response.getWriter().print("Payment verification failed: " + e.getMessage());
+//		}
+//	}
 
 }

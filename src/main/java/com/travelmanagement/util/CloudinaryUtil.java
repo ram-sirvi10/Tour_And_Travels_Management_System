@@ -13,35 +13,33 @@ import com.cloudinary.utils.ObjectUtils;
 
 import jakarta.servlet.http.Part;
 
+
+
 public class CloudinaryUtil {
 
-    private static Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-            "cloud_name", "dmjrgxq7c",
-            "api_key", "425932696452778",
-            "api_secret", "7r6lS-Cho24EIGyYdzFG_Y1Wsus",
-            "secure", true
-    ));
+	private static Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap("cloud_name", "dmjrgxq7c", "api_key",
+			"425932696452778", "api_secret", "7r6lS-Cho24EIGyYdzFG_Y1Wsus", "secure", true));
 
-    public static Cloudinary getCloudinary() {
-        return cloudinary;
-    }
+	public static Cloudinary getCloudinary() {
+		return cloudinary;
+	}
 
-   
-    public static String uploadImage(Part filePart) throws Exception {
-        if (filePart == null || filePart.getSize() == 0) {
-            return null;
-        }
+	public static String uploadImage(Part filePart) throws Exception {
+		if (filePart == null || filePart.getSize() == 0) {
+			return null;
+		}
 
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-        String contentType = filePart.getContentType();
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+		String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+		String contentType = filePart.getContentType();
+		String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 
-        List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png");
-        List<String> allowedMimeTypes = Arrays.asList("image/jpeg", "image/png");
+		List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png");
+		List<String> allowedMimeTypes = Arrays.asList("image/jpeg", "image/png");
 
-        if (!allowedExtensions.contains(fileExtension) || !allowedMimeTypes.contains(contentType)) {
-            throw new Exception("Invalid image format! Only JPG, JPEG, PNG");
-        }
+		if (!allowedExtensions.contains(fileExtension) || !allowedMimeTypes.contains(contentType)) {
+			throw new Exception("Invalid image format! Only JPG, JPEG, PNG");
+		}
+
 
       
         File tempFile = File.createTempFile("upload-", fileName);
@@ -57,6 +55,7 @@ public class CloudinaryUtil {
        
         tempFile.delete();
 
-        return (String) uploadResult.get("secure_url");
-    }
+
+		return (String) uploadResult.get("secure_url");
+	}
 }
