@@ -405,7 +405,8 @@ public class AuthServlet extends HttpServlet {
 			boolean sent = EmailUtil.sendOTP(dto.getEmail(), otp);
 			if (sent) {
 				request.setAttribute("showOtp", true);
-				request.setAttribute("message", "OTP sent to your email. Please verify to complete registration.");
+				request.setAttribute("message",
+						"OTP sent to your email. Please verify to complete registration. OTP -> " + otp);
 			} else {
 				request.setAttribute("error", "Failed to send OTP. Please try again.");
 			}
@@ -471,8 +472,10 @@ public class AuthServlet extends HttpServlet {
 		dto.setRegistrationNumber(request.getParameter("registration_number"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
-
+		 dto.setArea(request.getParameter("area"));
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
+		Map<String, String> locationErrors = authService.validateLocation(dto);
+		errors.putAll(locationErrors);
 
 		try {
 			Part filePart = request.getPart("profileImage");
@@ -507,7 +510,8 @@ public class AuthServlet extends HttpServlet {
 			boolean sent = EmailUtil.sendOTP(dto.getEmail(), otp);
 			if (sent) {
 				request.setAttribute("showOtp", true);
-				request.setAttribute("message", "OTP sent to your email. Please verify to complete registration.");
+				request.setAttribute("message",
+						"OTP sent to your email. Please verify to complete registration. OTP -> " + otp);
 			} else {
 				request.setAttribute("error", "Failed to send OTP. Please try again.");
 			}

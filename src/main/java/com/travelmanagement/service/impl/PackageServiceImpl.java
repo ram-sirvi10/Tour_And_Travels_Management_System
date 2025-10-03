@@ -153,27 +153,18 @@ public class PackageServiceImpl implements IPackageService {
 	}
 
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
-		Packages pkg = packageDAO.getPackageById(packageId);
-		if (pkg == null)
-			return false;
-
-		int newSeats = pkg.getTotalSeats() + seatsChange;
-		if (newSeats < 0)
-			return false;
-
-		System.out.println(
-				"Adjusting seats: current=" + pkg.getTotalSeats() + ", change=" + seatsChange + ", new=" + newSeats);
-
-		return packageDAO.adjustSeats(packageId, newSeats);
+		if (seatsChange == 0)
+			return true;
+		return packageDAO.adjustSeats(packageId, seatsChange);
 	}
 
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit,
-			int offset, Boolean isAgencyView) throws Exception {
+			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
+			Boolean isAgencyView) throws Exception {
 
 		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo,
-				totalSeats,  isActive, limit, offset, isAgencyView);
+				totalSeats, isActive, limit, offset, isAgencyView);
 
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
@@ -185,14 +176,12 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats,  Boolean isActive, Boolean isAgencyView)
-			throws Exception {
+			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception {
 
-		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, 
-				isActive, isAgencyView);
+		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, isActive,
+				isAgencyView);
 	}
-	
-	
+
 //	public boolean adjustSeatsOptimistic(int packageId, int seatsToBook) throws Exception {
 //	    PackageResponseDTO pkg = getPackageById(packageId);
 //	    if (pkg == null) return false;
@@ -201,18 +190,15 @@ public class PackageServiceImpl implements IPackageService {
 //	    return updatedRows > 0;
 //	}
 
-//	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
-//		// TODO Auto-generated method stub
-//		try {
-//			return  packageDAO.updateSeatsOptimistic(packageId, noOfTravellers,version);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return 0;
-//	}
-
-	
-
+	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
+		// TODO Auto-generated method stub
+		try {
+			return  packageDAO.updateSeatsOptimistic(packageId, noOfTravellers,version);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 }
