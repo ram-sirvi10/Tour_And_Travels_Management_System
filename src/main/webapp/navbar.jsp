@@ -568,7 +568,9 @@ String label = obj != null ? "My Account" : "Login";
 
 	<ul>
 		<li><a href="<%=request.getContextPath()%>/">Home</a></li>
-
+ <li><a href="#features">Features</a></li>  
+  <li><a href="#about">About</a></li>       
+    <li><a href="#privacy">Privacy</a></li> 
 		<li><a href="login.jsp"> <%=label%>
 		</a></li>
 		<%

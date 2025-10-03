@@ -1,115 +1,123 @@
 package com.travelmanagement.dto.requestDTO;
 
 public class AgencyRegisterRequestDTO {
-    private String agencyName;
-    private String ownerName;
-    private String email;
-    private String phone;
-    private String city;
-    private String state;
-    private String country;
-    private String pincode;
-    private String registrationNumber;
-    private String password;
-    private String confirmPassword;
-    private String imageurl;
-	
+	private String agencyName;
+	private String ownerName;
+	private String email;
+	private String phone;
+	private String city;
+	private String state;
+	private String country;
+	private String pincode;
+	private String registrationNumber;
+	private String password;
+	private String confirmPassword;
+	private String imageurl;
+	private String area;
 
-    public String getImageurl() {
-    	return imageurl;
-    }
+	public String getArea() {
+		return area;
+	}
 
-    public void setImageurl(String imageurl) {
-    	this.imageurl = imageurl;
-    }
-   
-    public String getAgencyName() {
-        return agencyName;
-    }
+	public void setArea(String area) {
+		this.area = area;
+	}
 
-    public void setAgencyName(String agencyName) {
-        this.agencyName = agencyName;
-    }
+	public String getImageurl() {
+		return imageurl;
+	}
 
-    public String getOwnerName() {
-        return ownerName;
-    }
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
 
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
+	public String getAgencyName() {
+		return agencyName;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setAgencyName(String agencyName) {
+		this.agencyName = agencyName;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getOwnerName() {
+		return ownerName;
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getCity() {
-        return city;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public String getState() {
-        return state;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public String getCountry() {
-        return country;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public String getPincode() {
-        return pincode;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public void setPincode(String pincode) {
-        this.pincode = pincode;
-    }
+	public String getCountry() {
+		return country;
+	}
 
-    public String getRegistrationNumber() {
-        return registrationNumber;
-    }
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
-    }
+	public String getPincode() {
+		return pincode;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setPincode(String pincode) {
+		this.pincode = pincode;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getRegistrationNumber() {
+		return registrationNumber;
+	}
 
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
+	public void setRegistrationNumber(String registrationNumber) {
+		this.registrationNumber = registrationNumber;
+	}
 
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
 
 	@Override
 	public String toString() {

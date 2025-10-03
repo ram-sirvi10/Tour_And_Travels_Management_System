@@ -575,7 +575,7 @@ a.card-link {
 
 
 	<!-- Features Section -->
-	<section id="features">
+	<section  id="features">
 		<h2>Our Features</h2>
 		<div class="features-grid">
 			<div class="feature-box">
@@ -600,6 +600,73 @@ a.card-link {
 			</div>
 		</div>
 	</section>
+
+
+
+<section id="about" style="padding:80px 10%; background:#f5f5f5;">
+    <h2 style="text-align:center; color:#ff6f61; margin-bottom:50px;">About Us</h2>
+    <div class="features-grid">
+        <!-- Mission Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Mission Icon">
+            <h3>Our Mission</h3>
+            <p>To make travel planning simple, secure, and enjoyable for every traveler.</p>
+        </div>
+        <!-- Services Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="Services Icon">
+            <h3>Our Services</h3>
+            <p>We provide verified travel packages, booking assistance, and personalized recommendations.</p>
+        </div>
+        <!-- User Friendly Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3176/3176296.png" alt="User Friendly Icon">
+            <h3>User Friendly</h3>
+            <p>Browse packages, check details, and make bookings easily with our intuitive platform.</p>
+        </div>
+        <!-- Support Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Support Icon">
+            <h3>24/7 Support</h3>
+            <p>Our team is available around the clock to help with queries or travel planning assistance.</p>
+        </div>
+    </div>
+</section>
+
+
+
+<section id="privacy" style="padding:80px 10%; background:#fff;">
+    <h2 style="text-align:center; color:#ff6f61; margin-bottom:50px;">Privacy & Platform Fee</h2>
+    <div class="features-grid">
+        <!-- Security Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Security Icon">
+            <h3>Data Security</h3>
+            <p>All personal and booking information is encrypted and securely stored.</p>
+        </div>
+        <!-- Platform Fee Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" alt="Fee Icon">
+            <h3>Platform Fee</h3>
+            <p>A 5% fee applies to all bookings, ensuring platform maintenance and secure transactions.</p>
+        </div>
+        <!-- Transparency Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/2910/2910762.png" alt="Transparency Icon">
+            <h3>Transparency</h3>
+            <p>All fees are clearly displayed during booking, with detailed receipts provided.</p>
+        </div>
+        <!-- Privacy Card -->
+        <div class="feature-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Privacy Icon">
+            <h3>User Privacy</h3>
+            <p>Your data will never be shared without consent, ensuring complete confidentiality.</p>
+        </div>
+    </div>
+</section>
+
+
+
 
 	<!-- CTA Section -->
 	<section class="cta">

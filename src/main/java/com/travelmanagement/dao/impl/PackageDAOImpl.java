@@ -137,6 +137,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			pkg.setDuration(resultSet.getInt("duration"));
 			pkg.setActive(resultSet.getBoolean("is_active"));
 			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			pkg.setVersion(resultSet.getInt("version"));
 			if (resultSet.getString("imageurl") != null) {
 				pkg.setImageurl(resultSet.getString("imageurl"));
 			}
@@ -258,22 +259,20 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
-		if (seatsChange < 0)
-			return false;
+	    String sql = "UPDATE travel_packages " +
+	                 "SET totalseats = totalseats + ?, updated_at = NOW() " +
+	                 "WHERE package_id = ? AND totalseats + ? >= 0";
 
-		String sql = "UPDATE travel_packages SET totalseats = ?, updated_at = NOW() WHERE package_id = ?";
-		try {
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setInt(1, seatsChange);
-			preparedStatement.setInt(2, packageId);
-			int rows = preparedStatement.executeUpdate();
-			System.out.println("Rows updated: " + rows);
-			return rows > 0;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
+	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	        ps.setInt(1, seatsChange);
+	        ps.setInt(2, packageId);
+	        ps.setInt(3, seatsChange);  
+
+	        int rows = ps.executeUpdate();
+	        return rows > 0;  
+	    }
 	}
+
 
 	@Override
 	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
@@ -353,21 +352,21 @@ public class PackageDAOImpl implements IPackageDAO {
 		return count;
 	}
 
-//	@Override
-//	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
-//		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats - ?, version = version + 1 "
-//				+ "WHERE package_id = ? AND version = ? AND totalseats >= ?";
-//		try {
-//			preparedStatement = connection.prepareStatement(sql);
-//			preparedStatement.setInt(1, seatsToBook);
-//			preparedStatement.setInt(2, packageId);
-//			preparedStatement.setInt(3, currentVersion);
-//			preparedStatement.setInt(4, seatsToBook);
-//			return preparedStatement.executeUpdate();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return 0;
-//	}
+	@Override
+	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
+		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats - ?, version = version + 1 "
+				+ "WHERE package_id = ? AND version = ? AND totalseats >= ?";
+		try {
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setInt(1, seatsToBook);
+			preparedStatement.setInt(2, packageId);
+			preparedStatement.setInt(3, currentVersion);
+			preparedStatement.setInt(4, seatsToBook);
+			return preparedStatement.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 }

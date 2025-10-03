@@ -156,10 +156,11 @@ if (errorMessage == null) errorMessage = (String) request.getAttribute("errorMes
     <% if(errors != null && errors.get("confirmPassword") != null){ %>
         <div class="text-danger mb-2"><%= errors.get("confirmPassword") %></div>
     <% } %>
-
+	
     <!-- Register / OTP buttons -->
     <% if(!lockFields){ %>
         <button type="submit" name="button" value="registerAsUser" class="btn btn-dark w-100 mt-3">Register</button>
+         <p>Already have an account? <a href="login.jsp">Login </a></p>
     <% } else { %>
         <div class="mt-3">
             <input type="text" name="otp" placeholder="Enter OTP" class="form-control mb-2">
@@ -169,7 +170,7 @@ if (errorMessage == null) errorMessage = (String) request.getAttribute("errorMes
 
     <!-- Success/Error messages -->
     <% if(request.getAttribute("message") != null){ %>
-        <div id="successAlert" class="alert alert-success mt-2 fade-alert"><%=request.getAttribute("message")%></div>
+        <div id="successAlert" class="alert alert-success mt-2 "><%=request.getAttribute("message")%></div>
     <% } %>
     <% if(request.getAttribute("error") != null){ %>
         <div id="errorAlert2" class="alert alert-danger mt-2 fade-alert"><%=request.getAttribute("error")%></div>

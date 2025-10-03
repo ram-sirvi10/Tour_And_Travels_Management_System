@@ -107,8 +107,6 @@ ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ;
 ALTER TABLE travel_packages
 ADD COLUMN departure_date TIMESTAMP not null;
 
--- ALTER TABLE travel_packages
--- DROP COLUMN version ;
 
 ALTER TABLE travel_packages
 ADD COLUMN last_booking_date  TIMESTAMP NOT NULL;
@@ -122,3 +120,7 @@ CHANGE COLUMN `status` `status` ENUM('CONFIRMED', 'PENDING', 'CANCELLED','COMPLE
 ALTER TABLE travelers
 ADD COLUMN status ENUM('CONFIRMED','CANCELLED','COMPLETE') DEFAULT 'CONFIRMED' ;
 
+ ALTER TABLE travel_packages
+ ADD COLUMN version Int DEFAULT 0;
+
+ 

@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import com.travelmanagement.dao.IAgencyDAO;
+import com.travelmanagement.dao.ILocationDAO;
 import com.travelmanagement.dao.IUserDAO;
 import com.travelmanagement.dao.impl.AgencyDAOImpl;
+import com.travelmanagement.dao.impl.LocationDAOImpl;
 import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
@@ -216,6 +218,44 @@ public class AuthServiceImpl implements IAuthService {
 		return errors;
 	}
 
+	public Map<String, String> validateLocation(AgencyRegisterRequestDTO dto) {
+		Map<String, String> errors = new HashMap<>();
+		ILocationDAO locationDAO = new LocationDAOImpl();
+		try {
+
+			List<String> countries = locationDAO.getLocations("countries", null);
+			if (!countries.contains(dto.getCountry())) {
+				errors.put("country", "Invalid country selected");
+			}
+
+			List<String> states = locationDAO.getLocations("states", dto.getCountry());
+			if (!states.contains(dto.getState())) {
+				errors.put("state", "State does not belong to selected country");
+			}
+
+			List<String> cities = locationDAO.getLocations("cities", dto.getState());
+			if (!cities.contains(dto.getCity())) {
+				errors.put("city", "City does not belong to selected state");
+			}
+
+			List<String> areas = locationDAO.getLocations("areas", dto.getCity());
+			if (!areas.contains(dto.getArea())) {
+				errors.put("area", "Area does not belong to selected city");
+			}
+
+			List<String> pincodes = locationDAO.getLocations("pincode", dto.getArea());
+			if (!pincodes.contains(dto.getPincode())) {
+				errors.put("pincode", "Invalid pincode for selected area");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			errors.put("location", "Error validating location hierarchy");
+		}
+
+		return errors;
+	}
+
 	@Override
 	public Map<String, String> validateLoginAgencyDto(LoginRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();
@@ -327,7 +367,7 @@ public class AuthServiceImpl implements IAuthService {
 
 	public Map<String, String> validateTravelers(List<TravelerRequestDTO> travelerRequestDTOs, int packageId) {
 		Map<String, String> errors = new HashMap<>();
-		Set<String> emailSet = new HashSet<>(); 
+		Set<String> emailSet = new HashSet<>();
 		TravelerServiceImpl serviceImpl = new TravelerServiceImpl();
 		int i = 1;
 

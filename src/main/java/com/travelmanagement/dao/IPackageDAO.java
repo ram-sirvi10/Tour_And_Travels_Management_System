@@ -29,4 +29,6 @@ public interface IPackageDAO {
 	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
 			String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset, Boolean isAgencyView)
 			throws Exception;
+
+	int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception;
 }

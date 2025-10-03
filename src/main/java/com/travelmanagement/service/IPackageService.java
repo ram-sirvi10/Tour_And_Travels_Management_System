@@ -9,13 +9,7 @@ public interface IPackageService {
 
 	boolean addPackage(Packages pkg) throws Exception;
 
-
 	PackageResponseDTO getPackageById(int id) throws Exception;
-
-
-	List<Packages> getAllPackages() throws Exception;
-
-	List<Packages> searchPackages(String keyword) throws Exception;
 
 	boolean updatePackage(Packages pkg) throws Exception;
 
@@ -27,12 +21,10 @@ public interface IPackageService {
 
 	List<PackageResponseDTO> searchPackagesByKeyword(String keyword) throws Exception;
 
-	
-
 	List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
-			String dateFrom, String dateTo, Integer totalSeats,  Boolean isActive, int limit,
-			int offset, Boolean isAgencyView) throws Exception;
+			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
+			Boolean isAgencyView) throws Exception;
 
 	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
-			Integer totalSeats,  Boolean isActive, Boolean isAgencyView) throws Exception;
+			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
 }

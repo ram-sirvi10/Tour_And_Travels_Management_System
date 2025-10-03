@@ -63,60 +63,29 @@ public class PackageServiceImpl implements IPackageService {
 		return packageDAO.togglePackageStatus(packageId);
 	}
 
-	// -------------------- Get All Packages --------------------
-	@Override
-	public List<Packages> getAllPackages() throws Exception {
-		return packageDAO.getAllPackages();
+	// -------------------- Private Validation --------------------
+	private void validatePackage(Packages pkg) throws Exception {
+		if (!ValidationUtil.isValidName(pkg.getTitle()))
+			throw new Exception("Invalid Title");
+		if (!ValidationUtil.isValidPrice(String.valueOf(pkg.getPrice())))
+			throw new Exception("Invalid Price");
+		if (!ValidationUtil.isValidName(pkg.getLocation()))
+			throw new Exception("Invalid Location");
+		if (pkg.getDuration() <= 0)
+			throw new Exception("Invalid Duration");
 	}
+
 
 	@Override
 	public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
 		List<Packages> list = packageDAO.getAllPackages();
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
-		for (Packages pkg : list) {
-			if (agencyId == 0 || pkg.getAgencyId() == agencyId) {
-				PackageResponseDTO dto = Mapper.toResponseDTO(pkg);
-
-				// Fetch total bookings for this package
-				int totalBookings = bookingDAO.getTotalBookingsByPackage(pkg.getPackageId());
-				dto.setTotalBookings(totalBookings);
-
-				// Fetch total revenue for this package
-				double totalRevenue = bookingDAO.getRevenueByPackage(pkg.getPackageId());
-				dto.setTotalRevenue(totalRevenue);
-
-				dtoList.add(dto);
+		for (Packages p : list) {
+			if (agencyId == 0 || p.getAgencyId() == agencyId) {
+				dtoList.add(Mapper.toResponseDTO(p));
 			}
 		}
 		return dtoList;
-	}
-
-	// -------------------- Get Package by ID --------------------
-	@Override
-	public PackageResponseDTO getPackageById(int id) throws Exception {
-		Packages pkg = packageDAO.getPackageById(id);
-		if (pkg == null) {
-			throw new ResourceNotFoundException("Package not found");
-		}
-
-		PackageResponseDTO dto = Mapper.toResponseDTO(pkg);
-		dto.setTotalBookings(bookingDAO.getTotalBookingsByPackage(pkg.getPackageId()));
-		dto.setTotalRevenue(bookingDAO.getRevenueByPackage(pkg.getPackageId()));
-		return dto;
-	}
-
-	// -------------------- Search Packages --------------------
-	@Override
-	public List<Packages> searchPackages(String keyword) throws Exception {
-		List<Packages> all = packageDAO.getAllPackages();
-		List<Packages> filtered = new ArrayList<>();
-		for (Packages p : all) {
-			if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
-					|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
-				filtered.add(p);
-			}
-		}
-		return filtered;
 	}
 
 	@Override
@@ -127,30 +96,29 @@ public class PackageServiceImpl implements IPackageService {
 			for (Packages p : all) {
 				if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
 						|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
-					PackageResponseDTO dto = Mapper.toResponseDTO(p);
-					dto.setTotalBookings(bookingDAO.getTotalBookingsByPackage(p.getPackageId()));
-					dto.setTotalRevenue(bookingDAO.getRevenueByPackage(p.getPackageId()));
-					filtered.add(dto);
+					filtered.add(Mapper.toResponseDTO(p));
 				}
 			}
 		}
 		return filtered;
 	}
 
-	// -------------------- Adjust Seats --------------------
-	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
-		Packages pkg = packageDAO.getPackageById(packageId);
-		if (pkg == null)
-			return false;
+	@Override
+	public PackageResponseDTO getPackageById(int id) throws Exception {
+		Packages packages = packageDAO.getPackageById(id);
+		if (packages == null) {
+			throw new ResourceNotFoundException("Package not found ");
+		}
 
-		int newSeats = pkg.getTotalSeats() + seatsChange;
-		if (newSeats < 0)
-			return false;
-
-		return packageDAO.adjustSeats(packageId, newSeats);
+		return Mapper.toResponseDTO(packages);
 	}
 
-	// -------------------- Search with Filters --------------------
+	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
+		if (seatsChange == 0)
+			return true;
+		return packageDAO.adjustSeats(packageId, seatsChange);
+	}
+
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
 			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
@@ -161,10 +129,7 @@ public class PackageServiceImpl implements IPackageService {
 
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
-			PackageResponseDTO dto = Mapper.toResponseDTO(pkg);
-			dto.setTotalBookings(bookingDAO.getTotalBookingsByPackage(pkg.getPackageId()));
-			dto.setTotalRevenue(bookingDAO.getRevenueByPackage(pkg.getPackageId()));
-			dtoList.add(dto);
+			dtoList.add(Mapper.toResponseDTO(pkg));
 		}
 
 		return dtoList;
@@ -178,15 +143,25 @@ public class PackageServiceImpl implements IPackageService {
 				isAgencyView);
 	}
 
-	// -------------------- Private Validation --------------------
-	private void validatePackage(Packages pkg) throws Exception {
-		if (!ValidationUtil.isValidName(pkg.getTitle()))
-			throw new Exception("Invalid Title");
-		if (!ValidationUtil.isValidPrice(String.valueOf(pkg.getPrice())))
-			throw new Exception("Invalid Price");
-		if (!ValidationUtil.isValidName(pkg.getLocation()))
-			throw new Exception("Invalid Location");
-		if (pkg.getDuration() <= 0)
-			throw new Exception("Invalid Duration");
+//	public boolean adjustSeatsOptimistic(int packageId, int seatsToBook) throws Exception {
+//	    PackageResponseDTO pkg = getPackageById(packageId);
+//	    if (pkg == null) return false;
+//
+//	    int updatedRows =
+//	    return updatedRows > 0;
+//	}
+
+	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
+		// TODO Auto-generated method stub
+		try {
+			return  packageDAO.updateSeatsOptimistic(packageId, noOfTravellers,version);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
 	}
+
+	
+
 }

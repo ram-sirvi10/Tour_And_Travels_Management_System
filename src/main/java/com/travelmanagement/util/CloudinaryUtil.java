@@ -40,17 +40,21 @@ public class CloudinaryUtil {
 			throw new Exception("Invalid image format! Only JPG, JPEG, PNG");
 		}
 
-		// Convert InputStream to temporary file
-		File tempFile = File.createTempFile("upload-", fileName);
-		try (InputStream inputStream = filePart.getInputStream()) {
-			Files.copy(inputStream, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-		}
 
-		// Upload temp file to Cloudinary
-		Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap("resource_type", "auto"));
+      
+        File tempFile = File.createTempFile("upload-", fileName);
+        try (InputStream inputStream = filePart.getInputStream()) {
+            Files.copy(inputStream, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }
 
-		// Delete temp file after upload
-		tempFile.delete();
+ 
+        Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap(
+                "resource_type", "auto"
+        ));
+
+       
+        tempFile.delete();
+
 
 		return (String) uploadResult.get("secure_url");
 	}

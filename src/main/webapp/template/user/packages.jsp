@@ -68,20 +68,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	<input type="hidden" name="button" value="packageList">
 
 	<div class="col-md-2">
-		<label for="title" class="form-label">Title</label> <input type="text"
-			name="title" id="title" class="form-control" value="<%=title%>">
-	</div>
-
-	<div class="col-md-2">
-		<label for="location" class="form-label">City</label> <input
-			type="text" name="location" id="location" class="form-control"
-			value="<%=location%>">
-	</div>
-
-
-
-
-	<div class="col-md-2">
 		<label for="dateFrom" class="form-label">Departure Date From </label>
 		<input type="date" name="dateFrom" class="form-control"
 			placeholder="Start Date" value="<%=dateFrom%>" id="dateFrom"

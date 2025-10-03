@@ -511,31 +511,29 @@ public class BookingServlet extends HttpServlet {
 			return;
 		}
 
-//		boolean seatsAdjusted = false;
-//		int retries = 3;
-//		while (retries-- > 0) {
-//			int rowsAffected = packageService.updateSeatsOptimistic(packageId, noOfTravellers, pkg.getVersion());
-//			if (rowsAffected > 0) {
-//				seatsAdjusted = true;
-//				break;
-//			} else {
-//
-//				pkg = packageService.getPackageById(packageId);
-//				if (noOfTravellers > pkg.getTotalSeats()) {
-//					request.setAttribute("errorMessage", "Not enough seats available. Try again.");
-//					request.setAttribute("package", pkg);
-//					request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-//					return;
-//				}
-//			}
-//		}
-//
-//		if (!seatsAdjusted) {
-//			request.setAttribute("errorMessage", "Booking failed due to concurrent bookings. Please try again.");
-//			request.setAttribute("package", pkg);
-//			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
-//			return;
-//		}
+		boolean seatsAdjusted = false;
+		int retries = 3;
+		while (retries-- > 0) {
+			int rowsAffected = packageService.updateSeatsOptimistic(packageId, noOfTravellers, pkg.getVersion());
+			if (rowsAffected > 0) {
+				seatsAdjusted = true;
+				break;
+			} else {
+				pkg = packageService.getPackageById(packageId);
+				if (noOfTravellers > pkg.getTotalSeats()) {
+					request.setAttribute("errorMessage", "Not enough seats available. Try again.");
+					request.setAttribute("package", pkg);
+					request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+					return;
+				}
+			}
+		}
+		if (!seatsAdjusted) {
+			request.setAttribute("errorMessage", "Booking failed due to concurrent bookings. Please try again.");
+			request.setAttribute("package", pkg);
+			request.getRequestDispatcher("template/user/booking.jsp").forward(request, response);
+			return;
+		}
 
 		bookingDTO.setUserId(userId);
 		bookingDTO.setPackageId(packageId);
