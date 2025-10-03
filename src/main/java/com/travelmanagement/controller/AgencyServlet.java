@@ -118,7 +118,7 @@ public class AgencyServlet extends HttpServlet {
 		dto.setPrice(request.getParameter("price"));
 		dto.setDuration(request.getParameter("duration"));
 		dto.setIsActive(request.getParameter("isActive"));
-		packageService.updatePackage(dto);
+//		packageService.updatePackage(dto);
 		response.sendRedirect("agency?button=dashboard");
 	}
 

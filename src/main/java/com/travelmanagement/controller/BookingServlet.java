@@ -5,10 +5,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
@@ -23,7 +21,6 @@ import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
-import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
