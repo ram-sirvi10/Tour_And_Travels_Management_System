@@ -11,9 +11,7 @@ public interface IPackageService {
 
 	PackageResponseDTO getPackageById(int id) throws Exception;
 
-	List<Packages> getAllPackages() throws Exception;
 
-	List<Packages> searchPackages(String keyword) throws Exception;
 
 	boolean updatePackage(Packages pkg) throws Exception;
 

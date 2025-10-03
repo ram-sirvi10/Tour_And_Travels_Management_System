@@ -78,24 +78,7 @@ public class PackageServiceImpl implements IPackageService {
 //        return packageDAO.getPackageById(id);
 //    }
 
-	@Override
-	public List<Packages> getAllPackages() throws Exception {
-		return packageDAO.getAllPackages();
-	}
-
-	@Override
-	public List<Packages> searchPackages(String keyword) throws Exception {
-		List<Packages> all = packageDAO.getAllPackages();
-		List<Packages> filtered = new ArrayList<>();
-		for (Packages p : all) {
-			if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
-					|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
-				filtered.add(p);
-			}
-		}
-		return filtered;
-	}
-
+	
 	@Override
 	public boolean updatePackage(Packages pkg) throws Exception {
 		validatePackage(pkg);
