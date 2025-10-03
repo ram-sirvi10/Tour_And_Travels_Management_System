@@ -1,4 +1,5 @@
 <style>/* ===================== Reset & Body ===================== */
+/* ===================== Reset & Body ===================== */
 * {
 	box-sizing: border-box;
 	margin: 0;
@@ -25,32 +26,69 @@ nav {
 	backdrop-filter: blur(6px);
 	z-index: 1000;
 	flex-wrap: wrap;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+	transition: background 0.3s ease;
+}
+
+nav:hover {
+	background: rgba(0, 0, 0, 0.75);
 }
 
 nav .logo {
-	font-size: 1.5rem;
+	font-size: 1.7rem;
 	font-weight: bold;
 	color: #fff;
+	letter-spacing: 1px;
 }
 
 nav ul {
 	list-style: none;
 	display: flex;
-	gap: 15px;
+	gap: 20px;
 	flex-wrap: wrap;
 }
 
 nav ul li a {
 	text-decoration: none;
 	color: #fff;
-	padding: 8px 14px;
-	border-radius: 6px;
+	padding: 8px 16px;
+	border-radius: 8px;
 	transition: 0.3s;
 	white-space: nowrap;
+	font-weight: 500;
 }
 
 nav ul li a:hover {
 	background: #ff6f61;
+	color: #fff;
+}
+
+/* ===================== Responsive Navbar ===================== */
+@media ( max-width : 992px) {
+	nav {
+		padding: 15px 5%;
+	}
+}
+
+@media ( max-width : 768px) {
+	nav {
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 15px 5%;
+	}
+	nav ul {
+		flex-direction: column;
+		width: 100%;
+		gap: 10px;
+		margin-top: 10px;
+	}
+	nav ul li a {
+		width: 100%;
+		text-align: left;
+	}
+	nav .logo {
+		margin-bottom: 10px;
+	}
 }
 
 /* ===================== Landing Page Header ===================== */
@@ -197,9 +235,13 @@ keyframes pulse { 0%{
 
 
 
+
+
 %
 {
 box-shadow
+
+
 
 
 
@@ -209,9 +251,6 @@ box-shadow
 
 
 
-0
-
-
 
 
 0
@@ -219,7 +258,18 @@ box-shadow
 
 
 
+
+
 0
+
+
+
+
+
+
+0
+
+
 
 
 
@@ -229,10 +279,16 @@ box-shadow
 
 
 
+
+
 rgba
 
 
+
+
 (
+
+
 
 
 
@@ -248,12 +304,18 @@ rgba
 
 
 
+
+
 )
+
+
 
 
 ;
 }
 100
+
+
 
 
 
@@ -265,14 +327,13 @@ box-shadow
 
 
 
+
+
 :
 
 
 
 
-0
-
-
 
 
 0
@@ -280,12 +341,25 @@ box-shadow
 
 
 
+
+
+0
+
+
+
+
+
+
 0
 
 
 
 
+
+
 0
+
+
 
 
 
@@ -293,7 +367,11 @@ box-shadow
 rgba
 
 
+
+
 (
+
+
 
 
 
@@ -309,7 +387,11 @@ rgba
 
 
 
+
+
 )
+
+
 
 
 ;
@@ -417,6 +499,40 @@ button:hover, input[type=submit]:hover {
 		padding: 20px;
 	}
 }
+/* logo styles (for SVG option) */
+.logo {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+}
+
+.logo-icon {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  /* subtle shadow */
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+}
+
+.logo-text {
+  font-size: 1.1rem;
+  color: #fff;
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(-1px);
+}
+
+.logo-text strong { font-weight: 700; letter-spacing: 0.4px; }
+.logo-text .accent { color: #ffd6cf; margin-left: 2px; font-weight: 600; }
+
+/* hover effect */
+nav .logo:hover .logo-icon { transform: translateY(-3px) scale(1.03); transition: transform .25s ease; }
+nav .logo:hover .logo-text { text-decoration: none; opacity: 0.95; }
+
+
 </style>
 <%
 Object obj = session.getAttribute("user");
@@ -427,9 +543,31 @@ String label = obj != null ? "My Account" : "Login";
 %>
 <nav>
 
-	<div class="logo">TravelMate</div>
+	
+	<a href="<%=request.getContextPath()%>/" class="logo d-flex align-items-center gap-2"
+		aria-label="TravelMate - Home"> <!-- SVG icon --> <svg
+			class="logo-icon" xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1">
+        <stop offset="0" stop-color="#ff6f61" />
+        <stop offset="1" stop-color="#ff9a8b" />
+      </linearGradient>
+    </defs>
+    <!-- location pin -->
+    <path fill="url(#g1)"
+				d="M32 4C22 4 14 12 14 22c0 12 14 26 16 28 2-2 16-16 16-28 0-10-8-18-14-18z" />
+    <circle cx="32" cy="22" r="6" fill="#fff" />
+    <!-- airplane silhouette (white) -->
+    <path fill="#fff"
+				d="M45 30c0 .6-.3 1.1-.8 1.4L40 34l1 4-5-3-5 3 1-4-4.2-2.6A1.6 1.6 0 0 1 27 30V28c0-.9.8-1.6 1.6-1.6L35 28l6-3-2 5 4 0c.6 0 1.1.3 1.4.8.2.5.2 1.1 0 1.4z" />
+  </svg> <!-- text --> <span class="logo-text"> <strong>Travel</strong><span
+			class="accent">Mate</span>
+	</span>
+	</a>
+
 	<ul>
-		<li><a href="index.jsp">Home</a></li>
+		<li><a href="<%=request.getContextPath()%>/">Home</a></li>
 
 		<li><a href="login.jsp"> <%=label%>
 		</a></li>

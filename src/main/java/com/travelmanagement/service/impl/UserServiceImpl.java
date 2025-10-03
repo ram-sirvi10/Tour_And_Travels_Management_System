@@ -44,7 +44,9 @@ public class UserServiceImpl implements IUserService {
 		if (dbUser == null) {
 			throw new UserNotFoundException("User not found!");
 		}
-		if (!dbUser.isActive()) {
+		System.out.println(dbUser.isActive());
+		if (dbUser.isActive()!=true) {
+			System.out.println(dbUser.isActive());
 			throw new BadRequestException("Account is blocked! Please contact support.");
 		}
 		if (!PasswordHashing.checkPassword(loginUser.getUserPassword(), dbUser.getUserPassword())) {

@@ -6,6 +6,7 @@ import java.util.List;
 import com.travelmanagement.dao.ITravelerDAO;
 import com.travelmanagement.dao.impl.TravelerDAOImpl;
 import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
+import com.travelmanagement.exception.BadRequestException;
 import com.travelmanagement.model.Traveler;
 import com.travelmanagement.service.ITravelerService;
 import com.travelmanagement.util.Mapper;
@@ -53,6 +54,11 @@ public class TravelerServiceImpl implements ITravelerService {
 
 	@Override
 	public void updateTravelerStatus(Integer travelerId, Integer bookingId ,String status) throws Exception {
+		 Traveler traveler = travelerDAO.getTravelerById(travelerId); 
+		 if (traveler == null) {
+	           throw new BadRequestException("Traveler Not Found !");
+	        }
+		
 	    travelerDAO.updateTravelerStatus(travelerId, bookingId, status);
 	}
 

@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import com.razorpay.Order;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
@@ -250,6 +251,7 @@ public class BookingServlet extends HttpServlet {
 			System.out.println("Remaning Days -> " + daysDiff);
 			System.out.println("Total Amount -> " + totalAmount);
 			System.out.println("Amount After GST -> " + amountAfterGST);
+
 			if (daysDiff >= 7) {
 				refundPercent = 100;
 			} else if (daysDiff >= 3) {
@@ -259,7 +261,11 @@ public class BookingServlet extends HttpServlet {
 			} else {
 				refundPercent = 0;
 			}
-			double refundAmount = (amountAfterGST * refundPercent) / 100;
+			double refundAmount = 0.0;
+			if (pkg.getPrice() > 0) {
+				double taxable = pkg.getPrice() / 1.18;
+				refundAmount = taxable * booking.getNoOfTravellers();
+			}
 			System.out.println("Refundable Amount -> " + refundAmount);
 			bookingService.updateBookingStatus(bookingId, "CANCELLED");
 			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
@@ -600,7 +606,7 @@ public class BookingServlet extends HttpServlet {
 
 			double totalAmount = packageResponseDTO.getPrice() * bookingDTO.getNumberOfTravelers();
 
-//			 Razorpay Order Create
+////			 Razorpay Order Create
 //			Order order = PaymentGatewayUtil.createOrder(totalAmount, "INR", "for booking " + createdBookingId);
 //			request.setAttribute("razorpayOrderId", order.get("id"));
 //			request.setAttribute("razorpayKey", "rzp_test_RNQiHnsfjn3up2");
@@ -854,7 +860,6 @@ public class BookingServlet extends HttpServlet {
 		try {
 			String body = request.getReader().lines().reduce("", (acc, line) -> acc + line);
 			JSONObject json = new JSONObject(body);
-
 			Map<String, String> params = new HashMap<>();
 			params.put("razorpay_order_id", json.getString("razorpay_order_id"));
 			params.put("razorpay_payment_id", json.getString("razorpay_payment_id"));

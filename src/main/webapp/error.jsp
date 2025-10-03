@@ -10,7 +10,7 @@ if (statusCode == null) {
 if (statusCode == 0)
 	statusCode = 500;
 
-String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
+String errorMessage = "An unexpected error occurred!";
 if (errorMessage == null || errorMessage.isEmpty()) {
 	switch (statusCode) {
 	case 404:
@@ -105,13 +105,27 @@ keyframes float { 0%, 100% {
 }
 
 50
+
+
 %
 {
 transform
+
+
 :
-translateY(
+
+
+translateY
+(
+
+
 -20px
-);
+
+
+)
+;
+
+
 }
 }
 @
@@ -121,16 +135,37 @@ keyframes fadeIn { 0% {
 }
 
 100
+
+
 %
 {
 opacity
+
+
 :
-1;
-transform
-:
-scale(
+
+
 1
-);
+;
+
+
+transform
+
+
+:
+
+
+scale
+(
+
+
+1
+
+
+)
+;
+
+
 }
 }
 /* Background circles */
@@ -167,30 +202,77 @@ keyframes floatCircle { 0% {
 	transform: translateY(0) translateX(0);
 }
 50
+
+
 %
 {
 transform
+
+
 :
-translateY(
+
+
+translateY
+(
+
+
 -50px
+
+
 )
-translateX(
+
+
+translateX
+(
+
+
 30px
-);
+
+
+)
+;
+
+
 }
 100
+
+
 %
 {
 transform
+
+
 :
-translateY(
+
+
+translateY
+(
+
+
 0
+
+
 )
-translateX(
+
+
+translateX
+(
+
+
 0
-);
+
+
+)
+;
+
+
 }
 }
+@media (max-width: 576px) {
+  h1 { font-size: 5rem; }
+  h2 { font-size: 1.2rem; }
+}
+
 </style>
 </head>
 <body>
