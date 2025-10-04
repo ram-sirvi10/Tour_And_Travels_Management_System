@@ -10,22 +10,25 @@ import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
+import com.travelmanagement.service.impl.TravelerServiceImpl;
 
 public class BookingScheduler {
 
 	private static BookingScheduler instance;
 
-	private final ScheduledExecutorService bookingSchedulerPool;
-
+	private final ScheduledExecutorService schedulerPool;
 	private final BookingServiceImpl bookingService;
 	private final PaymentServiceImpl paymentService;
 	private final PackageServiceImpl packageService;
+	private final TravelerServiceImpl travelerServiceImpl;
 
 	private BookingScheduler() {
-		this.bookingSchedulerPool = Executors.newScheduledThreadPool(50);
+		this.schedulerPool = Executors.newScheduledThreadPool(100);
 		this.bookingService = new BookingServiceImpl();
 		this.paymentService = new PaymentServiceImpl();
 		this.packageService = new PackageServiceImpl();
+		this.travelerServiceImpl = new TravelerServiceImpl();
+
 	}
 
 	public static synchronized BookingScheduler getInstance() {
@@ -36,54 +39,84 @@ public class BookingScheduler {
 	}
 
 	public void scheduleAutoCancel(int bookingId) {
-		bookingSchedulerPool.schedule(() -> {
+
+		schedulerPool.schedule(() -> {
 			try {
 				BookingResponseDTO booking = bookingService.getBookingById(bookingId);
 
 				if (booking == null || !"PENDING".equalsIgnoreCase(booking.getStatus())) {
-					System.out.println("Booking " + bookingId + " already processed  thread exiting");
+					System.out.println("Booking " + bookingId + " already processed.");
 					return;
 				}
 
 				PaymentResponseDTO payment = paymentService.getPaymentByBookingId(bookingId);
 
-				boolean paymentSuccessful = payment != null && payment.getStatus() != null
-						&& "SUCCESSFUL".equalsIgnoreCase(payment.getStatus().trim());
+				boolean paymentSuccess = payment != null && "SUCCESSFUL".equalsIgnoreCase(payment.getStatus());
 
-				if (paymentSuccessful) {
-					System.out.println("Booking " + bookingId + " payment SUCCESSFUL  thread exiting, no cancel");
+				if (paymentSuccess) {
+					System.out.println("Booking " + bookingId + " already paid.");
 					return;
-				} else
-					cancelBooking(booking, payment);
+				}
 
+				bookingService.updateBookingStatus(bookingId, "CANCELLED");
+				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+				travelerServiceImpl.updateTravelerStatus(null, bookingId, "CANCELLED");
+				System.out.println(payment);
+				if (payment == null) {
+					PaymentRequestDTO failedPayment = new PaymentRequestDTO();
+					failedPayment.setBookingId(bookingId);
+					failedPayment.setAmount(booking.getNoOfTravellers()
+							* packageService.getPackageById(booking.getPackageId()).getPrice());
+					failedPayment.setStatus("FAILED");
+					paymentService.addPayment(failedPayment);
+					System.out.println(" payment entry  " + payment);
+				}
+
+				System.out.println("Booking " + bookingId + " auto-cancelled and seats restored.");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}, 2, TimeUnit.MINUTES);
+		}, 5, TimeUnit.MINUTES);
 	}
 
-	private void cancelBooking(BookingResponseDTO booking, PaymentResponseDTO payment) throws Exception {
+	public void startAutoCancelTask() {
+		schedulerPool.scheduleAtFixedRate(() -> {
+			try {
 
-		if (!"PENDING".equalsIgnoreCase(booking.getStatus())) {
-			System.out.println("Booking " + booking.getBookingId() + " is not PENDING →skipping cancel");
-			return;
-		}
+				var pendingBookings = bookingService.getAllBookings(null, null, null, "PENDING", null, null, 1000, 0);
 
-		bookingService.updateBookingStatus(booking.getBookingId(), "CANCELLED");
-		packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+				for (BookingResponseDTO booking : pendingBookings) {
+					PaymentResponseDTO payment = paymentService.getPaymentByBookingId(booking.getBookingId());
 
-		if (payment == null) {
-			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-			paymentDTO.setBookingId(booking.getBookingId());
-			paymentDTO.setAmount(booking.getAmount());
-			paymentDTO.setStatus("FAILED");
-			paymentService.addPayment(paymentDTO);
-		}
+					boolean paymentSuccess = payment != null && "SUCCESSFUL".equalsIgnoreCase(payment.getStatus());
 
-		System.out.println("Booking " + booking.getBookingId() + " cancelled & seats restored");
+					if (!paymentSuccess
+							&& booking.getCreated_at().plusMinutes(5).isBefore(java.time.LocalDateTime.now())) {
+
+						bookingService.updateBookingStatus(booking.getBookingId(), "CANCELLED");
+						packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+						travelerServiceImpl.updateTravelerStatus(null, booking.getBookingId(), "CANCELLED");
+
+						if (payment == null) {
+							PaymentRequestDTO failedPayment = new PaymentRequestDTO();
+							failedPayment.setBookingId(booking.getBookingId());
+							failedPayment.setAmount(booking.getNoOfTravellers()
+									* packageService.getPackageById(booking.getPackageId()).getPrice());
+							failedPayment.setStatus("FAILED");
+							paymentService.addPayment(failedPayment);
+							System.out.println("startAutoCancelTask  Paymnet faild entry -> " + failedPayment);
+						}
+
+						System.out.println("Booking " + booking.getBookingId() + " auto-cancelled.");
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}, 0, 1, TimeUnit.MINUTES);
 	}
 
 	public void shutdown() {
-		bookingSchedulerPool.shutdownNow();
+		schedulerPool.shutdownNow();
 	}
 }

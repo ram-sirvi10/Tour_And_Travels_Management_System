@@ -10,6 +10,15 @@ public class PaymentResponseDTO {
 	private String status;
 	private double amount;
 	private String packageName;
+	private String razorpayPaymentId;
+
+	public String getRazorpayPaymentId() {
+		return razorpayPaymentId;
+	}
+
+	public void setRazorpayPaymentId(String razorpayPaymentId) {
+		this.razorpayPaymentId = razorpayPaymentId;
+	}
 	public int getPaymentId() {
 		return paymentId;
 	}
@@ -56,6 +65,12 @@ public class PaymentResponseDTO {
 
 	public void setAmount(double amount) {
 		this.amount = amount;
+	}
+
+	@Override
+	public String toString() {
+		return "PaymentResponseDTO [paymentId=" + paymentId + ", bookingId=" + bookingId + ", paymentDate="
+				+ paymentDate + ", status=" + status + ", amount=" + amount + ", packageName=" + packageName + "]";
 	}
 
 }

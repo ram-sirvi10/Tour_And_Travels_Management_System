@@ -259,20 +259,22 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
-	    String sql = "UPDATE travel_packages " +
-	                 "SET totalseats = totalseats + ?, updated_at = NOW() " +
-	                 "WHERE package_id = ? AND totalseats + ? >= 0";
+		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats + ?, updated_at = NOW() "
+				+ "WHERE package_id = ? AND totalseats + ? >= 0";
 
-	    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-	        ps.setInt(1, seatsChange);
-	        ps.setInt(2, packageId);
-	        ps.setInt(3, seatsChange);  
-
-	        int rows = ps.executeUpdate();
-	        return rows > 0;  
-	    }
+		try {
+			PreparedStatement ps = connection.prepareStatement(sql);
+			ps.setInt(1, seatsChange);
+			ps.setInt(2, packageId);
+			ps.setInt(3, seatsChange);
+			System.out.println(ps);
+			int rows = ps.executeUpdate();
+			return rows > 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
-
 
 	@Override
 	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,

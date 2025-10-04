@@ -1,6 +1,7 @@
 package com.travelmanagement.dto.responseDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class BookingResponseDTO {
 
@@ -17,9 +18,19 @@ public class BookingResponseDTO {
 	private LocalDateTime created_at;
 	private LocalDateTime departureDateAndTime;
 	private LocalDateTime lastBookingDate;
+
+	private List<TravelerResponseDTO> travelers;
+
+    public List<TravelerResponseDTO> getTravelers() {
+        return travelers;
+    }
+
+    public void setTravelers(List<TravelerResponseDTO> travelers) {
+        this.travelers = travelers;
+    }
 	public LocalDateTime getLastBookingDate() {
 		return lastBookingDate;
-	}
+		}
 
 	public void setLastBookingDate(LocalDateTime lastBookingDate) {
 		this.lastBookingDate = lastBookingDate;

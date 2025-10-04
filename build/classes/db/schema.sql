@@ -124,3 +124,14 @@ ADD COLUMN status ENUM('CONFIRMED','CANCELLED','COMPLETE') DEFAULT 'CONFIRMED' ;
  ADD COLUMN version Int DEFAULT 0;
 
  
+ CREATE TABLE package_schedule (
+    schedule_id INT AUTO_INCREMENT PRIMARY KEY,
+    package_id INT NOT NULL,
+    day_number INT NOT NULL,
+    activity VARCHAR(255) NOT NULL,
+    description TEXT,
+    FOREIGN KEY (package_id) REFERENCES travel_packages(package_id) ON DELETE CASCADE
+);
+
+
+ALTER TABLE  payments ADD COLUMN razorpay_payment_id varchar(100);

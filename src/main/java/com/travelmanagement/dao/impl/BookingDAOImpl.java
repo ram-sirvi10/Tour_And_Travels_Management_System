@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +28,14 @@ public class BookingDAOImpl implements IBookingDAO {
 	@Override
 	public int createBooking(Booking booking) {
 		int bookingId = -1;
-		String sql = "INSERT INTO bookings (user_id, package_id,  no_of_travellers) VALUES (?,  ?,  ?)";
+		String sql = "INSERT INTO bookings (user_id, package_id,no_of_travellers) VALUES (?,  ?,  ?)";
 
 		try {
 			preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 			preparedStatement.setInt(1, booking.getUserId());
 			preparedStatement.setInt(2, booking.getPackageId());
 			preparedStatement.setInt(3, booking.getNoOfTravellers());
+		
 
 			int rows = preparedStatement.executeUpdate();
 			if (rows > 0) {
@@ -212,21 +215,7 @@ public class BookingDAOImpl implements IBookingDAO {
 		return updateBookingStatus(bookingId, "CANCELLED");
 	}
 
-	@Override
-	public List<Integer> getPendingBookingsInLast10Minutes() throws Exception {
-		List<Integer> bookingIds = new ArrayList<>();
-		String sql = "SELECT booking_id FROM bookings " + "WHERE status = 'PENDING' "
-				+ "AND created_at >= (NOW() - INTERVAL 10 MINUTE)";
-
-		preparedStatement = connection.prepareStatement(sql);
-		resultSet = preparedStatement.executeQuery();
-
-		while (resultSet.next()) {
-			bookingIds.add(resultSet.getInt("booking_id"));
-		}
-
-		return bookingIds;
-	}
+	
 
 	@Override
 	public void decrementTravelerCount(int bookingId) throws Exception {
@@ -245,7 +234,7 @@ public class BookingDAOImpl implements IBookingDAO {
 	public int getTotalBookingsByPackage(int packageId) throws Exception {
 		int totalBookings = 0;
 		String sql = "SELECT SUM(no_of_travellers) as totalBookings FROM bookings WHERE package_id = ?";
-		try (Connection conn =DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			ps.setInt(1, packageId);
 			ResultSet rs = ps.executeQuery();

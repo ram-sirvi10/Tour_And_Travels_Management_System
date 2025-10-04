@@ -300,37 +300,39 @@ a.card-link {
 		font-size: 1rem;
 	}
 }
-<style>
-/* Book Now Button Gradient */
-.btn-book-now {
-    background: linear-gradient(90deg, #ff6f61, #ff3b2e); /* bright orange */
-    color: white;
-    font-weight: 600;
-    border: 2px solid transparent; /* initial border */
-    border-radius: 50px;
-    transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
+
+<
+style> /* Book Now Button Gradient */ .btn-book-now {
+	background: linear-gradient(90deg, #ff6f61, #ff3b2e);
+	/* bright orange */
+	color: white;
+	font-weight: 600;
+	border: 2px solid transparent; /* initial border */
+	border-radius: 50px;
+	transition: transform 0.3s, box-shadow 0.3s, border 0.3s;
 }
 
 .btn-book-now:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-    border: 2px solid #fff; /* hover border */
+	transform: translateY(-3px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+	border: 2px solid #fff; /* hover border */
 }
 
 /* Already Booked Button - muted/darker orange */
 .btn-booked {
-    background: linear-gradient(90deg, #ff8c42, #e07b30); /* darker/muted orange */
-    color: white;
-    font-weight: 600;
-    border: 2px solid transparent;
-    border-radius: 50px;
-    pointer-events: none; /* Disable click */
+	background: linear-gradient(90deg, #ff8c42, #e07b30);
+	/* darker/muted orange */
+	color: white;
+	font-weight: 600;
+	border: 2px solid transparent;
+	border-radius: 50px;
+	pointer-events: none; /* Disable click */
 }
 
 .btn-booked:hover {
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
 }
 }
 </style>
@@ -422,7 +424,7 @@ a.card-link {
 										<%=pkg.getLocation()%>
 										| <i class="fas fa-clock"></i>
 										<%=pkg.getDuration()%>
-										Days | $<%=pkg.getPrice()%>
+										Days | ₹<%=pkg.getPrice()%>
 									</p>
 									<p><%=pkg.getDescription()%></p>
 
@@ -431,7 +433,7 @@ a.card-link {
 										java.time.LocalDateTime departure = userBooking.getDepartureDateAndTime();
 									%>
 									<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
-										<small class="d-block">Booked: $<%=userBooking.getAmount()%></small>
+										<small class="d-block">Booked: ₹<%=userBooking.getAmount()%></small>
 										<small class="d-block">Status: <%=userBooking.getStatus()%></small>
 										<small class="d-block"
 											id="carousel-countdown-<%=pkg.getPackageId()%>"></small>
@@ -575,7 +577,7 @@ a.card-link {
 
 
 	<!-- Features Section -->
-	<section  id="features">
+	<section id="features">
 		<h2>Our Features</h2>
 		<div class="features-grid">
 			<div class="feature-box">
@@ -601,70 +603,136 @@ a.card-link {
 		</div>
 	</section>
 
-
-
-<section id="about" style="padding:80px 10%; background:#f5f5f5;">
-    <h2 style="text-align:center; color:#ff6f61; margin-bottom:50px;">About Us</h2>
-    <div class="features-grid">
-        <!-- Mission Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Mission Icon">
-            <h3>Our Mission</h3>
-            <p>To make travel planning simple, secure, and enjoyable for every traveler.</p>
-        </div>
-        <!-- Services Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="Services Icon">
-            <h3>Our Services</h3>
-            <p>We provide verified travel packages, booking assistance, and personalized recommendations.</p>
-        </div>
-        <!-- User Friendly Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/3176/3176296.png" alt="User Friendly Icon">
-            <h3>User Friendly</h3>
-            <p>Browse packages, check details, and make bookings easily with our intuitive platform.</p>
-        </div>
-        <!-- Support Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Support Icon">
-            <h3>24/7 Support</h3>
-            <p>Our team is available around the clock to help with queries or travel planning assistance.</p>
-        </div>
-    </div>
-</section>
+	<section id="process" style="padding: 80px 10%; background: #fff;">
+		<h2 style="text-align: center; color: #ff6f61; margin-bottom: 50px;">How
+			It Works</h2>
+		<div class="features-grid">
+			<div class="feature-box">
+				<h3>1. Browse Packages</h3>
+				<p>Find your ideal travel package by location, price, and
+					availability.</p>
+			</div>
+			<div class="feature-box">
+				<h3>2. Book & Pay</h3>
+				<p>Book online easily with secure payment options.</p>
+			</div>
+			<div class="feature-box">
+				<h3>3. Get Confirmation</h3>
+				<p>Receive booking confirmation instantly via email or SMS.</p>
+			</div>
+			<div class="feature-box">
+				<h3>4. Enjoy Your Trip</h3>
+				<p>Travel stress-free and make memories for a lifetime.</p>
+			</div>
+		</div>
+	</section>
 
 
 
-<section id="privacy" style="padding:80px 10%; background:#fff;">
-    <h2 style="text-align:center; color:#ff6f61; margin-bottom:50px;">Privacy & Platform Fee</h2>
-    <div class="features-grid">
-        <!-- Security Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/3064/3064197.png" alt="Security Icon">
-            <h3>Data Security</h3>
-            <p>All personal and booking information is encrypted and securely stored.</p>
-        </div>
-        <!-- Platform Fee Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" alt="Fee Icon">
-            <h3>Platform Fee</h3>
-            <p>A 5% fee applies to all bookings, ensuring platform maintenance and secure transactions.</p>
-        </div>
-        <!-- Transparency Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/2910/2910762.png" alt="Transparency Icon">
-            <h3>Transparency</h3>
-            <p>All fees are clearly displayed during booking, with detailed receipts provided.</p>
-        </div>
-        <!-- Privacy Card -->
-        <div class="feature-box">
-            <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Privacy Icon">
-            <h3>User Privacy</h3>
-            <p>Your data will never be shared without consent, ensuring complete confidentiality.</p>
-        </div>
-    </div>
-</section>
 
+
+
+
+	<section id="about" style="padding: 80px 10%; background: #f5f5f5;">
+		<h2 style="text-align: center; color: #ff6f61; margin-bottom: 50px;">About
+			Us</h2>
+		<div class="features-grid">
+			<!-- Mission Card -->
+			<div class="feature-box">
+				<img src="https://cdn-icons-png.flaticon.com/512/190/190411.png"
+					alt="Mission Icon">
+				<h3>Our Mission</h3>
+				<p>To make travel planning simple, secure, and enjoyable for
+					every traveler.</p>
+			</div>
+			<!-- Services Card -->
+			<div class="feature-box">
+				<img src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+					alt="Services Icon">
+				<h3>Our Services</h3>
+				<p>We provide verified travel packages, booking assistance, and
+					personalized recommendations.</p>
+			</div>
+			<!-- User Friendly Card -->
+			<div class="feature-box">
+				<img src="https://cdn-icons-png.flaticon.com/512/3176/3176296.png"
+					alt="User Friendly Icon">
+				<h3>User Friendly</h3>
+				<p>Browse packages, check details, and make bookings easily with
+					our intuitive platform.</p>
+			</div>
+			<!-- Support Card -->
+			<div class="feature-box">
+				<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+					alt="Support Icon">
+				<h3>24/7 Support</h3>
+				<p>Our team is available around the clock to help with queries
+					or travel planning assistance.</p>
+			</div>
+		</div>
+	</section>
+
+	<section id="contact" style="padding: 80px 10%; background: #f5f5f5;">
+		<h2 style="text-align: center; color: #ff6f61; margin-bottom: 50px;">Contact
+			Us</h2>
+
+		<div
+			style="display: flex; flex-wrap: wrap; gap: 40px; justify-content: center;">
+
+			<!-- Contact Info -->
+			<div style="flex: 1 1 300px; max-width: 400px;">
+				<div
+					style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);">
+					<h3 style="margin-bottom: 20px; color: #333;">Get in Touch</h3>
+
+					<p>
+						<strong>📍 Address:</strong><br> 5, Vishnu Puri, 103,
+						Sukhmani Apartment,<br> Above Union Bank AB Road, Bhawarkua
+						Main Rd,<br> Indore, Madhya Pradesh 452014
+					</p>
+
+					<p>
+						<strong>📞 Phone:</strong> <a href="tel:+919876543210"
+							style="color: #ff6f61; text-decoration: none;">+91 98765
+							43210</a>
+					</p>
+
+					<p>
+						<strong>📧 Email:</strong> <a
+							href="mailto:info@placementsadda.com"
+							style="color: #ff6f61; text-decoration: none;">info@placementsadda.com</a>
+					</p>
+
+					<p>
+						<i class="fab fa-whatsapp"> </i><strong> WhatsApp:</strong> <a href="https://wa.me/919876543210"
+							target="_blank"
+							style="color: #25d366; font-weight: 600; text-decoration: none;">
+							Chat on WhatsApp </a>
+					</p>
+
+					<!-- Social Media Links -->
+					<div style="margin-top: 20px; display: flex; gap: 15px;">
+						<a href="https://www.instagram.com/" target="_blank">📷
+							Instagram</a> <a href="https://www.linkedin.com/" target="_blank">💼
+							LinkedIn</a>
+					</div>
+				</div>
+			</div>
+			<!-- Google Map -->
+			<div style="flex: 1 1 350px; max-width: 500px;">
+				<iframe
+					src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3670.123456!2d75.864123!3d22.690013!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3962fd11ad0a250d%3A0xd38a1cb27d4c7827!2sPlacements+Adda+%7C+IT+Training+Institute+Indore!5e0!3m2!1sen!2sin!4v1696246687686!5m2!1sen!2sin"
+					width="100%" height="400"
+					style="border: 0; border-radius: 15px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);"
+					allowfullscreen="" loading="lazy"></iframe>
+			</div>
+		</div>
+
+		<!-- Google Map -->
+
+
+
+	</section>
 
 
 
@@ -679,7 +747,7 @@ a.card-link {
 	<div class="footer">&copy; 2025 Tour & Travel Management System |
 		All Rights Reserved</div>
 	<script>#packagesCarousel .carousel-item {
-    transition: transform 0.4s ease-in-out; /* faster sliding */
+    transition: transform 0.4s ease-in-out;
 }</script>
 
 	<script

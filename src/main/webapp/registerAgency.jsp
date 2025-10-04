@@ -87,10 +87,26 @@ String pincodeVal = request.getParameter("pincode") != null ? request.getParamet
 <input type="email" name="email" class="form-control mb-2" placeholder="Email"
        value="<%=request.getParameter("email") != null ? request.getParameter("email") : ""%>" <%=lockFields ? "readonly" : ""%>>
 <% if (errors != null && errors.get("email") != null) { %><div class="error"><%=errors.get("email")%></div><% } %>
+<label class="form-label">Phone <span style="color:red;">*</span></label>
+<input type="text" name="phone" class="form-control mb-2" placeholder="Phone Number"
+       value="<%=request.getParameter("phone") != null ? request.getParameter("phone") : ""%>" <%=lockFields ? "readonly" : ""%>>
+<% if (errors != null && errors.get("phone") != null) { %>
+    <div class="error"><%=errors.get("phone")%></div>
+<% } %>
+
+
+
 </div>
 
 
 <div class="col-md-6">
+<label class="form-label">Registration Number <span style="color:red;">*</span></label>
+<input type="text" name="registration_number" class="form-control mb-2" placeholder="Registration Number"
+       value="<%=request.getParameter("registration_number") != null ? request.getParameter("registration_number") : ""%>" <%=lockFields ? "readonly" : ""%>>
+<% if (errors != null && errors.get("registrationNumber") != null) { %>
+    <div class="error"><%=errors.get("registrationNumber")%></div>
+<% } %>
+
     <label class="form-label">Country <span style="color:red;">*</span></label>
     <select id="country" name="country" class="form-select mb-2" <%=lockFields ? "disabled" : ""%>></select>
 

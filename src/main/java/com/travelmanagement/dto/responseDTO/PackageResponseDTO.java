@@ -1,6 +1,9 @@
 package com.travelmanagement.dto.responseDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.travelmanagement.model.PackageSchedule;
 
 public class PackageResponseDTO {
 	private int packageId;
@@ -13,13 +16,24 @@ public class PackageResponseDTO {
 	private boolean isActive;
 	private String imageurl;
 	private int totalSeats;
-
-
+	private List<PackageSchedule> packageSchedule;
 	private int version;
 
 	private LocalDateTime departureDate;
 
 	private LocalDateTime lastBookingDate;
+
+	public List<PackageSchedule> getPackageSchedule() {
+		return packageSchedule;
+	}
+
+	public void setPackageSchedule(List<PackageSchedule> packageSchedule) {
+		this.packageSchedule = packageSchedule;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 
 	public LocalDateTime getLastBookingDate() {
 		return lastBookingDate;
@@ -142,7 +156,7 @@ public class PackageResponseDTO {
 
 	public void setTotalRevenue(double totalRevenue) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

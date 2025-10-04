@@ -13,8 +13,6 @@ import com.cloudinary.utils.ObjectUtils;
 
 import jakarta.servlet.http.Part;
 
-
-
 public class CloudinaryUtil {
 
 	private static Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap("cloud_name", "dmjrgxq7c", "api_key",
@@ -40,21 +38,14 @@ public class CloudinaryUtil {
 			throw new Exception("Invalid image format! Only JPG, JPEG, PNG");
 		}
 
+		File tempFile = File.createTempFile("upload-", fileName);
+		try (InputStream inputStream = filePart.getInputStream()) {
+			Files.copy(inputStream, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		}
 
-      
-        File tempFile = File.createTempFile("upload-", fileName);
-        try (InputStream inputStream = filePart.getInputStream()) {
-            Files.copy(inputStream, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        }
+		Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap("resource_type", "auto"));
 
- 
-        Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap(
-                "resource_type", "auto"
-        ));
-
-       
-        tempFile.delete();
-
+		tempFile.delete();
 
 		return (String) uploadResult.get("secure_url");
 	}

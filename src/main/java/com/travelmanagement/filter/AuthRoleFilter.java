@@ -88,17 +88,15 @@ public class AuthRoleFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		
 
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		HttpSession session = req.getSession(false);
 
-	
-	        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-	        res.setHeader("Pragma", "no-cache"); 
-	        res.setDateHeader("Expires", 0); 
-		
+		res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		res.setHeader("Pragma", "no-cache");
+		res.setDateHeader("Expires", 0);
+
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
 
@@ -129,7 +127,7 @@ public class AuthRoleFilter implements Filter {
 					isActive = false;
 				}
 			} catch (Exception e) {
-			
+
 				e.printStackTrace();
 			}
 
@@ -146,7 +144,9 @@ public class AuthRoleFilter implements Filter {
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
-		System.out.println("filter -> " + button);
+		if (button != null)
+			button.trim();
+		System.out.println("filter button value -> " + button);
 		String context = req.getContextPath();
 
 		Map<String, List<String>> adminAccess = new HashMap<>();
@@ -163,15 +163,17 @@ public class AuthRoleFilter implements Filter {
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 
 		Map<String, List<String>> userAccess = new HashMap<>();
-		userAccess.put(context + "/user", List.of("dashboard", "profile", "updateProfile", "changePassword","viewProfile"));
-		userAccess.put(context + "/booking", List.of("book", "viewBookings", "createBooking", "paymentReject",
-				"paymentConfirm", "viewBookingForm", "bookingHistroy", "viewTravelers","paymentHistory","cancelBooking","cancelTraveler"));
+		userAccess.put(context + "/user",
+				List.of("dashboard", "profile", "updateProfile", "changePassword", "viewProfile"));
+		userAccess.put(context + "/booking",
+				List.of("book", "viewBookings", "createBooking", "paymentReject", "paymentConfirm", "viewBookingForm",
+						"bookingHistroy", "viewTravelers", "paymentHistory", "cancelBooking", "cancelTraveler",
+						"downloadInvoice", "verifyPayment", "autoCancelBooking"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));
 
 		boolean allowed = switch (role) {
 		case "ADMIN" -> checkAccess(path, button, adminAccess);
-		case "SUBADMIN" -> path.startsWith(context + "/agency")
-        || checkAccess(path, button, subAdminAccess);
+		case "SUBADMIN" -> path.startsWith(context + "/agency") || checkAccess(path, button, subAdminAccess);
 
 		case "USER" -> checkAccess(path, button, userAccess);
 		default -> false;
@@ -190,7 +192,9 @@ public class AuthRoleFilter implements Filter {
 				System.out.println(button);
 				List<String> buttons = entry.getValue();
 				// if button param is null, allow only if list contains empty string or null`
+				System.out.println(buttons.toString());
 				if (button == null) {
+					System.out.println("Button in check access -> " + button);
 					return buttons.contains(null) || buttons.contains("");
 				}
 				return buttons.contains(button);

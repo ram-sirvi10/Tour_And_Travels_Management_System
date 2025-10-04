@@ -237,9 +237,17 @@ keyframes pulse { 0%{
 
 
 
+
+
+
+
 %
 {
 box-shadow
+
+
+
+
 
 
 
@@ -253,6 +261,21 @@ box-shadow
 
 
 
+
+
+
+
+0
+
+
+
+
+
+
+
+
+
+
 0
 
 
@@ -260,14 +283,15 @@ box-shadow
 
 
 
+
+
+
+
 0
 
 
 
 
-
-
-0
 
 
 
@@ -281,12 +305,24 @@ box-shadow
 
 
 
+
+
+
+
 rgba
 
 
 
 
+
+
+
+
 (
+
+
+
+
 
 
 
@@ -306,7 +342,15 @@ rgba
 
 
 
+
+
+
+
 )
+
+
+
+
 
 
 
@@ -314,6 +358,10 @@ rgba
 ;
 }
 100
+
+
+
+
 
 
 
@@ -329,6 +377,10 @@ box-shadow
 
 
 
+
+
+
+
 :
 
 
@@ -336,16 +388,6 @@ box-shadow
 
 
 
-0
-
-
-
-
-
-
-0
-
-
 
 
 
@@ -357,7 +399,37 @@ box-shadow
 
 
 
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
+0
+
+
+
+
+
+
+
+
+
+
+0
+
+
+
+
 
 
 
@@ -369,7 +441,15 @@ rgba
 
 
 
+
+
+
+
 (
+
+
+
+
 
 
 
@@ -389,7 +469,15 @@ rgba
 
 
 
+
+
+
+
 )
+
+
+
+
 
 
 
@@ -501,38 +589,51 @@ button:hover, input[type=submit]:hover {
 }
 /* logo styles (for SVG option) */
 .logo {
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: #fff;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: #fff;
 }
 
 .logo-icon {
-  display: block;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  /* subtle shadow */
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+	display: block;
+	width: 44px;
+	height: 44px;
+	flex-shrink: 0;
+	/* subtle shadow */
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
 }
 
 .logo-text {
-  font-size: 1.1rem;
-  color: #fff;
-  line-height: 1;
-  display: inline-block;
-  transform: translateY(-1px);
+	font-size: 1.1rem;
+	color: #fff;
+	line-height: 1;
+	display: inline-block;
+	transform: translateY(-1px);
 }
 
-.logo-text strong { font-weight: 700; letter-spacing: 0.4px; }
-.logo-text .accent { color: #ffd6cf; margin-left: 2px; font-weight: 600; }
+.logo-text strong {
+	font-weight: 700;
+	letter-spacing: 0.4px;
+}
+
+.logo-text .accent {
+	color: #ffd6cf;
+	margin-left: 2px;
+	font-weight: 600;
+}
 
 /* hover effect */
-nav .logo:hover .logo-icon { transform: translateY(-3px) scale(1.03); transition: transform .25s ease; }
-nav .logo:hover .logo-text { text-decoration: none; opacity: 0.95; }
+nav .logo:hover .logo-icon {
+	transform: translateY(-3px) scale(1.03);
+	transition: transform .25s ease;
+}
 
-
+nav .logo:hover .logo-text {
+	text-decoration: none;
+	opacity: 0.95;
+}
 </style>
 <%
 Object obj = session.getAttribute("user");
@@ -543,8 +644,9 @@ String label = obj != null ? "My Account" : "Login";
 %>
 <nav>
 
-	
-	<a href="<%=request.getContextPath()%>/" class="logo d-flex align-items-center gap-2"
+
+	<a href="<%=request.getContextPath()%>/"
+		class="logo d-flex align-items-center gap-2"
 		aria-label="TravelMate - Home"> <!-- SVG icon --> <svg
 			class="logo-icon" xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
@@ -568,9 +670,11 @@ String label = obj != null ? "My Account" : "Login";
 
 	<ul>
 		<li><a href="<%=request.getContextPath()%>/">Home</a></li>
- <li><a href="#features">Features</a></li>  
-  <li><a href="#about">About</a></li>       
-    <li><a href="#privacy">Privacy</a></li> 
+		<li><a href="<%=request.getContextPath()%>/#features">Features</a></li>
+		<li><a href="<%=request.getContextPath()%>/#about">About</a></li>
+		<li><a href="<%=request.getContextPath()%>/#contact">Contact</a></li>
+
+
 		<li><a href="login.jsp"> <%=label%>
 		</a></li>
 		<%

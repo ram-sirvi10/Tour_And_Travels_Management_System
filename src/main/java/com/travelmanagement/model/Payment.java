@@ -9,6 +9,15 @@ public class Payment {
 	private LocalDateTime paymentDate;
 	private String status;
 	private double amount;
+	private String razorpayPaymentId;
+
+	public String getRazorpayPaymentId() {
+		return razorpayPaymentId;
+	}
+
+	public void setRazorpayPaymentId(String razorpayPaymentId) {
+		this.razorpayPaymentId = razorpayPaymentId;
+	}
 
 	public int getPaymentId() {
 		return paymentId;

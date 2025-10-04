@@ -15,6 +15,7 @@ import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
+import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.EmailUtil;
 import com.travelmanagement.util.OTPUtil;
 import com.travelmanagement.util.ValidationUtil;
@@ -103,24 +104,24 @@ public class AuthServlet extends HttpServlet {
 //				request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 //				break;
 
-			case "registerAsUser":
+			case Constants.ACTION_REGISTER_USER:
 				handleRegisterAsUser(request, response);
 				break;
 
-			case "verifyOTPAndRegisterUser":
+			case Constants.ACTION_VERIFY_OTP_USER:
 				handleVerifyOTPAndRegisterUser(request, response);
 				break;
 
-			case "registerAsAgency":
+			case Constants.ACTION_REGISTER_AGENCY:
 				handleRegisterAsAgency(request, response);
 				break;
-			case "verifyOTPAndRegisterAgency":
+			case Constants.ACTION_VERIFY_OTP_AGENCY:
 				handleVerifyOTPAndRegisterAgency(request, response);
 				break;
-			case "login":
+			case Constants.ACTION_LOGIN:
 				handleLogin(request, response);
 				break;
-			case "logout":
+			case Constants.ACTION_LOGOUT:
 				handleLogout(request, response);
 				break;
 			default:
@@ -269,33 +270,33 @@ public class AuthServlet extends HttpServlet {
 		String result = OTPUtil.verifyOTP(session, inputOtp);
 
 		switch (result) {
-		case "SUCCESS":
+		case Constants.OTP_SUCCESS:
 			RegisterRequestDTO dto = (RegisterRequestDTO) session.getAttribute("pendingUser");
 			if (dto == null) {
-				request.setAttribute("error", "Session expired. Please start registration again.");
+				request.setAttribute("error", Constants.ERROR_SESSION_EXPIRED);
 				request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 				return;
 			}
 			userService.register(dto);
 			session.removeAttribute("pendingUser");
-			request.setAttribute("success", "User registered successfully. Please login.");
+			request.setAttribute("success", Constants.SUCCESS_USER_REGISTERED);
 			request.getRequestDispatcher("login.jsp").forward(request, response);
 			break;
 
-		case "EXPIRED":
-			request.setAttribute("error", "OTP expired. Please try registering again.");
+		case Constants.OTP_EXPIRED:
+			request.setAttribute("error", Constants.ERROR_OTP_EXPIRED);
 			session.removeAttribute("pendingUser");
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 			break;
 
-		case "INVALID":
-			request.setAttribute("error", "Invalid OTP. Please try again.");
+		case Constants.OTP_INVALID:
+			request.setAttribute("error", Constants.ERROR_OTP_INVALID);
 			request.setAttribute("showOtp", true);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 			break;
 
 		default:
-			request.setAttribute("error", "OTP verification failed. Please try again.");
+			request.setAttribute("error", Constants.ERROR_OTP_FAILED);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 			break;
 		}
@@ -393,22 +394,21 @@ public class AuthServlet extends HttpServlet {
 
 		String otp = OTPUtil.generateOTP(session);
 		switch (otp) {
-		case "WAIT":
-			request.setAttribute("error", "Please wait 1 minute before requesting another OTP.");
+		case Constants.OTP_WAIT:
+			request.setAttribute("error", Constants.ERROR_OTP_WAIT);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 			return;
-		case "LIMIT":
-			request.setAttribute("error", "You have reached maximum OTP requests for today.");
+		case Constants.OTP_LIMIT:
+			request.setAttribute("error", Constants.ERROR_OTP_LIMIT);
 			request.getRequestDispatcher("registerUser.jsp").forward(request, response);
 			return;
 		default:
 			boolean sent = EmailUtil.sendOTP(dto.getEmail(), otp);
 			if (sent) {
 				request.setAttribute("showOtp", true);
-				request.setAttribute("message",
-						"OTP sent to your email. Please verify to complete registration. OTP -> " + otp);
+				request.setAttribute("message", Constants.SUCCESS_OTP_SENT + " otp -> " + otp);
 			} else {
-				request.setAttribute("error", "Failed to send OTP. Please try again.");
+				request.setAttribute("error", Constants.ERROR_OTP_FAILED);
 			}
 		}
 
@@ -422,34 +422,34 @@ public class AuthServlet extends HttpServlet {
 		String result = OTPUtil.verifyOTP(session, inputOtp);
 
 		switch (result) {
-		case "SUCCESS":
+		case Constants.OTP_SUCCESS:
 			AgencyRegisterRequestDTO dto = (AgencyRegisterRequestDTO) session.getAttribute("pendingAgency");
 			if (dto == null) {
-				request.setAttribute("error", "Session expired. Please start registration again.");
+				request.setAttribute("error", Constants.ERROR_SESSION_EXPIRED);
 				request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 				return;
 			}
 
 			agencyService.register(dto);
 			session.removeAttribute("pendingAgency");
-			request.setAttribute("success", "Agency registered successfully! Waiting for admin approval.");
+			request.setAttribute("success", Constants.SUCCESS_AGENCY_REGISTERED);
 			request.getRequestDispatcher("login.jsp?role=agency").forward(request, response);
 			break;
 
-		case "EXPIRED":
-			request.setAttribute("error", "OTP expired. Please try registering again.");
+		case Constants.OTP_EXPIRED:
+			request.setAttribute("error", Constants.ERROR_OTP_EXPIRED);
 			session.removeAttribute("pendingAgency");
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			break;
 
-		case "INVALID":
-			request.setAttribute("error", "Invalid OTP. Please try again.");
+		case Constants.OTP_INVALID:
+			request.setAttribute("error", Constants.ERROR_OTP_INVALID);
 			request.setAttribute("showOtp", true);
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			break;
 
 		default:
-			request.setAttribute("error", "OTP verification failed. Please try again.");
+			request.setAttribute("error", Constants.ERROR_OTP_FAILED);
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			break;
 		}
@@ -472,11 +472,12 @@ public class AuthServlet extends HttpServlet {
 		dto.setRegistrationNumber(request.getParameter("registration_number"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
-		 dto.setArea(request.getParameter("area"));
+		dto.setArea(request.getParameter("area"));
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
 		Map<String, String> locationErrors = authService.validateLocation(dto);
 		errors.putAll(locationErrors);
 
+		System.out.println(locationErrors);
 		try {
 			Part filePart = request.getPart("profileImage");
 			String imageUrl = CloudinaryUtil.uploadImage(filePart);
@@ -495,29 +496,32 @@ public class AuthServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 		session.setAttribute("pendingAgency", dto);
-
 		String otp = OTPUtil.generateOTP(session);
+		System.out.println("Agency ragister otp --- >" + otp);
 		switch (otp) {
-		case "WAIT":
-			request.setAttribute("error", "Please wait 1 minute before requesting another OTP.");
+		case Constants.OTP_WAIT:
+			request.setAttribute("error", Constants.ERROR_OTP_WAIT);
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			return;
-		case "LIMIT":
-			request.setAttribute("error", "You have reached maximum OTP requests for today.");
+		case Constants.OTP_LIMIT:
+			request.setAttribute("error", Constants.ERROR_OTP_LIMIT);
 			request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
 			return;
 		default:
 			boolean sent = EmailUtil.sendOTP(dto.getEmail(), otp);
 			if (sent) {
+				System.out.println("OTP: " + otp);
+				System.out.println("Email sent: " + sent);
 				request.setAttribute("showOtp", true);
 				request.setAttribute("message",
-						"OTP sent to your email. Please verify to complete registration. OTP -> " + otp);
+						Constants.SUCCESS_OTP_SENT +" OTP -> " + otp);
 			} else {
-				request.setAttribute("error", "Failed to send OTP. Please try again.");
+				request.setAttribute("error", Constants.ERROR_OTP_FAILED);
 			}
 		}
 
 		request.getRequestDispatcher("registerAgency.jsp").forward(request, response);
+		return;
 	}
 
 	private void handleLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -532,7 +536,7 @@ public class AuthServlet extends HttpServlet {
 		} else if ("agency".equalsIgnoreCase(dto.getRole())) {
 			errors = authService.validateLoginAgencyDto(dto);
 		} else {
-			errors.put("role", "Invalid role selected!");
+			errors.put("role", Constants.ERROR_ROLE_INVALID);
 		}
 
 		if (!errors.isEmpty()) {

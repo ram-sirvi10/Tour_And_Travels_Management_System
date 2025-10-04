@@ -24,11 +24,12 @@ public class PaymentDAOImpl implements IPaymentDAO {
 
 	@Override
 	public boolean createPayment(Payment payment) throws Exception {
-		String sql = "INSERT INTO payments (booking_id, status, amount) VALUES (?, ?, ?)";
+		String sql = "INSERT INTO payments (booking_id, status, amount,razorpay_payment_id) VALUES (?, ?,?, ?)";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, payment.getBookingId());
 		preparedStatement.setString(2, payment.getStatus());
 		preparedStatement.setDouble(3, payment.getAmount());
+		preparedStatement.setString(4, payment.getRazorpayPaymentId());
 		int rowsInserted = preparedStatement.executeUpdate();
 		return rowsInserted > 0;
 	}
@@ -47,6 +48,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 			payment.setStatus(resultSet.getString("status"));
 			payment.setAmount(resultSet.getDouble("amount"));
 			payment.setPaymentDate(resultSet.getTimestamp("payment_date").toLocalDateTime());
+			payment.setRazorpayPaymentId(resultSet.getString("razorpay_payment_id"));
 			return payment;
 		}
 		return null;
@@ -54,7 +56,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 
 	@Override
 	public Payment getPaymentByBookingId(int bookingId) throws Exception {
-		String sql = "SELECT * FROM payments WHERE booking_id = ?";
+		String sql = "SELECT * FROM payments WHERE booking_id = ? order by payment_date desc";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, bookingId);
 		resultSet = preparedStatement.executeQuery();
@@ -66,6 +68,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 			payment.setStatus(resultSet.getString("status"));
 			payment.setAmount(resultSet.getDouble("amount"));
 			payment.setPaymentDate(resultSet.getTimestamp("payment_date").toLocalDateTime());
+			payment.setRazorpayPaymentId(resultSet.getString("razorpay_payment_id"));
 			return payment;
 		}
 		return null;
@@ -83,11 +86,11 @@ public class PaymentDAOImpl implements IPaymentDAO {
 
 	@Override
 	public List<Payment> getPaymentHistory(Integer userId, Integer agencyId, Integer packageId, String status,
-			String startDate, String endDate,int limit,int offset) throws Exception {
+			String startDate, String endDate, int limit, int offset) throws Exception {
 		List<Payment> payments = new ArrayList<>();
 
-		String sql = "SELECT p.payment_id, p.booking_id, p.payment_date, p.status, p.amount " + "FROM payments p "
-				+ "JOIN bookings b ON p.booking_id = b.booking_id "
+		String sql = "SELECT p.payment_id, p.booking_id, p.payment_date, p.status, p.amount ,p.razorpay_payment_id "
+				+ " FROM payments p " + "JOIN bookings b ON p.booking_id = b.booking_id "
 				+ "JOIN travel_packages tp ON b.package_id = tp.package_id " + "WHERE 1=1";
 
 		if (userId != null)
@@ -105,7 +108,8 @@ public class PaymentDAOImpl implements IPaymentDAO {
 			sql += " AND DATE(p.payment_date) >= ?";
 		} else if (endDate != null) {
 			sql += " AND DATE(p.payment_date) <= ?";
-		}sql += " ORDER BY p.payment_date DESC LIMIT ? OFFSET ?";
+		}
+		sql += " ORDER BY p.payment_date DESC LIMIT ? OFFSET ?";
 
 		preparedStatement = connection.prepareStatement(sql);
 
@@ -138,72 +142,68 @@ public class PaymentDAOImpl implements IPaymentDAO {
 			payment.setBookingId(resultSet.getInt("booking_id"));
 			payment.setStatus(resultSet.getString("status"));
 			payment.setAmount(resultSet.getDouble("amount"));
+			payment.setRazorpayPaymentId(resultSet.getString("razorpay_payment_id"));
 			payment.setPaymentDate(resultSet.getTimestamp("payment_date").toLocalDateTime());
 			payments.add(payment);
 		}
 
 		return payments;
 	}
-	
+
 	@Override
 	public int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
-	        String startDate, String endDate) throws Exception {
-	    int count = 0;
+			String startDate, String endDate) throws Exception {
+		int count = 0;
 
-	    String sql = "SELECT COUNT(*) AS total " +
-	            "FROM payments p " +
-	            "JOIN bookings b ON p.booking_id = b.booking_id " +
-	            "JOIN travel_packages tp ON b.package_id = tp.package_id " +
-	            "WHERE 1=1";
+		String sql = "SELECT COUNT(*) AS total " + "FROM payments p "
+				+ "JOIN bookings b ON p.booking_id = b.booking_id "
+				+ "JOIN travel_packages tp ON b.package_id = tp.package_id " + "WHERE 1=1";
 
-	    if (userId != null)
-	        sql += " AND b.user_id = ?";
-	    if (agencyId != null)
-	        sql += " AND tp.agency_id = ?";
-	    if (packageId != null)
-	        sql += " AND b.package_id = ?";
-	    if (status != null && !status.isEmpty())
-	        sql += " AND p.status = ?";
+		if (userId != null)
+			sql += " AND b.user_id = ?";
+		if (agencyId != null)
+			sql += " AND tp.agency_id = ?";
+		if (packageId != null)
+			sql += " AND b.package_id = ?";
+		if (status != null && !status.isEmpty())
+			sql += " AND p.status = ?";
 
-	    if (startDate != null && endDate != null) {
-	        sql += " AND DATE(p.payment_date) BETWEEN ? AND ?";
-	    } else if (startDate != null) {
-	        sql += " AND DATE(p.payment_date) >= ?";
-	    } else if (endDate != null) {
-	        sql += " AND DATE(p.payment_date) <= ?";
-	    }
+		if (startDate != null && endDate != null) {
+			sql += " AND DATE(p.payment_date) BETWEEN ? AND ?";
+		} else if (startDate != null) {
+			sql += " AND DATE(p.payment_date) >= ?";
+		} else if (endDate != null) {
+			sql += " AND DATE(p.payment_date) <= ?";
+		}
 
-	    preparedStatement = connection.prepareStatement(sql);
+		preparedStatement = connection.prepareStatement(sql);
 
-	    int index = 1;
+		int index = 1;
 
-	    if (userId != null)
-	        preparedStatement.setInt(index++, userId);
-	    if (agencyId != null)
-	        preparedStatement.setInt(index++, agencyId);
-	    if (packageId != null)
-	        preparedStatement.setInt(index++, packageId);
-	    if (status != null && !status.isEmpty())
-	        preparedStatement.setString(index++, status);
+		if (userId != null)
+			preparedStatement.setInt(index++, userId);
+		if (agencyId != null)
+			preparedStatement.setInt(index++, agencyId);
+		if (packageId != null)
+			preparedStatement.setInt(index++, packageId);
+		if (status != null && !status.isEmpty())
+			preparedStatement.setString(index++, status);
 
-	    if (startDate != null && endDate != null) {
-	        preparedStatement.setDate(index++, Date.valueOf(startDate));
-	        preparedStatement.setDate(index++, Date.valueOf(endDate));
-	    } else if (startDate != null) {
-	        preparedStatement.setDate(index++, Date.valueOf(startDate));
-	    } else if (endDate != null) {
-	        preparedStatement.setDate(index++, Date.valueOf(endDate));
-	    }
+		if (startDate != null && endDate != null) {
+			preparedStatement.setDate(index++, Date.valueOf(startDate));
+			preparedStatement.setDate(index++, Date.valueOf(endDate));
+		} else if (startDate != null) {
+			preparedStatement.setDate(index++, Date.valueOf(startDate));
+		} else if (endDate != null) {
+			preparedStatement.setDate(index++, Date.valueOf(endDate));
+		}
 
-	    resultSet = preparedStatement.executeQuery();
-	    if (resultSet.next()) {
-	        count = resultSet.getInt("total");
-	    }
+		resultSet = preparedStatement.executeQuery();
+		if (resultSet.next()) {
+			count = resultSet.getInt("total");
+		}
 
-	    return count;
+		return count;
 	}
-
-	
-	
 
 }

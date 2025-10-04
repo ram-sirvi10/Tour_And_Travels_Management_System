@@ -163,7 +163,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 								Travelers
 							</p>
 							<p class="mb-1">
-								<i class="fas fa-dollar-sign"></i> $<%=booking.getAmount()%></p>
+								<i class="fas fa-dollar-sign"></i> ₹<%=booking.getAmount()%></p>
 							<p class="mb-1">
 								<i class="fas fa-calendar"></i> Booking Date:
 								<%=booking.getBookingDate() != null ? booking.getBookingDate().toLocalDate() : "N/A"%>
@@ -172,17 +172,29 @@ if (successMessage != null && !successMessage.isEmpty()) {
 						</div>
 
 						<div class="mt-3 d-flex gap-2">
+							<%
+							UserResponseDTO sessionUser = (UserResponseDTO) session.getAttribute("user");
+							if (booking.getUserId() == sessionUser.getUserId()) {
+							%>
+							<a
+								href="<%=request.getContextPath()%>/booking?button=downloadInvoice&bookingId=<%=booking.getBookingId()%>"
+								class="btn btn-sm btn-success flex-grow-1">Download Invoice</a>
+							<%
+							}
+							%>
+
 							<a
 								href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
 								class="btn btn-sm btn-primary flex-grow-1">View Travelers</a>
-		
+
 
 							<%
 							if (("PENDING".equalsIgnoreCase(booking.getStatus()) || "CONFIRMED".equalsIgnoreCase(booking.getStatus()))
 									&& departure != null && departure.isAfter(now)) {
 							%>
 							<button type="button" class="btn btn-sm btn-danger flex-grow-1"
-								onclick="showCancelModal(<%=booking.getBookingId()%>, '<%=booking.getLastBookingDate()%>', <%=booking.getAmount()%>)">
+								onclick="showCancelModal(<%=booking.getBookingId()%>, '<%=booking.getLastBookingDate()%>', <%=booking.getAmount()%>, '<%=booking.getStatus()%>')"
+>
 								Cancel Booking</button>
 							<%
 							}
@@ -298,6 +310,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 				<p id="cancellationFee" style="margin: 0;"></p>
 				<hr>
 				<p id="refundableAmount" style="margin: 0;"></p>
+				<p id="noPaymentInfo" style="margin: 0; color: red;"></p>
 			</div>
 			<div class="modal-footer">
 				<form id="confirmCancelForm" method="post"
@@ -314,48 +327,50 @@ if (successMessage != null && !successMessage.isEmpty()) {
 	</div>
 </div>
 
-
-<!-- Include Bootstrap CSS and JS -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-function updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount) {
-    console.log("Updating modal with:", { bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount }); // Debug the input values
+function updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount, paymentDone) {
     const totalAmountEl = document.getElementById("totalAmount");
     const amountAfterGstEl = document.getElementById("amountAfterGst");
     const cancellationFeeEl = document.getElementById("cancellationFee");
     const refundableAmountEl = document.getElementById("refundableAmount");
+    const noPaymentInfoEl = document.getElementById("noPaymentInfo");
     const bookingIdEl = document.getElementById("modalBookingId");
 
-  
-    if (totalAmountEl && amountAfterGstEl && cancellationFeeEl && refundableAmountEl && bookingIdEl) {
+    bookingIdEl.value = bookingId;
+
+    if (!paymentDone) {
+        totalAmountEl.innerText = '';
+        amountAfterGstEl.innerText = '';
+        cancellationFeeEl.innerText = '';
+        refundableAmountEl.innerText = '';
+        noPaymentInfoEl.innerText = 'Payment not made yet. No refund applicable.';
+    } else {
         totalAmountEl.innerText = 'Total Amount: ₹'+totalAmount.toFixed(2);
         amountAfterGstEl.innerText = 'Amount After GST Charges(18%): ₹'+amountAfterGST.toFixed(2);
         cancellationFeeEl.innerText = 'Cancellation Charge: ₹'+cancelFee.toFixed(2);
         refundableAmountEl.innerText = 'Refundable Amount: ₹'+refundAmount.toFixed(2);
-        bookingIdEl.value = bookingId;
-        console.log("Modal content updated successfully");
-        console.log("Modal body content:", document.getElementById("cancelModal").querySelector(".modal-body").innerHTML);
-    } else {
-        console.error("One or more modal elements not found:", {
-            totalAmountEl, amountAfterGstEl, cancellationFeeEl, refundableAmountEl, bookingIdEl
-        });
+        noPaymentInfoEl.innerText = '';
     }
 }
 
-function showCancelModal(bookingId, lastBookingDateStr, amount) {
+function showCancelModal(bookingId, lastBookingDateStr, amount, status) {
+    const modalEl = document.getElementById('cancelModal');
+    if (!modalEl) return;
+
+    const bootstrapModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+    bootstrapModal.show();
+
     let totalAmount = Number(amount) || 0;
-    let lastBookingDate = new Date(lastBookingDateStr.replace(' ', 'T'));
-    if (isNaN(lastBookingDate.getTime())) {
-        console.error("Invalid lastBookingDate:", lastBookingDateStr);
+    let paymentDone = status === 'CONFIRMED'; // only CONFIRMED bookings have payment
+
+    if (!paymentDone) {
+        updateModalContent(bookingId, 0, 0, 0, 0, false);
         return;
     }
-    const now = new Date(); 
-    let daysDiff = Math.ceil((lastBookingDate - now) / (1000 * 60 * 60 * 24));
+
+    let lastBookingDate = new Date(lastBookingDateStr.replace(' ', 'T'));
+    const now = new Date();
+    let daysDiff = Math.ceil((lastBookingDate - now) / (1000*60*60*24));
 
     let refundPercent = 0;
     if (daysDiff >= 7) refundPercent = 100;
@@ -366,24 +381,20 @@ function showCancelModal(bookingId, lastBookingDateStr, amount) {
     let refundAmount = (amountAfterGST * refundPercent) / 100;
     let cancelFee = amountAfterGST - refundAmount;
 
-    console.log({
-        totalAmount: totalAmount.toFixed(2),
-        amountAfterGST: amountAfterGST.toFixed(2),
-        cancelFee: cancelFee.toFixed(2),
-        refundAmount: refundAmount.toFixed(2)
-    });
-
-    const modal = document.getElementById('cancelModal');
-    if (modal) {
-        const bootstrapModal = new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false });
-        bootstrapModal.show();
-        modal.addEventListener('shown.bs.modal', function() {
-            updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount);
-        }, { once: true }); 
-    } else {
-        console.error("Modal element not found!");
-    }
+    updateModalContent(bookingId, totalAmount, amountAfterGST, cancelFee, refundAmount, true);
 }
+</script>
+
+
+
+<!-- Include Bootstrap CSS and JS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
 
 
 window.addEventListener("pageshow", function(event) {

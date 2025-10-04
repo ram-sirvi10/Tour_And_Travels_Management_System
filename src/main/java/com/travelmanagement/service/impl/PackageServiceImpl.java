@@ -21,17 +21,22 @@ import com.travelmanagement.util.ValidationUtil;
 public class PackageServiceImpl implements IPackageService {
 
 	private IPackageDAO packageDAO = new PackageDAOImpl();
-	private IBookingDAO bookingDAO = new BookingDAOImpl(); 
+	private IBookingDAO bookingDAO = new BookingDAOImpl();
 	private IPackageScheduleDAO scheduleDAO = new PackageScheduleDAOImpl();
 
 	public boolean addSchedule(PackageSchedule schedule) throws Exception {
-	    return scheduleDAO.addSchedule(schedule);
+		return scheduleDAO.addSchedule(schedule);
 	}
 
-	public List<PackageSchedule> getScheduleByPackage(int packageId) throws Exception {
-	    return scheduleDAO.getScheduleByPackage(packageId);
+	public List<PackageSchedule> getScheduleByPackage(int packageId) {
+		try {
+			return scheduleDAO.getScheduleByPackage(packageId);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
-
 
 	// -------------------- Create Package --------------------
 	public boolean addPackage(Packages pkg) throws Exception {
@@ -39,13 +44,11 @@ public class PackageServiceImpl implements IPackageService {
 		return packageDAO.addPackage(pkg);
 	}
 
-
 	public void createPackage(PackageRegisterDTO dto) throws Exception {
 		Packages pkg = Mapper.mapToModel(dto);
 		validatePackage(pkg);
 		packageDAO.addPackage(pkg);
 	}
-
 
 	@Override
 	public boolean updatePackage(Packages pkg) throws Exception {
@@ -75,7 +78,6 @@ public class PackageServiceImpl implements IPackageService {
 		if (pkg.getDuration() <= 0)
 			throw new Exception("Invalid Duration");
 	}
-
 
 	@Override
 	public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
@@ -117,6 +119,7 @@ public class PackageServiceImpl implements IPackageService {
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
 		if (seatsChange == 0)
 			return true;
+		System.out.println("Package service adjust seat = "+(seatsChange));
 		return packageDAO.adjustSeats(packageId, seatsChange);
 	}
 
@@ -155,14 +158,12 @@ public class PackageServiceImpl implements IPackageService {
 	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
 		// TODO Auto-generated method stub
 		try {
-			return  packageDAO.updateSeatsOptimistic(packageId, noOfTravellers,version);
+			return packageDAO.updateSeatsOptimistic(packageId, noOfTravellers, version);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return 0;
 	}
-
-	
 
 }

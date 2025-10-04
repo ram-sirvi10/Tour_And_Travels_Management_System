@@ -3,7 +3,6 @@ package com.travelmanagement.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
+import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.PasswordHashing;
 
 import jakarta.servlet.ServletException;
@@ -48,42 +48,46 @@ public class AdminServlet extends HttpServlet {
 
 		try {
 			switch (action) {
-			case "dashboard":
+			case Constants.ACTION_DASHBOARD:
 				dashboard(request, response);
 				break;
 
-			case "manageUsers":
+			case Constants.ACTION_MANAGE_USERS:
 				manageUsers(request, response);
 				break;
 
-			case "userAction":
+			case Constants.ACTION_USER_ACTION:
 				userAction(request, response);
 				break;
 
-			case "manageAgencies":
+			case Constants.ACTION_MANAGE_AGENCIES:
 				manageAgencies(request, response);
 				break;
 
-			case "agencyAction":
+			case Constants.ACTION_AGENCY_ACTION:
 				agencyAction(request, response);
 				break;
-			case "pendingAgencies":
 
+			case Constants.ACTION_PENDING_AGENCIES:
 				pendingAgencies(request, response);
 				break;
-			case "deletedAgencies":
-				deletedAgencies(request, response);
 
+			case Constants.ACTION_DELETED_AGENCIES:
+				deletedAgencies(request, response);
 				break;
-			case "deletedUsers":
+
+			case Constants.ACTION_DELETED_USERS:
 				deletedUsers(request, response);
 				break;
 
-			case "updateProfile":
+			case Constants.ACTION_UPDATE_PROFILE:
 				updateProfile(request, response);
 				break;
-			case "changePassword":
+
+			case Constants.ACTION_CHANGE_PASSWORD:
 				changePassword(request, response);
+				break;
+
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + action);
 			}
@@ -110,12 +114,12 @@ public class AdminServlet extends HttpServlet {
 			System.out.println("dp pass" + dbUser.getUserPassword());
 			if (oldPassword != null && !oldPassword.isEmpty()) {
 				if (!PasswordHashing.checkPassword(oldPassword, dbUser.getUserPassword())) {
-					errors.put("oldPassword", "Old password is incorrect");
+					errors.put("oldPassword", Constants.ERROR_OLD_PASSWORD);
 				}
 			}
 
 			if (!errors.isEmpty()) {
-				request.setAttribute("actionType", "changePassword");
+				request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
 				request.setAttribute("errors", errors);
 				request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
 				return;
@@ -123,16 +127,16 @@ public class AdminServlet extends HttpServlet {
 
 			boolean updated = userService.changePassword(user.getUserId(), newPassword);
 			if (updated) {
-				request.setAttribute("successMessage", "Password changed successfully!");
+				request.setAttribute("successMessage", Constants.SUCCESS_PASSWORD_CHANGE);
 			} else {
-				request.setAttribute("errorMessage", "Failed to change password!");
+				request.setAttribute("errorMessage", Constants.ERROR_PASSWORD_CHANGE);
 			}
-			request.setAttribute("actionType", "changePassword");
+			request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
 			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
 			return;
 		} catch (Exception e) {
 			request.setAttribute("errorMessage", e.getMessage());
-			request.setAttribute("actionType", "changePassword");
+			request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
 			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
 			e.printStackTrace();
 			return;
@@ -166,7 +170,7 @@ public class AdminServlet extends HttpServlet {
 			}
 			dto.setImageurl(imageUrl);
 			if (!errors.isEmpty()) {
-				request.setAttribute("actionType", "updateProfile");
+				request.setAttribute("actionType", Constants.ACTION_UPDATE_PROFILE);
 				request.setAttribute("errors", errors);
 				request.setAttribute("formData", dto);
 				request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
@@ -177,17 +181,17 @@ public class AdminServlet extends HttpServlet {
 			if (updated) {
 				UserResponseDTO updatedUser = userService.getById(dto.getUserId());
 				session.setAttribute("user", updatedUser);
-				request.setAttribute("successMessage", "Profile updated successfully!");
+				request.setAttribute("successMessage", Constants.SUCCESS_PROFILE_UPDATE);
 			} else {
-				request.setAttribute("errorMessage", "Failed to update profile!");
+				request.setAttribute("errorMessage", Constants.ERROR_PROFILE_UPDATE);
 			}
-			request.setAttribute("actionType", "updateProfile");
+			request.setAttribute("actionType", Constants.ACTION_UPDATE_PROFILE);
 			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
 			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.setAttribute("errorMessage", e.getMessage());
-			request.setAttribute("actionType", "updateProfile");
+			request.setAttribute("actionType", Constants.ACTION_UPDATE_PROFILE);
 			request.getRequestDispatcher("template/admin/profileManagement.jsp").forward(request, response);
 			return;
 		}
@@ -282,7 +286,7 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("currentPage", 1);
 			request.setAttribute("totalPages", 1);
 			request.setAttribute("pageSize", 5);
-			request.setAttribute("listType", "Agencies");
+			request.setAttribute("listType", "Manage Agencies");
 			request.setAttribute("errorMessage", e.getMessage());
 			request.setAttribute("status", "PENDING");
 
@@ -480,21 +484,22 @@ public class AdminServlet extends HttpServlet {
 				if (sessionUser.getUserId() != userId) {
 
 					switch (actionType) {
-					case "activate":
+					case Constants.USER_ACTIVATE:
 						userService.updateUserActiveState(userId, true);
 						break;
-					case "deactivate":
+					case Constants.USER_DEACTIVATE:
 						userService.updateUserActiveState(userId, false);
 						break;
-					case "delete":
+					case Constants.USER_DELETE:
 						userService.delete(userId);
 						break;
-
 					default:
+						request.setAttribute("errorMessage", Constants.ERROR_INVALID_ACTION);
 						break;
+
 					}
 				} else {
-					request.setAttribute("errorMessage", "Invalid Action");
+					request.setAttribute("errorMessage", Constants.ERROR_INVALID_ACTION);
 				}
 			}
 
@@ -588,7 +593,7 @@ public class AdminServlet extends HttpServlet {
 			}
 
 			if (start != null && end != null && start.isAfter(end)) {
-				request.setAttribute("errorMessage", "Start date cannot be after end date.");
+				request.setAttribute("errorMessage", Constants.ERROR_START_AFTER_END_DATE);
 				start = null;
 				end = null;
 			}

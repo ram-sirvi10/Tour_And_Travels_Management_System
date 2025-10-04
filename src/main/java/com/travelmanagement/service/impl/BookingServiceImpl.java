@@ -96,15 +96,7 @@ public class BookingServiceImpl implements IBookingService {
 		return bookingDAO.getAllBookingsCount(userId, packageId, noOfTravellers, status, startDate, endDate);
 	}
 
-	public List<Integer> getPendingBookingsInLast10Minutes() {
-
-		try {
-			return bookingDAO.getPendingBookingsInLast10Minutes();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+	
 
 	public boolean hasExistingBooking(int userId, int packageId) throws Exception {
 		List<BookingResponseDTO> existingBookings = getAllBookings(userId, packageId, null, null, null, null, 100, 0);

@@ -156,6 +156,7 @@ public class Mapper {
 		booking.setUserId(dto.getUserId());
 		booking.setNoOfTravellers(dto.getNumberOfTravelers());
 		booking.setPackageId(dto.getPackageId());
+
 		return booking;
 
 	}
@@ -169,6 +170,7 @@ public class Mapper {
 		bookingDTO.setPackageId(booking.getPackageId());
 		bookingDTO.setStatus(booking.getStatus());
 		bookingDTO.setCreated_at(booking.getCreated_at());
+		
 		return bookingDTO;
 	}
 
@@ -177,7 +179,7 @@ public class Mapper {
 		payment.setAmount(dto.getAmount());
 		payment.setBookingId(dto.getBookingId());
 		payment.setStatus(dto.getStatus());
-		
+		payment.setRazorpayPaymentId(dto.getRazorpayPaymentId());
 		
 	
 		
@@ -193,6 +195,7 @@ public class Mapper {
 		dto.setAmount(payment.getAmount());
 		dto.setStatus(payment.getStatus());
 		dto.setPaymentDate(payment.getPaymentDate());
+		dto.setRazorpayPaymentId(payment.getRazorpayPaymentId());
 		return dto;
 
 	}

@@ -3,6 +3,7 @@ package com.travelmanagement.service;
 import java.util.List;
 
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.Packages;
 
 public interface IPackageService {
@@ -27,4 +28,6 @@ public interface IPackageService {
 
 	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
 			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
+
+	List<PackageSchedule> getScheduleByPackage(int packageId);
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
@@ -65,7 +66,10 @@ public class LandingPageServlet extends HttpServlet {
 				LocalDateTime now = LocalDateTime.now();
 				List<BookingResponseDTO> upcomingBookings = new ArrayList<>();
 				Map<Integer, BookingResponseDTO> bookingMap = new HashMap<>();
-
+				for (PackageResponseDTO pkg : packages) {
+					List<PackageSchedule> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
+					pkg.setPackageSchedule(schedule);
+				}
 				for (BookingResponseDTO booking : allBookings) {
 					PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
 					if (pkg != null && pkg.getDepartureDate() != null && pkg.getDepartureDate().isAfter(now)) {

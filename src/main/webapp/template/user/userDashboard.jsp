@@ -7,7 +7,7 @@
 	import="com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
-
+<%@ page import="com.travelmanagement.model.PackageSchedule"  %>
 <%@ include file="header.jsp"%>
 
 <%
@@ -92,7 +92,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 											Days
 										</p>
 										<p class="mb-1">
-											<i class="fas fa-dollar-sign"></i> $<%=pkg.getPrice()%></p>
+											<i class="fas fa-dollar-sign"></i> ₹<%=pkg.getPrice()%></p>
 										<p class="mb-1">
 											<i class="fas fa-chair"></i> Available Seats:
 											<%=pkg.getTotalSeats()%></p>
@@ -104,7 +104,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 											java.time.LocalDateTime departure = userBooking.getDepartureDateAndTime();
 										%>
 										<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
-											<small class="d-block">Booked: $<%=userBooking.getAmount()%></small>
+											<small class="d-block">Booked: ₹<%=userBooking.getAmount()%></small>
 											<small class="d-block">Status: <%=userBooking.getStatus()%></small>
 											<small class="d-block"
 												id="carousel-countdown-<%=pkg.getPackageId()%>"></small>
@@ -164,8 +164,13 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 										<%
 										}
 										%>
+										<button type="button" class="btn btn-warning w-100 mt-2"
+											data-bs-toggle="modal"
+											data-bs-target="#itineraryModal<%=pkg.getPackageId()%>">
+											View Itinerary</button>
+
 										<%
-										if ( userBooking==null||!"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
+										if (userBooking == null || !"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
 										%>
 										<form action="<%=request.getContextPath()%>/booking"
 											method="post" class="mt-auto">
@@ -180,10 +185,67 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 									</div>
 								</div>
 							</div>
+
+
+
+							<%-- Itinerary Modal --%>
+							<div class="modal fade"
+								id="itineraryModal<%=pkg.getPackageId()%>" tabindex="-1"
+								aria-labelledby="itineraryModalLabel<%=pkg.getPackageId()%>"
+								aria-hidden="true">
+								<div class="modal-dialog modal-lg modal-dialog-scrollable">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title"
+												id="itineraryModalLabel<%=pkg.getPackageId()%>">
+												Itinerary -
+												<%=pkg.getTitle()%>
+											</h5>
+											<button type="button" class="btn-close"
+												data-bs-dismiss="modal" aria-label="Close"></button>
+										</div>
+										<div class="modal-body">
+											<%-- Display day-wise schedule --%>
+											<%
+											List<PackageSchedule> schedules = pkg.getPackageSchedule();
+											if (schedules != null && !schedules.isEmpty()) {
+												for (PackageSchedule schedule : schedules) {
+											%>
+											<div class="card mb-2 shadow-sm">
+												<div class="card-body">
+													<strong>Day <%=schedule.getDayNumber()%>:
+													</strong>
+													<%=schedule.getActivity()%><br> <small
+														class="text-muted"><%=schedule.getDescription()%></small>
+												</div>
+											</div>
+											<%
+											}
+											} else {
+											%>
+											<p>No itinerary available for this package.</p>
+											<%
+											}
+											%>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary"
+												data-bs-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+
 							<%
 							}
 							%>
 						</div>
+
+
+
+
 					</div>
 					<%
 					}
@@ -242,7 +304,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 						<!-- Amount -->
 						<div class="text-center mb-2">
 							<h6 class="mb-1">Amount</h6>
-							<span class="badge bg-primary rounded-pill">$<%=dto.getAmount()%></span>
+							<span class="badge bg-primary rounded-pill">₹<%=dto.getAmount()%></span>
 						</div>
 
 						<!-- Status -->
@@ -323,5 +385,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 
 	</div>
 </div>
+
 
 <%@ include file="footer.jsp"%>

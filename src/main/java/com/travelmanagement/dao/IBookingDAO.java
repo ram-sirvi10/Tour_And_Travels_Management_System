@@ -20,7 +20,7 @@ public interface IBookingDAO {
 	int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status, 
 			String startDate, String endDate) throws Exception;
 
-	List<Integer> getPendingBookingsInLast10Minutes() throws Exception;
+
 
 	void decrementTravelerCount(int bookingId) throws Exception;
 

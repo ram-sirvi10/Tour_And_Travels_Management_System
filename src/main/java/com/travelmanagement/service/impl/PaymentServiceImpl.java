@@ -22,7 +22,7 @@ public class PaymentServiceImpl implements IPaymentService {
 
 	public PaymentResponseDTO getPaymentByBookingId(int bookingId) throws Exception {
 		Payment payment = paymentDAO.getPaymentByBookingId(bookingId);
-		PaymentResponseDTO responseDTO = new PaymentResponseDTO();
+		PaymentResponseDTO responseDTO = null;
 		if (payment != null) {
 			responseDTO = Mapper.mapPaymentToPaymentResponse(payment);
 		}

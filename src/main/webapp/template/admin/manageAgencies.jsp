@@ -11,7 +11,9 @@ if (admin == null || !"ADMIN".equals(admin.getUserRole())) {
 
 List<AgencyResponseDTO> agenciesList = (List<AgencyResponseDTO>) request.getAttribute("agenciesList");
 
-String currentList = request.getAttribute("listType") != null ? (String) request.getAttribute("listType") : "Manage Agencies";
+String currentList = request.getAttribute("listType") != null
+		? (String) request.getAttribute("listType")
+		: "Manage Agencies";
 int currentPage = request.getAttribute("currentPage") != null ? (Integer) request.getAttribute("currentPage") : 1;
 int totalPages = request.getAttribute("totalPages") != null ? (Integer) request.getAttribute("totalPages") : 1;
 int pageSize = request.getAttribute("pageSize") != null ? (Integer) request.getAttribute("pageSize") : 5;
@@ -157,6 +159,8 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 				<thead class="table-primary">
 					<tr>
 						<th>S.No</th>
+						<th>Profile Image</th>
+
 						<th>Agency Name</th>
 						<th>Owner Name</th>
 						<th>Email</th>
@@ -176,6 +180,21 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					%>
 					<tr>
 						<td><%=serial++%></td>
+						<td>
+							<%
+							if (agency.getImageurl() != null && !agency.getImageurl().isEmpty()) {
+							%> <img src="<%=agency.getImageurl()%>" alt="Profile"
+							class="table-profile-img"
+							style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; cursor: pointer;"
+							onclick="showProfileImageModal('<%=agency.getImageurl()%>')">
+
+							<%
+							} else {
+							%> <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+							<%
+							}
+							%>
+						</td>
 						<td><%=agency.getAgencyName()%></td>
 						<td><%=agency.getOwnerName()%></td>
 						<td><%=agency.getEmail()%></td>
@@ -399,6 +418,29 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 		</div>
 	</div>
 
+
+	<div class="modal fade" id="profileImageModal" tabindex="-1"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-body text-center">
+					<img id="modalProfileImage" src="" alt="Profile Image"
+						style="max-width: 100%; max-height: 500px; border-radius: 8px;">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function showProfileImageModal(imageUrl) {
+			var modalImg = document.getElementById('modalProfileImage');
+			modalImg.src = imageUrl;
+
+			var myModal = new bootstrap.Modal(document
+					.getElementById('profileImageModal'));
+			myModal.show();
+		}
+	</script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>

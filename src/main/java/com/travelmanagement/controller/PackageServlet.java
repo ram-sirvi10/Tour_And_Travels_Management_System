@@ -11,10 +11,12 @@ import java.util.Map;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.IBookingService;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
+import com.travelmanagement.util.Constants;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,9 +39,7 @@ public class PackageServlet extends HttpServlet {
 			if (button == null)
 				button = "packageList";
 			switch (button) {
-			case "packageList":
-			case "search":
-			case "filter":
+			case Constants.ACTION_PACKAGES_LIST:
 				listPackages(request, response);
 				break;
 			default:
@@ -47,7 +47,9 @@ public class PackageServlet extends HttpServlet {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.sendRedirect("template/user/userDashboard.jsp");
+			request.setAttribute("errorMessage", e.getMessage());
+			listPackages(request, response);
+			return;
 		}
 	}
 
@@ -92,7 +94,7 @@ public class PackageServlet extends HttpServlet {
 			}
 
 			if (start != null && end != null && start.isAfter(end)) {
-				request.setAttribute("errorMessage", "Start date cannot be after end date.");
+				request.setAttribute("errorMessage", Constants.ERROR_START_AFTER_END_DATE);
 				start = null;
 				end = null;
 			}
@@ -126,6 +128,11 @@ public class PackageServlet extends HttpServlet {
 					bookingMap.put(booking.getPackageId(), booking);
 				}
 			}
+			for (PackageResponseDTO pkg : packages) {
+				List<PackageSchedule> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
+				pkg.setPackageSchedule(schedule);
+			}
+
 			request.setAttribute("bookingMap", bookingMap);
 			request.setAttribute("packages", packages);
 			request.setAttribute("currentPage", page);
@@ -141,7 +148,7 @@ public class PackageServlet extends HttpServlet {
 			request.getRequestDispatcher("/template/user/packages.jsp").forward(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("errorMessage", "Error fetching packages. Please try again.");
+			request.setAttribute("errorMessage", Constants.ERROR_FETCH_PACKAGES);
 			request.getRequestDispatcher("/template/user/packages.jsp").forward(request, response);
 		}
 	}

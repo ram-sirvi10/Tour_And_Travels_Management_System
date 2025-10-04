@@ -36,7 +36,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 		payments = new java.util.ArrayList<>();
 	}
 	%>
-	<form method="post" action="booking" class="row g-2 mb-3">
+	<form method="get" action="booking" class="row g-2 mb-3">
 		<input type="hidden" name="button" value="paymentHistory">
 
 		<div class="col-md-3">
@@ -114,7 +114,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 						<td><%=p.getPaymentId()%></td>
 						<td><%=p.getBookingId()%></td>
 						<td><%=p.getPackageName() != null ? p.getPackageName() : "-"%></td>
-						<td>$<%=p.getAmount()%></td>
+						<td>₹<%=p.getAmount()%></td>
 						<td><span
 							class="badge 
         <%="SUCCESSFUL".equals(p.getStatus()) ? "bg-success" : "REFUNDED".equals(p.getStatus()) ? "bg-info" : "bg-danger"%>">

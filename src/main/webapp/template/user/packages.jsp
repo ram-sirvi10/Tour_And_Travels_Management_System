@@ -5,7 +5,7 @@
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
-
+<%@ page import="com.travelmanagement.model.PackageSchedule"  %>
 <button type="button" class="btn btn-secondary mb-3"
 	onclick="window.history.back();">Back</button>
 
@@ -67,6 +67,10 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	class="row g-2 mb-4">
 	<input type="hidden" name="button" value="packageList">
 
+
+
+
+
 	<div class="col-md-2">
 		<label for="dateFrom" class="form-label">Departure Date From </label>
 		<input type="date" name="dateFrom" class="form-control"
@@ -117,7 +121,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				java.time.LocalDateTime lastBookingDate = pkg.getLastBookingDate();
 				%>
 
-				
+
 
 				<%-- If user has booked this package --%>
 				<%
@@ -126,7 +130,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					java.time.LocalDateTime departure = userBooking.getDepartureDateAndTime();
 				%>
 				<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
-					<small class="d-block">Booked: $<%=userBooking.getAmount()%></small>
+					<small class="d-block">Booked: ₹<%=userBooking.getAmount()%></small>
 					<small class="d-block">Status: <%=userBooking.getStatus()%></small>
 					<small class="d-block"
 						id="carousel-countdown-<%=pkg.getPackageId()%>"></small>
@@ -197,21 +201,21 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					Days
 				</p>
 				<p class="mb-1">
-					<i class="fas fa-dollar-sign"></i> $<%=pkg.getPrice()%></p>
+					<i class="fas fa-dollar-sign"></i> ₹<%=pkg.getPrice()%></p>
 				<p class="mb-1">
 					<i class="fas fa-chair"></i> Available Seats:
 					<%=pkg.getTotalSeats()%></p>
 				<p>
-								<strong>Departure Date:</strong>
+					<strong>Departure Date:</strong>
 
-								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
+					<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
 
 
-							<p>
-								<strong>Departure Time:</strong>
+				<p>
+					<strong>Departure Time:</strong>
 
-								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
-						
+					<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
+
 
 				<form action="<%=request.getContextPath()%>/booking" method="post">
 					<input type="hidden" name="packageId"
@@ -220,6 +224,10 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 						data-bs-toggle="modal"
 						data-bs-target="#packageModal<%=pkg.getPackageId()%>">View
 						Details</button>
+					<button type="button" class="btn btn-warning w-100 mt-2"
+						data-bs-toggle="modal"
+						data-bs-target="#itineraryModal<%=pkg.getPackageId()%>">
+						View Itinerary</button>
 
 					<%
 					if (userBooking == null || !"CONFIRMED".equalsIgnoreCase(userBooking.getStatus())) {
@@ -228,10 +236,12 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					<button type="submit" name="button" value="viewBookingForm"
 						class="btn btn-primary w-100 mt-2">Book Now</button>
 					<%
-					}else{
+					} else {
 					%>
-					<p class="btn btn-primary w-100 mt-2" >Already Booked</p>
-					<%} %>
+					<p class="btn btn-primary w-100 mt-2">Already Booked</p>
+					<%
+					}
+					%>
 
 
 
@@ -239,6 +249,56 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 			</div>
 		</div>
 	</div>
+
+
+	<%-- Itinerary Modal --%>
+	<div class="modal fade" id="itineraryModal<%=pkg.getPackageId()%>"
+		tabindex="-1"
+		aria-labelledby="itineraryModalLabel<%=pkg.getPackageId()%>"
+		aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"
+						id="itineraryModalLabel<%=pkg.getPackageId()%>">
+						Itinerary -
+						<%=pkg.getTitle()%>
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<%-- Display day-wise schedule --%>
+					<%
+					List<PackageSchedule> schedules = pkg.getPackageSchedule();
+					if (schedules != null && !schedules.isEmpty()) {
+						for (PackageSchedule schedule : schedules) {
+					%>
+					<div class="card mb-2 shadow-sm">
+						<div class="card-body">
+							<strong>Day <%=schedule.getDayNumber()%>:
+							</strong>
+							<%=schedule.getActivity()%><br> <small class="text-muted"><%=schedule.getDescription()%></small>
+						</div>
+					</div>
+					<%
+					}
+					} else {
+					%>
+					<p>No itinerary available for this package.</p>
+					<%
+					}
+					%>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
 
 	<%-- Modal for Package Details --%>
 	<div class="modal fade" id="packageModal<%=pkg.getPackageId()%>"
@@ -270,7 +330,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 								Days
 							</p>
 							<p>
-								<strong>Price:</strong> $<%=pkg.getPrice()%></p>
+								<strong>Price:</strong> ₹<%=pkg.getPrice()%></p>
 							<p>
 								<strong>Available Seats:</strong>
 								<%=pkg.getTotalSeats()%></p>
