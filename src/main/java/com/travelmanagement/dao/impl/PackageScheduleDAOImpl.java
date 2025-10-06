@@ -12,21 +12,47 @@ import com.travelmanagement.model.PackageSchedule;
 
 public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 
-	@Override
-	public boolean addSchedule(PackageSchedule schedule) throws Exception {
-		String sql = "INSERT INTO package_schedule(package_id, day_number, activity, description) VALUES(?,?,?,?)";
+	private Connection connection;
+	private PreparedStatement preparedStatement;
+	private ResultSet resultSet;
+
+	public PackageScheduleDAOImpl() {
+		connection = DatabaseConfig.getConnection();
+	}
+
+	public boolean addSchedules(List<PackageSchedule> schedules) throws Exception {
+		boolean success = false;
 		try {
-			Connection con = DatabaseConfig.getConnection();
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setInt(1, schedule.getPackageId());
-			ps.setInt(2, schedule.getDayNumber());
-			ps.setString(3, schedule.getActivity());
-			ps.setString(4, schedule.getDescription());
-			return ps.executeUpdate() > 0;
+			connection.setAutoCommit(false); // transaction start
+			preparedStatement = connection.prepareStatement(
+					"INSERT INTO package_schedule(package_id, day_number, activity, description) VALUES (?, ?, ?, ?)");
+
+			for (PackageSchedule s : schedules) {
+				preparedStatement.setInt(1, s.getPackageId());
+				preparedStatement.setInt(2, s.getDayNumber());
+				preparedStatement.setString(3, s.getActivity());
+				preparedStatement.setString(4, s.getDescription());
+				preparedStatement.addBatch();
+			}
+
+			int[] results = preparedStatement.executeBatch();
+			for (int r : results) {
+				if (r == PreparedStatement.EXECUTE_FAILED) {
+					connection.rollback();
+					return false;
+				}
+			}
+
+			connection.commit();
+			success = true;
 		} catch (Exception e) {
+			connection.rollback();
 			e.printStackTrace();
+			throw e;
+		} finally {
+			connection.setAutoCommit(true);
 		}
-		return false;
+		return success;
 	}
 
 	@Override

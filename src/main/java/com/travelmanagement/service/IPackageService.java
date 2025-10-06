@@ -2,13 +2,13 @@ package com.travelmanagement.service;
 
 import java.util.List;
 
+import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.Packages;
 
 public interface IPackageService {
-
-	boolean addPackage(Packages pkg) throws Exception;
 
 	PackageResponseDTO getPackageById(int id) throws Exception;
 
@@ -29,5 +29,7 @@ public interface IPackageService {
 	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
 			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
 
-	List<PackageSchedule> getScheduleByPackage(int packageId);
+	List<PackageScheduleResponseDTO> getScheduleByPackage(int packageId);
+
+	int addPackage(PackageRegisterDTO dto) throws Exception;
 }

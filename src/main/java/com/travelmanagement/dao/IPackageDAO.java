@@ -4,7 +4,7 @@ import com.travelmanagement.model.Packages;
 import java.util.List;
 
 public interface IPackageDAO {
-	boolean addPackage(Packages pkg) throws Exception;
+	int addPackage(Packages pkg) throws Exception;
 
 	boolean updatePackage(Packages pkg) throws Exception;
 	

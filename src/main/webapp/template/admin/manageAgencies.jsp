@@ -78,13 +78,15 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 			<%
 			}
 			%>
+			<button type="button" class="btn btn-secondary"
+	onclick="window.history.back();">Back</button>
 			<h2>Manage Agencies</h2>
 
 			<!-- Search & Filters -->
 
 			<div class="row g-2 mb-2">
 				<h6>Filter Option</h6>
-				<form method="post" action="<%=request.getContextPath()%>/admin"
+				<form method="get" action="<%=request.getContextPath()%>/admin"
 					class="row g-2">
 					<input type="hidden" name="button"
 						value="<%=request.getParameter("button")%>" />
@@ -131,6 +133,8 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					<div class="col-md-2">
 						<button type="submit" class="btn btn-primary w-100">Apply</button>
 					</div>
+					<a href="booking?button=<%=request.getParameter("button")%>"
+						class="btn btn-secondary w-100">Reset</a>
 					<%
 					}
 					%>
@@ -139,7 +143,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 
 
 			<div class="row g-2 mb-3">
-				<form method="post" action="<%=request.getContextPath()%>/admin"
+				<form method="get" action="<%=request.getContextPath()%>/admin"
 					class="row g-2">
 					<input type="hidden" name="button"
 						value="<%=request.getParameter("button")%>" />

@@ -39,6 +39,18 @@ public class ValidationUtil {
 		return Pattern.matches(pinRegex, pincode);
 	}
 
+	// Number Validation (positive integers)
+	public static Boolean isValidNumber(String numberStr) {
+		if (numberStr == null || numberStr.trim().isEmpty())
+			return false;
+		try {
+			int num = Integer.parseInt(numberStr);
+			return num > 0;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	// Price Validation (Decimal upto 2 places)
 	public static Boolean isValidPrice(String price) {
 		String priceRegex = "^[0-9]+(\\.[0-9]{1,2})?$";
@@ -65,6 +77,20 @@ public class ValidationUtil {
 		return price != null && Pattern.matches("^[0-9]+(\\.[0-9]{1,2})?$", price);
 	}
 
-	
+	// Description Validation (minimum 10 words)
+	public static Boolean isValidDescription(String description) {
+		if (description == null || description.trim().isEmpty())
+			return false;
+		String[] words = description.trim().split("\\s+");
+		return words.length >= 10; // minimum 10 words
+	}
+
+	// Package/Activity Name Validation (letters, numbers, spaces, few special
+	// chars, max 100 chars)
+	public static Boolean isValidPackageActivity(String name) {
+		if (name == null)
+			return false;
+		return Pattern.matches("^[A-Za-z0-9 .,'’\\-()]{2,100}$", name);
+	}
 
 }

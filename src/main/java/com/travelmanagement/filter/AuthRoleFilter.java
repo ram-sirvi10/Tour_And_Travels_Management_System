@@ -79,10 +79,10 @@ import jakarta.servlet.http.HttpSession;
 //}
 
 @WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
-@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
-		maxFileSize = 1024 * 1024 * 5, // 5 MB
-		maxRequestSize = 1024 * 1024 * 10 // 10 MB
-)
+//@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+//		maxFileSize = 1024 * 1024 * 5, // 5 MB
+//		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+//)
 public class AuthRoleFilter implements Filter {
 
 	@Override
@@ -144,8 +144,11 @@ public class AuthRoleFilter implements Filter {
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
 		String button = req.getParameter("button"); // get the button param
+		if (button == null) {
+			button = req.getParameter("action");
+		}
 		if (button != null)
-			button.trim();
+			button = button.trim();
 		System.out.println("filter button value -> " + button);
 		String context = req.getContextPath();
 
@@ -157,8 +160,8 @@ public class AuthRoleFilter implements Filter {
 //		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
-		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage"));
-		subAdminAccess.put(context + "/booking", List.of("viewBookings"));
+		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage", "managePackages", "addSchedule"));
+		subAdminAccess.put(context + "/booking", List.of("bookingHistroy", "viewTravelers", "viewBookings"));
 		subAdminAccess.put(context + "/package", List.of("viewPackages"));
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));
 

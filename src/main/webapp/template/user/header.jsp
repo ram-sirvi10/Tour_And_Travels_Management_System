@@ -138,7 +138,7 @@ nav .logo:hover .logo-text { text-decoration: none; opacity: 0.95; }
 				class="nav-link">Home</a>
 			<a href="<%=request.getContextPath()%>/package?button=packageList" class="nav-link">Packages</a>
  <a
-				href="<%=request.getContextPath()%>/booking?button=bookingHistroy"
+				href="<%=request.getContextPath()%>/booking?button=viewBookings"
 				class="nav-link">Bookings</a> <a
 				href="<%=request.getContextPath()%>/booking?button=paymentHistory"
 				class="nav-link">Payments</a>

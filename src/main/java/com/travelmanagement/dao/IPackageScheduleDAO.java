@@ -5,7 +5,7 @@ import java.util.List;
 import com.travelmanagement.model.PackageSchedule;
 
 public interface IPackageScheduleDAO {
-	boolean addSchedule(PackageSchedule schedule) throws Exception;
+	public boolean addSchedules(List<PackageSchedule> schedules) throws Exception;
 
 	boolean updateSchedule(PackageSchedule schedule) throws Exception;
 

@@ -1,6 +1,5 @@
 package com.travelmanagement.util;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -9,26 +8,28 @@ import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
+import com.travelmanagement.dto.requestDTO.PackageScheduleRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
 import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.Booking;
+import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.Packages;
 import com.travelmanagement.model.Payment;
 import com.travelmanagement.model.Traveler;
 import com.travelmanagement.model.User;
 
 public class Mapper {
-	
-	
-	public static LocalDate parseAnyDate(String dateStr) throws Exception{
+
+	public static LocalDate parseAnyDate(String dateStr) throws Exception {
 
 		String[] dateFormats = { "yyyy-MM-dd", "dd-MM-yyyy", "MM-dd-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd",
 				"dd.MM.yyyy", "yyyy.MM.dd", "dd MMM yyyy", "MMM dd, yyyy" };
@@ -44,8 +45,7 @@ public class Mapper {
 
 		throw new IllegalArgumentException("Date format not recognized: " + dateStr);
 	}
-	
-	
+
 	public static User mapRegisterDtoToUser(RegisterRequestDTO dto) {
 		User user = new User();
 		user.setUserId(dto.getUserId());
@@ -118,18 +118,18 @@ public class Mapper {
 
 	public static Packages mapToModel(PackageRegisterDTO dto) {
 		Packages pkg = new Packages();
-		if (dto.getPackageId() != null && !dto.getPackageId().isEmpty()) {
-			pkg.setPackageId(Integer.parseInt(dto.getPackageId()));
-		}
+
 		pkg.setTitle(dto.getTitle());
-		pkg.setAgencyId(Integer.parseInt(dto.getAgencyId()));
+		pkg.setAgencyId(dto.getAgencyId());
 		pkg.setDescription(dto.getDescription());
-		pkg.setPrice(Double.parseDouble(dto.getPrice()));
+		pkg.setPrice(dto.getPrice());
 		pkg.setLocation(dto.getLocation());
-		pkg.setDuration(Integer.parseInt(dto.getDuration()));
-		pkg.setActive(Boolean.parseBoolean(dto.getIsActive()));
+		pkg.setDuration(dto.getDuration());
+		pkg.setActive(dto.getIsActive());
 		pkg.setImageurl(dto.getImageurl());
 		pkg.setTotalSeats(dto.getTotalSeats());
+		pkg.setDepartureDate(dto.getDepartureDate());
+		pkg.setLastBookingDate(dto.getLastBookingDate());
 		return pkg;
 	}
 
@@ -170,7 +170,7 @@ public class Mapper {
 		bookingDTO.setPackageId(booking.getPackageId());
 		bookingDTO.setStatus(booking.getStatus());
 		bookingDTO.setCreated_at(booking.getCreated_at());
-		
+
 		return bookingDTO;
 	}
 
@@ -180,16 +180,14 @@ public class Mapper {
 		payment.setBookingId(dto.getBookingId());
 		payment.setStatus(dto.getStatus());
 		payment.setRazorpayPaymentId(dto.getRazorpayPaymentId());
-		
-	
-		
+
 		return payment;
 
 	}
 
 	public static PaymentResponseDTO mapPaymentToPaymentResponse(Payment payment) {
 		PaymentResponseDTO dto = new PaymentResponseDTO();
-		
+
 		dto.setPaymentId(payment.getPaymentId());
 		dto.setBookingId(payment.getBookingId());
 		dto.setAmount(payment.getAmount());
@@ -208,6 +206,7 @@ public class Mapper {
 		traveler.setMobile(dto.getMobile());
 		return traveler;
 	}
+
 	public static TravelerResponseDTO mapTravelerToTravelerResponseDTO(Traveler traveler) {
 		TravelerResponseDTO dto = new TravelerResponseDTO();
 		dto.setId(traveler.getId());
@@ -218,5 +217,26 @@ public class Mapper {
 		dto.setAge(traveler.getAge());
 		dto.setStatus(traveler.getStatus());
 		return dto;
+	}
+
+	public static PackageScheduleResponseDTO mapPackageScheduleToDTO(PackageSchedule packageSchedule) {
+		PackageScheduleResponseDTO responseDTO = new PackageScheduleResponseDTO();
+		responseDTO.setScheduleId(packageSchedule.getScheduleId());
+		responseDTO.setActivity(packageSchedule.getActivity());
+		responseDTO.setDayNumber(packageSchedule.getDayNumber());
+		responseDTO.setDescription(packageSchedule.getDescription());
+		responseDTO.setPackageId(packageSchedule.getPackageId());
+		return responseDTO;
+
+	}
+
+	public static PackageSchedule mapPackageScheduleRequestDTOToModel(PackageScheduleRequestDTO requestDTO) {
+		PackageSchedule packageSchedule = new PackageSchedule();
+		packageSchedule.setActivity(requestDTO.getActivity());
+		packageSchedule.setDayNumber(requestDTO.getDayNumber());
+		packageSchedule.setDescription(requestDTO.getDescription());
+		packageSchedule.setPackageId(requestDTO.getPackageId());
+		return packageSchedule;
+
 	}
 }

@@ -59,7 +59,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 %>
 <h2 class="mb-4">My Booking History</h2>
 <form method="post" action="booking" class="row g-2 mb-3">
-	<input type="hidden" name="button" value="bookingHistroy">
+	<input type="hidden" name="button" value="viewBookings">
 
 	<div class="col-md-2">
 		<select name="status" class="form-select">
@@ -273,7 +273,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 
 		<li class="page-item <%=currentPage == 1 ? "disabled" : ""%>"><a
 			class="page-link"
-			href="booking?button=bookingHistroy&page=<%=currentPage - 1%>&<%=queryParams%>">Previous</a>
+			href="booking?button=viewBookings&page=<%=currentPage - 1%>&<%=queryParams%>">Previous</a>
 		</li>
 
 		<%
@@ -281,7 +281,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 		%>
 		<li class="page-item <%=currentPage == i ? "active" : ""%>"><a
 			class="page-link"
-			href="booking?button=bookingHistroy&page=<%=i%>&<%=queryParams%>"><%=i%></a>
+			href="booking?button=viewBookings&page=<%=i%>&<%=queryParams%>"><%=i%></a>
 		</li>
 		<%
 		}
@@ -289,7 +289,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 
 		<li class="page-item <%=currentPage == totalPages ? "disabled" : ""%>">
 			<a class="page-link"
-			href="booking?button=bookingHistroy&page=<%=currentPage + 1%>&<%=queryParams%>">Next</a>
+			href="booking?button=viewBookings&page=<%=currentPage + 1%>&<%=queryParams%>">Next</a>
 		</li>
 	</ul>
 </nav>

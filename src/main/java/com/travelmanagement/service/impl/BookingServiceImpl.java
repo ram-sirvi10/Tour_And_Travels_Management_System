@@ -76,11 +76,12 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public List<BookingResponseDTO> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers,
-			String status, String startDate, String endDate, int limit, int offset) throws Exception {
+	public List<BookingResponseDTO> getAllBookings(Integer agencyId, Integer userId, Integer packageId,
+			Integer noOfTravellers, String status, String startDate, String endDate, int limit, int offset)
+			throws Exception {
 
-		List<Booking> bookings = bookingDAO.getAllBookings(userId, packageId, noOfTravellers, status, startDate,
-				endDate, limit, offset);
+		List<Booking> bookings = bookingDAO.getAllBookings(agencyId, userId, packageId, noOfTravellers, status,
+				startDate, endDate, limit, offset);
 		List<BookingResponseDTO> bookingResponseDTOs = new ArrayList<>();
 
 		for (Booking booking : bookings) {
@@ -91,15 +92,14 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status,
-			String startDate, String endDate) throws Exception {
-		return bookingDAO.getAllBookingsCount(userId, packageId, noOfTravellers, status, startDate, endDate);
+	public int getAllBookingsCount(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
+			String status, String startDate, String endDate) throws Exception {
+		return bookingDAO.getAllBookingsCount(agencyId, userId, packageId, noOfTravellers, status, startDate, endDate);
 	}
 
-	
-
 	public boolean hasExistingBooking(int userId, int packageId) throws Exception {
-		List<BookingResponseDTO> existingBookings = getAllBookings(userId, packageId, null, null, null, null, 100, 0);
+		List<BookingResponseDTO> existingBookings = getAllBookings(null, userId, packageId, null, null, null, null,
+				1000, 0);
 
 		for (BookingResponseDTO b : existingBookings) {
 			if ("PENDING".equals(b.getStatus()) || "SUCCESSFUL".equals(b.getStatus())) {

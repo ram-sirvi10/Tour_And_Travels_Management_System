@@ -50,11 +50,12 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
 		<jsp:include page="sidebar.jsp" />
 		<div class="main-content">
 			<jsp:include page="header.jsp" />
-
+<button type="button" class="btn btn-secondary"
+	onclick="window.history.back();">Back</button>
 			<h2>Manage Users</h2>
 
 			<div class="mb-3">
-				<form method="post" action="<%=request.getContextPath()%>/admin"
+				<form method="get" action="<%=request.getContextPath()%>/admin"
 					class="row g-2">
 					<input type="hidden" name="button"
 						value="<%=request.getParameter("button")%>" />
@@ -73,6 +74,8 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
 					<div class="col-md-2">
 						<button type="submit" class="btn btn-primary w-100">Apply</button>
 					</div>
+					<a href="booking?button=<%=request.getParameter("button")%>"
+						class="btn btn-secondary w-100">Reset</a>
 					<%
 					}
 					%>
@@ -86,6 +89,8 @@ String queryParams = "keyword=" + (request.getParameter("keyword") != null ? req
 							<button type="submit" class="btn btn-primary w-100">Search</button>
 						</div>
 					</div>
+					<a href="booking?button=<%=request.getParameter("button")%>"
+						class="btn btn-secondary w-100">Reset</a>
 				</form>
 			</div>
 

@@ -5,17 +5,13 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.json.JSONObject;
-
-import com.razorpay.Order;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
+import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
@@ -29,7 +25,6 @@ import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
 import com.travelmanagement.util.BookingInvoiceUtil;
 import com.travelmanagement.util.Constants;
-import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -76,7 +71,7 @@ public class BookingServlet extends HttpServlet {
 			case Constants.ACTION_PAYMENT_REJECT:
 				processPayment(request, response, false);
 				break;
-			
+
 			case Constants.ACTION_CANCEL_BOOKING:
 				cancelBooking(request, response);
 				break;
@@ -775,6 +770,7 @@ public class BookingServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
+		AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
 
 		int pageSize = 10;
 		int currentPage = 1;
@@ -782,8 +778,17 @@ public class BookingServlet extends HttpServlet {
 		String startDate = request.getParameter("startDate");
 		String endDate = request.getParameter("endDate");
 
-		try {
+		String packageIdParam = request.getParameter("packageId");
+		Integer packageId = null;
+		if (packageIdParam != null && !packageIdParam.isEmpty()) {
+			try {
+				packageId = Integer.parseInt(packageIdParam);
+			} catch (NumberFormatException e) {
+				packageId = null;
+			}
+		}
 
+		try {
 			if (request.getParameter("pageSize") != null) {
 				int ps = Integer.parseInt(request.getParameter("pageSize"));
 				if (ps > 0)
@@ -808,7 +813,6 @@ public class BookingServlet extends HttpServlet {
 				if (endDate != null && !endDate.isEmpty())
 					end = LocalDate.parse(endDate);
 			} catch (Exception e) {
-
 			}
 
 			if (start != null && end != null && start.isAfter(end)) {
@@ -817,9 +821,13 @@ public class BookingServlet extends HttpServlet {
 				end = null;
 			}
 
-			List<BookingResponseDTO> bookings = bookingService.getAllBookings(user.getUserId(), null, null, status,
+			Integer agencyId = (agency != null) ? agency.getAgencyId() : null;
+			Integer userId = (user != null) ? user.getUserId() : null;
+
+			List<BookingResponseDTO> bookings = bookingService.getAllBookings(agencyId, userId, packageId, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize, offset);
-			int totalRecords = bookingService.getAllBookingsCount(user.getUserId(), null, null, status,
+
+			int totalRecords = bookingService.getAllBookingsCount(agencyId, userId, packageId, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null);
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
@@ -841,13 +849,22 @@ public class BookingServlet extends HttpServlet {
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);
 			request.setAttribute("pageSize", pageSize);
-			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+
+			if (user != null) {
+				request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			} else if (agency != null) {
+				request.getRequestDispatcher("template/agency/manageBooking.jsp").forward(request, response);
+			}
 			return;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.setAttribute("errorMessage", Constants.ERROR_FETCH_BOOKING_HISTORY);
-			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			if (user != null) {
+				request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+			} else if (agency != null) {
+				request.getRequestDispatcher("template/agency/manageBooking.jsp").forward(request, response);
+			}
 			return;
 		}
 	}
@@ -857,14 +874,28 @@ public class BookingServlet extends HttpServlet {
 
 		HttpSession session = request.getSession();
 		UserResponseDTO user = (UserResponseDTO) session.getAttribute("user");
-
-		if (user == null) {
+		AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
+		if (user == null && agency == null) {
 			response.sendRedirect(request.getContextPath() + "/login.jsp");
 			return;
 		}
 
+		Integer bookingId = null;
+		Integer agencyId = null;
+		Integer userId = null;
+		Integer packageId = null;
+		String bookingStatus = null;
+		String keyword = null;
 		String bookingIdParam = request.getParameter("bookingId");
-		String keyword = request.getParameter("keyword") != null ? request.getParameter("keyword").trim() : "";
+		String packageIdParam = request.getParameter("packageId");
+		if (user != null) {
+			userId = user.getUserId();
+		}
+		if (agency != null) {
+			agencyId = agency.getAgencyId();
+		}
+
+		keyword = request.getParameter("keyword") != null ? request.getParameter("keyword").trim() : null;
 		int pageSize = 10;
 		int currentPage = 1;
 
@@ -889,34 +920,49 @@ public class BookingServlet extends HttpServlet {
 			currentPage = 1;
 		}
 
-		if (bookingIdParam == null || bookingIdParam.isEmpty()) {
-			request.setAttribute("errorMessage", Constants.ERROR_BOOKING_ID_MISSING);
-			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
-			return;
-		}
+//		if (bookingIdParam == null || bookingIdParam.isEmpty()) {
+//			request.setAttribute("errorMessage", Constants.ERROR_BOOKING_ID_MISSING);
+//			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+//			return;
+//		}
 
-		int bookingId;
 		try {
 			bookingId = Integer.parseInt(bookingIdParam);
-		} catch (NumberFormatException e) {
-			request.setAttribute("errorMessage", Constants.ERROR_INVALID_BOOKING_ID);
-			request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
-			return;
+			BookingResponseDTO bookingResponseDTO = bookingService.getBookingById(bookingId);
+			if (user != null) {
+				if (bookingResponseDTO.getUserId() != userId) {
+					request.setAttribute("errorMessage", Constants.ERROR_INVALID_BOOKING_ID);
+					request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+					return;
+				}
+			}
+		} catch (Exception e) {
+			if (user != null) {
+				request.setAttribute("errorMessage", Constants.ERROR_INVALID_BOOKING_ID);
+				request.getRequestDispatcher("template/user/bookingHistory.jsp").forward(request, response);
+				return;
+			}
+			bookingId = null;
+		}
+
+		try {
+			packageId = Integer.parseInt(packageIdParam);
+		} catch (Exception e) {
+			packageId = null;
 		}
 
 		try {
 
-			int totalRecords = travelerService.getTravelerCount(null, bookingId, user.getUserId(), null, null, null,
-					keyword);
+			int totalRecords = travelerService.getTravelerCount(null, bookingId, userId, packageId, agencyId,
+					bookingStatus, keyword);
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 			if (currentPage > totalPages && totalPages > 0)
 				currentPage = totalPages;
 
 			int offset = (currentPage - 1) * pageSize;
-
-			List<TravelerResponseDTO> travelers = travelerService.getAllTravelers(null, bookingId, user.getUserId(),
-					null, null, null, keyword, pageSize, offset);
+			List<TravelerResponseDTO> travelers = travelerService.getAllTravelers(null, bookingId, userId, packageId,
+					agencyId, bookingStatus, keyword, pageSize, offset);
 
 			PackageResponseDTO pkg = packageService
 					.getPackageById(bookingService.getBookingById(bookingId).getPackageId());
@@ -927,13 +973,26 @@ public class BookingServlet extends HttpServlet {
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);
 			request.setAttribute("pageSize", pageSize);
+			request.setAttribute("bookingId", bookingId);
+			if (agency == null) {
+				request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
+				return;
+			} else {
+				request.getRequestDispatcher("template/agency/travelerList.jsp").forward(request, response);
+				return;
+			}
+		} catch (
 
-			request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
-
-		} catch (Exception e) {
+		Exception e) {
 			e.printStackTrace();
 			request.setAttribute("errorMessage", e.getMessage());
-			request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
+			if (user != null) {
+				request.getRequestDispatcher("template/user/TravelersList.jsp").forward(request, response);
+				return;
+			} else {
+				request.getRequestDispatcher("template/agency/travelersList.jsp").forward(request, response);
+				return;
+			}
 		}
 	}
 //

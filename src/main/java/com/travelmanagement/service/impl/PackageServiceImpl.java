@@ -10,7 +10,9 @@ import com.travelmanagement.dao.impl.BookingDAOImpl;
 import com.travelmanagement.dao.impl.PackageDAOImpl;
 import com.travelmanagement.dao.impl.PackageScheduleDAOImpl;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
+import com.travelmanagement.dto.requestDTO.PackageScheduleRequestDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.exception.ResourceNotFoundException;
 import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.Packages;
@@ -24,24 +26,52 @@ public class PackageServiceImpl implements IPackageService {
 	private IBookingDAO bookingDAO = new BookingDAOImpl();
 	private IPackageScheduleDAO scheduleDAO = new PackageScheduleDAOImpl();
 
-	public boolean addSchedule(PackageSchedule schedule) throws Exception {
-		return scheduleDAO.addSchedule(schedule);
+	@Override
+	public int addPackage(PackageRegisterDTO dto) throws Exception {
+
+		int packageId = 0;
+		try {
+
+			Packages pkg = Mapper.mapToModel(dto);
+			pkg.setVersion(0);
+			packageId = packageDAO.addPackage(pkg);
+
+			if (packageId <= 0) {
+				throw new Exception("Failed to insert package");
+			}
+
+			List<PackageScheduleRequestDTO> schedules = dto.getPackageSchedule();
+			List<PackageSchedule> packageSchedules = new ArrayList<PackageSchedule>();
+			for (PackageScheduleRequestDTO schedule : schedules) {
+				PackageSchedule packageSchedule = Mapper.mapPackageScheduleRequestDTOToModel(schedule);
+				schedule.setPackageId(packageId);
+				packageSchedules.add(packageSchedule);
+			}
+
+			boolean scheduleCreated = scheduleDAO.addSchedules(packageSchedules);
+			if (!scheduleCreated) {
+				packageDAO.deletePackage(packageId);
+				throw new Exception("Failed to add package schedules");
+			}
+
+			return packageId;
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
-	public List<PackageSchedule> getScheduleByPackage(int packageId) {
+	public List<PackageScheduleResponseDTO> getScheduleByPackage(int packageId) {
+		List<PackageScheduleResponseDTO> packageScheduleResponseDTOs = new ArrayList<PackageScheduleResponseDTO>();
 		try {
-			return scheduleDAO.getScheduleByPackage(packageId);
+			List<PackageSchedule> packageSchedule = scheduleDAO.getScheduleByPackage(packageId);
+			for (PackageSchedule pkg : packageSchedule) {
+				packageScheduleResponseDTOs.add(Mapper.mapPackageScheduleToDTO(pkg));
+			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
-		return null;
-	}
-
-	// -------------------- Create Package --------------------
-	public boolean addPackage(Packages pkg) throws Exception {
-		validatePackage(pkg);
-		return packageDAO.addPackage(pkg);
+		return packageScheduleResponseDTOs;
 	}
 
 	public void createPackage(PackageRegisterDTO dto) throws Exception {
@@ -119,7 +149,7 @@ public class PackageServiceImpl implements IPackageService {
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
 		if (seatsChange == 0)
 			return true;
-		System.out.println("Package service adjust seat = "+(seatsChange));
+		System.out.println("Package service adjust seat = " + (seatsChange));
 		return packageDAO.adjustSeats(packageId, seatsChange);
 	}
 

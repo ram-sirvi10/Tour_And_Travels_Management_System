@@ -74,7 +74,7 @@ public class Constants {
 	public static final String ACTION_CANCEL_BOOKING = "cancelBooking";
 	public static final String ACTION_CANCEL_TRAVELER = "cancelTraveler";
 	public static final String ACTION_VIEW_BOOKING_FORM = "viewBookingForm";
-	public static final String ACTION_BOOKING_HISTORY = "bookingHistroy";
+	public static final String ACTION_BOOKING_HISTORY = "viewBookings";
 	public static final String ACTION_VIEW_TRAVELERS = "viewTravelers";
 	public static final String ACTION_PAYMENT_HISTORY = "paymentHistory";
 	public static final String ACTION_DOWNLOAD_INVOICE = "downloadInvoice";

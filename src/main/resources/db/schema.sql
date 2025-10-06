@@ -99,7 +99,7 @@ ALTER TABLE travel_packages
 ADD COLUMN imageurl VARCHAR(500) ;
 
 ALTER TABLE travel_packages
-ADD COLUMN totalseats int not null ;
+ADD COLUMN total_seats int not null ;
 
 ALTER TABLE bookings
 ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ;

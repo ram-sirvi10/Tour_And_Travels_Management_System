@@ -83,7 +83,7 @@ public class BookingScheduler {
 		schedulerPool.scheduleAtFixedRate(() -> {
 			try {
 
-				var pendingBookings = bookingService.getAllBookings(null, null, null, "PENDING", null, null, 1000, 0);
+				var pendingBookings = bookingService.getAllBookings(null,null, null, null, "PENDING", null, null, 1000, 0);
 
 				for (BookingResponseDTO booking : pendingBookings) {
 					PaymentResponseDTO payment = paymentService.getPaymentByBookingId(booking.getBookingId());

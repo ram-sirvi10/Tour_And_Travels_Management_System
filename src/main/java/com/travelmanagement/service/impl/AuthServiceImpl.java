@@ -1,5 +1,6 @@
 package com.travelmanagement.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,14 +15,100 @@ import com.travelmanagement.dao.impl.LocationDAOImpl;
 import com.travelmanagement.dao.impl.UserDAOImpl;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
+import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
+import com.travelmanagement.dto.requestDTO.PackageScheduleRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.model.Agency;
+import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.User;
 import com.travelmanagement.service.IAuthService;
 import com.travelmanagement.util.ValidationUtil;
 
 public class AuthServiceImpl implements IAuthService {
+
+	public Map<String, String> validatePackageFields(PackageRegisterDTO dto) {
+		Map<String, String> errors = new HashMap<>();
+
+		if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()
+				|| !ValidationUtil.isValidPackageActivity(dto.getTitle())) {
+			errors.put("title", "Invalid title");
+		}
+
+
+		if (dto.getLocation() == null || dto.getLocation().trim().isEmpty()
+				|| !ValidationUtil.isValidCityOrState(dto.getLocation())) {
+			errors.put("location", "Invalid location");
+		}
+
+	
+		if (dto.getPrice() == null || dto.getPrice() <= 0) {
+			errors.put("price", "Price must be greater than zero");
+		}
+
+
+		if (dto.getDuration() == null || dto.getDuration() <= 0) {
+			errors.put("duration", "Duration must be at least 1 day");
+		}
+
+		if (dto.getTotalSeats() == null || dto.getTotalSeats() <= 0) {
+			errors.put("totalseats", "Total seats must be at least 1");
+		}
+
+	
+		LocalDateTime now = LocalDateTime.now();
+
+	
+		if (dto.getDepartureDate() == null) {
+			errors.put("departureDate", "Departure date is required");
+		} else if (dto.getDepartureDate().isBefore(now)) {
+			errors.put("departureDate", "Departure date must be in the future");
+		}
+
+		if (dto.getLastBookingDate() == null) {
+			errors.put("lastBookingDate", "Last booking date is required");
+		} else if (dto.getLastBookingDate().isBefore(now)) {
+			errors.put("lastBookingDate", "Last booking date must be in the future");
+		}
+
+	
+		if (dto.getDepartureDate() != null && dto.getLastBookingDate() != null) {
+			if (dto.getLastBookingDate().isAfter(dto.getDepartureDate())) {
+				errors.put("lastBookingDate", "Last booking date cannot be after departure date");
+			}
+		}
+
+	
+		if (dto.getDescription() == null || !ValidationUtil.isValidDescription(dto.getDescription())) {
+			errors.put("description", "Description must have at least 10 words");
+		}
+
+		if (dto.getIsActive() == null) {
+		    errors.put("isActive", "Package status is required");
+		}
+
+		List<PackageScheduleRequestDTO> scheduleList = dto.getPackageSchedule();
+		if (scheduleList == null || scheduleList.size() != dto.getDuration()) {
+			errors.put("schedule", "Schedule must have exactly " + dto.getDuration() + " days");
+		} else {
+			for (int i = 0; i < scheduleList.size(); i++) {
+				PackageScheduleRequestDTO day = scheduleList.get(i);
+
+		
+				if (day.getActivity() == null || !ValidationUtil.isValidPackageActivity(day.getActivity())) {
+					errors.put("day" + (i + 1) + "_activity", "Activity for day " + (i + 1) + " is invalid or empty");
+				}
+
+				
+				if (day.getDescription() == null || !ValidationUtil.isValidDescription(day.getDescription())) {
+					errors.put("day" + (i + 1) + "_desc",
+							"Description for day " + (i + 1) + " must have at least 10 words");
+				}
+			}
+		}
+
+		return errors; 
+	}
 
 	@Override
 	public Map<String, String> validateRegisterDto(RegisterRequestDTO dto) {

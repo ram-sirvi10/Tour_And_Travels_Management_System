@@ -21,22 +21,36 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public boolean addPackage(Packages pkg) throws Exception {
-		String sql = "INSERT INTO travel_packages (title, agency_id, description, price, location, duration, is_active, created_at, updated_at) "
-				+ "VALUES (?,?,?,?,?,?,?, NOW(), NOW())";
+	public int addPackage(Packages pkg) throws Exception {
+		int generatedId = 0;
+		String sql = "INSERT INTO travel_packages (title, agency_id, description, price, location, duration, is_active, total_seats, imageurl, departure_date, last_booking_date, created_at, updated_at, version) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW(), NOW(), ?)";
 
-		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql);
-
-		preparedStatement.setString(1, pkg.getTitle());
-		preparedStatement.setInt(2, pkg.getAgencyId());
-		preparedStatement.setString(3, pkg.getDescription());
-		preparedStatement.setDouble(4, pkg.getPrice());
-		preparedStatement.setString(5, pkg.getLocation());
-		preparedStatement.setInt(6, pkg.getDuration());
-		preparedStatement.setBoolean(7, pkg.isActive());
-
-		return preparedStatement.executeUpdate() > 0;
+		try {
+			preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+			preparedStatement.setString(1, pkg.getTitle());
+			preparedStatement.setInt(2, pkg.getAgencyId());
+			preparedStatement.setString(3, pkg.getDescription());
+			preparedStatement.setDouble(4, pkg.getPrice());
+			preparedStatement.setString(5, pkg.getLocation());
+			preparedStatement.setInt(6, pkg.getDuration());
+			preparedStatement.setBoolean(7, pkg.isActive());
+			preparedStatement.setInt(8, pkg.getTotalSeats());
+			preparedStatement.setString(9, pkg.getImageurl());
+			preparedStatement.setObject(10, pkg.getDepartureDate());
+			preparedStatement.setObject(11, pkg.getLastBookingDate());
+			preparedStatement.setInt(12, pkg.getVersion());
+			int rows = preparedStatement.executeUpdate();
+			if (rows > 0) {
+				resultSet = preparedStatement.getGeneratedKeys();
+				if (resultSet.next()) {
+					generatedId = resultSet.getInt(1);
+				}
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		return generatedId;
 	}
 
 	@Override
@@ -99,14 +113,14 @@ public class PackageDAOImpl implements IPackageDAO {
 			pkg.setLocation(resultSet.getString("location"));
 			pkg.setDuration(resultSet.getInt("duration"));
 			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			pkg.setTotalSeats(resultSet.getInt("total_seats"));
 			if (resultSet.getString("imageurl") != null) {
 				pkg.setImageurl(resultSet.getString("imageurl"));
 			}
 			if (resultSet.getTimestamp("departure_date") != null) {
 				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
 			}
-			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			pkg.setTotalSeats(resultSet.getInt("total_seats"));
 			if (resultSet.getTimestamp("last_booking_date") != null) {
 				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
 
@@ -136,7 +150,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			pkg.setLocation(resultSet.getString("location"));
 			pkg.setDuration(resultSet.getInt("duration"));
 			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			pkg.setTotalSeats(resultSet.getInt("total_seats"));
 			pkg.setVersion(resultSet.getInt("version"));
 			if (resultSet.getString("imageurl") != null) {
 				pkg.setImageurl(resultSet.getString("imageurl"));
@@ -172,7 +186,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			sql.append(" AND location LIKE ?");
 		}
 		if (keyword != null && !keyword.isEmpty()) {
-			sql.append(" AND (title LIKE ? OR description LIKE ? OR location LIKE ?)");
+			sql.append(" AND (title LIKE ?  OR location LIKE ?)");
 		}
 		if (dateFrom != null && !dateFrom.isEmpty()) {
 			sql.append(" AND DATE(departure_date) >= ?");
@@ -181,7 +195,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			sql.append(" AND DATE(departure_date) <= ?");
 		}
 		if (totalSeats != null) {
-			sql.append(" AND totalseats = ?");
+			sql.append(" AND total_seats = ?");
 		}
 		if (isActive != null) {
 			sql.append(" AND is_active = ?");
@@ -189,7 +203,7 @@ public class PackageDAOImpl implements IPackageDAO {
 
 		if (isAgencyView == null || !isAgencyView) {
 			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
-			sql.append(" AND totalseats > 0");
+			sql.append(" AND total_seats > 0");
 		}
 
 		sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
@@ -210,7 +224,7 @@ public class PackageDAOImpl implements IPackageDAO {
 		if (keyword != null && !keyword.isEmpty()) {
 			String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
 			preparedStatement.setString(index++, kw);
-			preparedStatement.setString(index++, kw);
+
 			preparedStatement.setString(index++, kw);
 		}
 		if (dateFrom != null && !dateFrom.isEmpty()) {
@@ -240,7 +254,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			pkg.setLocation(resultSet.getString("location"));
 			pkg.setDuration(resultSet.getInt("duration"));
 			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("totalseats"));
+			pkg.setTotalSeats(resultSet.getInt("total_seats"));
 			if (resultSet.getString("imageurl") != null) {
 				pkg.setImageurl(resultSet.getString("imageurl"));
 			}
@@ -259,8 +273,8 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
-		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats + ?, updated_at = NOW() "
-				+ "WHERE package_id = ? AND totalseats + ? >= 0";
+		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats + ?, updated_at = NOW() "
+				+ "WHERE package_id = ? AND total_seats + ? >= 0";
 
 		try {
 			PreparedStatement ps = connection.prepareStatement(sql);
@@ -303,7 +317,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			sql.append(" AND DATE(departure_date) <= ?");
 		}
 		if (totalSeats != null) {
-			sql.append(" AND totalseats = ?");
+			sql.append(" AND total_seats = ?");
 		}
 		if (isActive != null) {
 			sql.append(" AND is_active = ?");
@@ -311,7 +325,7 @@ public class PackageDAOImpl implements IPackageDAO {
 
 		if (isAgencyView == null || !isAgencyView) {
 			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
-			sql.append(" AND totalseats > 0");
+			sql.append(" AND total_seats > 0");
 		}
 
 		connection = DatabaseConfig.getConnection();
@@ -356,8 +370,8 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
-		String sql = "UPDATE travel_packages " + "SET totalseats = totalseats - ?, version = version + 1 "
-				+ "WHERE package_id = ? AND version = ? AND totalseats >= ?";
+		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats - ?, version = version + 1 "
+				+ "WHERE package_id = ? AND version = ? AND total_seats >= ?";
 		try {
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, seatsToBook);

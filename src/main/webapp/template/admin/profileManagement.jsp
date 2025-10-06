@@ -51,7 +51,8 @@ RegisterRequestDTO formData = (RegisterRequestDTO) request.getAttribute("formDat
 <jsp:include page="header.jsp" />
 <div class="dashboard-container">
     <jsp:include page="sidebar.jsp" />
-
+<button type="button" class="btn btn-secondary"
+	onclick="window.history.back();">Back</button>
     <div class="main-content">
         <%-- Success/Error Messages --%>
         <% if (successMessage != null) { %>

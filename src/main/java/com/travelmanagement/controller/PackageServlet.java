@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.IBookingService;
@@ -19,6 +20,7 @@ import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.util.Constants;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +28,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/package")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class PackageServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -71,7 +77,6 @@ public class PackageServlet extends HttpServlet {
 			String startDate = trimOrNull(request.getParameter("dateFrom"));
 			String endDate = trimOrNull(request.getParameter("dateTo"));
 			String departureDate = trimOrNull(request.getParameter("departureDate"));
-
 			Integer agencyId = parseIntSafe(request.getParameter("agencyId"));
 			Integer totalSeats = parseIntSafe(request.getParameter("totalSeats"));
 			Boolean isActive = true;
@@ -109,7 +114,7 @@ public class PackageServlet extends HttpServlet {
 
 			int totalPages = (int) Math.ceil((double) totalPackages / limit);
 
-			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(user.getUserId(), null, null,
+			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(null,user.getUserId(), null, null,
 					"CONFIRMED", null, null, 100, 0);
 
 			LocalDateTime now = LocalDateTime.now();
@@ -129,7 +134,7 @@ public class PackageServlet extends HttpServlet {
 				}
 			}
 			for (PackageResponseDTO pkg : packages) {
-				List<PackageSchedule> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
+				List<PackageScheduleResponseDTO> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
 				pkg.setPackageSchedule(schedule);
 			}
 

@@ -5,7 +5,8 @@
 <%@ page import="com.travelmanagement.dto.responseDTO.UserResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
-<%@ page import="com.travelmanagement.model.PackageSchedule"  %>
+<%@ page
+	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
 <button type="button" class="btn btn-secondary mb-3"
 	onclick="window.history.back();">Back</button>
 
@@ -67,10 +68,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 	class="row g-2 mb-4">
 	<input type="hidden" name="button" value="packageList">
 
-
-
-
-
 	<div class="col-md-2">
 		<label for="dateFrom" class="form-label">Departure Date From </label>
 		<input type="date" name="dateFrom" class="form-control"
@@ -82,8 +79,6 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 		<label for="dateTo" class="form-label"> To </label> <input type="date"
 			name="dateTo" class="form-control" value="<%=dateTo%>" id="dateTo">
 	</div>
-
-
 
 
 	<div class="col-md-2">
@@ -270,9 +265,9 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				<div class="modal-body">
 					<%-- Display day-wise schedule --%>
 					<%
-					List<PackageSchedule> schedules = pkg.getPackageSchedule();
+					List<PackageScheduleResponseDTO> schedules = pkg.getPackageSchedule();
 					if (schedules != null && !schedules.isEmpty()) {
-						for (PackageSchedule schedule : schedules) {
+						for (PackageScheduleResponseDTO schedule : schedules) {
 					%>
 					<div class="card mb-2 shadow-sm">
 						<div class="card-body">

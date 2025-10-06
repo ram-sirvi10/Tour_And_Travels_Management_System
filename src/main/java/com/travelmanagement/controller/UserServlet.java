@@ -7,16 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
+import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
-import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.util.Constants;
 
-import jakarta.mail.Session;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -103,7 +101,7 @@ public class UserServlet extends HttpServlet {
 					true, 8, 0, false);
 			request.setAttribute("packages", packages);
 
-			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(user.getUserId(), null, null,
+			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(null, user.getUserId(), null, null,
 					"CONFIRMED", null, null, 100, 0);
 
 			LocalDateTime now = LocalDateTime.now();
@@ -111,7 +109,7 @@ public class UserServlet extends HttpServlet {
 			Map<Integer, BookingResponseDTO> bookingMap = new HashMap<>();
 
 			for (PackageResponseDTO pkg : packages) {
-				List<PackageSchedule> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
+				List<PackageScheduleResponseDTO> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
 				pkg.setPackageSchedule(schedule);
 			}
 

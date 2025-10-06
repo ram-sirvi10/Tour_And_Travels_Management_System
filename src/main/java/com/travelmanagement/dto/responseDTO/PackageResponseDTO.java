@@ -3,9 +3,16 @@ package com.travelmanagement.dto.responseDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.travelmanagement.model.PackageSchedule;
-
 public class PackageResponseDTO {
+	@Override
+	public String toString() {
+		return "PackageResponseDTO [packageId=" + packageId + ", title=" + title + ", agencyId=" + agencyId
+				+ ", description=" + description + ", price=" + price + ", location=" + location + ", duration="
+				+ duration + ", isActive=" + isActive + ", imageurl=" + imageurl + ", totalSeats=" + totalSeats
+				+ ", packageSchedule=" + packageSchedule + ", version=" + version + ", departureDate=" + departureDate
+				+ ", lastBookingDate=" + lastBookingDate + ", totalBookings=" + totalBookings + "]";
+	}
+
 	private int packageId;
 	private String title;
 	private int agencyId;
@@ -16,18 +23,18 @@ public class PackageResponseDTO {
 	private boolean isActive;
 	private String imageurl;
 	private int totalSeats;
-	private List<PackageSchedule> packageSchedule;
+	private List<PackageScheduleResponseDTO> packageSchedule;
 	private int version;
 
 	private LocalDateTime departureDate;
 
 	private LocalDateTime lastBookingDate;
 
-	public List<PackageSchedule> getPackageSchedule() {
+	public List<PackageScheduleResponseDTO> getPackageSchedule() {
 		return packageSchedule;
 	}
 
-	public void setPackageSchedule(List<PackageSchedule> packageSchedule) {
+	public void setPackageSchedule(List<PackageScheduleResponseDTO> packageSchedule) {
 		this.packageSchedule = packageSchedule;
 	}
 

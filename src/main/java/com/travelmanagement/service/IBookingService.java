@@ -14,10 +14,10 @@ public interface IBookingService {
 
 	boolean cancelBooking(int bookingId) throws Exception;
 
-	List<BookingResponseDTO> getAllBookings(Integer userId, Integer packageId, Integer noOfTravellers, String status,
+	List<BookingResponseDTO> getAllBookings(Integer agencyId,Integer userId, Integer packageId, Integer noOfTravellers, String status,
 			 String startDate, String endDate, int limit, int offset) throws Exception;
 
-	int getAllBookingsCount(Integer userId, Integer packageId, Integer noOfTravellers, String status, 
+	int getAllBookingsCount(Integer agencyId,Integer userId, Integer packageId, Integer noOfTravellers, String status, 
 			String startDate, String endDate) throws Exception;
 
 	int createBooking(BookingRequestDTO dto) throws Exception;

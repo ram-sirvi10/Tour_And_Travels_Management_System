@@ -7,7 +7,8 @@
 	import="com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
-<%@ page import="com.travelmanagement.model.PackageSchedule"  %>
+<%@ page
+	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
 <%@ include file="header.jsp"%>
 
 <%
@@ -207,9 +208,9 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 										<div class="modal-body">
 											<%-- Display day-wise schedule --%>
 											<%
-											List<PackageSchedule> schedules = pkg.getPackageSchedule();
+											List<PackageScheduleResponseDTO> schedules = pkg.getPackageSchedule();
 											if (schedules != null && !schedules.isEmpty()) {
-												for (PackageSchedule schedule : schedules) {
+												for (PackageScheduleResponseDTO schedule : schedules) {
 											%>
 											<div class="card mb-2 shadow-sm">
 												<div class="card-body">
