@@ -1,6 +1,7 @@
 package com.travelmanagement.controller;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
 import com.travelmanagement.util.Constants;
+import com.travelmanagement.util.Mapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -32,6 +34,7 @@ public class AgencyServlet extends HttpServlet {
 	private PackageServiceImpl packageService = new PackageServiceImpl();
 	private BookingServiceImpl bookingService = new BookingServiceImpl();
 	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
+	private AuthServiceImpl authServiceImpl = new AuthServiceImpl();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -67,6 +70,15 @@ public class AgencyServlet extends HttpServlet {
 			case "viewBookings":
 				viewBookings(request, response, agency);
 				break;
+			case "packageAction":
+				packageAction(request, response, agency);
+				break;
+			case "editPackageForm":
+				editPackageForm(request, response, agency);
+				break;
+			case "updatePackage":
+				updatePackage(request, response, agency);
+				break;
 
 			default:
 				showDashboard(request, response, agency);
@@ -79,7 +91,220 @@ public class AgencyServlet extends HttpServlet {
 		}
 	}
 
-	// -------------------- Methods --------------------
+	private void editPackageForm(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
+			throws ServletException, IOException {
+		String packageIdParam = request.getParameter("id");
+		if (packageIdParam == null || packageIdParam.isEmpty()) {
+			request.getSession().setAttribute("errorMessage", "Package ID is missing.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		try {
+			int packageId = Integer.parseInt(packageIdParam);
+			PackageResponseDTO packageData = packageService.getPackageById(packageId);
+
+			if (packageData == null || packageData.getAgencyId() != agency.getAgencyId()) {
+				request.getSession().setAttribute("errorMessage", "Package not found or unauthorized.");
+				response.sendRedirect("agency?button=viewPackages");
+				return;
+			}
+
+			List<PackageScheduleResponseDTO> scheduleList = packageService.getScheduleByPackage(packageId);
+
+			request.setAttribute("packageData", packageData);
+			request.setAttribute("scheduleList", scheduleList);
+
+			request.getRequestDispatcher("template/agency/addPackage.jsp").forward(request, response);
+			return;
+		} catch (NumberFormatException e) {
+			request.getSession().setAttribute("errorMessage", "Invalid package ID format.");
+			response.sendRedirect("agency?button=viewPackages");
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errorMessage", "Something went wrong while fetching package.");
+			response.sendRedirect("agency?button=viewPackages");
+		}
+	}
+
+	private void updatePackage(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
+			throws Exception {
+
+		String packageIdParam = request.getParameter("packageId");
+		if (packageIdParam == null || packageIdParam.isEmpty()) {
+			request.getSession().setAttribute("errorMessage", "Package ID missing.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		int packageId = Integer.parseInt(packageIdParam);
+		PackageResponseDTO existingPackage = packageService.getPackageById(packageId);
+
+		if (existingPackage == null || existingPackage.getAgencyId() != agency.getAgencyId()) {
+			request.getSession().setAttribute("errorMessage", "Unauthorized action!");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		boolean isScheduleSubmit = "true".equals(request.getParameter("isScheduleSubmit"));
+
+		PackageRegisterDTO dto = new PackageRegisterDTO();
+		dto.setPackageId(existingPackage.getPackageId());
+		dto.setAgencyId(agency.getAgencyId());
+		dto.setTitle(trimOrNull(request.getParameter("title")));
+		dto.setLocation(trimOrNull(request.getParameter("location")));
+		dto.setPrice(request.getParameter("price") != null && !request.getParameter("price").isEmpty()
+				? Double.parseDouble(request.getParameter("price"))
+				: null);
+		dto.setDuration(request.getParameter("duration") != null && !request.getParameter("duration").isEmpty()
+				? Integer.parseInt(request.getParameter("duration"))
+				: null);
+		dto.setTotalSeats(request.getParameter("totalseats") != null && !request.getParameter("totalseats").isEmpty()
+				? Integer.parseInt(request.getParameter("totalseats"))
+				: null);
+		dto.setDescription(trimOrNull(request.getParameter("description")));
+		dto.setIsActive("on".equals(request.getParameter("isActive")));
+		dto.setDepartureDate(
+				request.getParameter("departure_date") != null && !request.getParameter("departure_date").isEmpty()
+						? LocalDateTime.parse(request.getParameter("departure_date"))
+						: null);
+		dto.setLastBookingDate(request.getParameter("last_booking_date") != null
+				&& !request.getParameter("last_booking_date").isEmpty()
+						? LocalDateTime.parse(request.getParameter("last_booking_date"))
+						: null);
+
+		List<PackageScheduleRequestDTO> schedules = new ArrayList<>();
+		if (dto.getDuration() != null) {
+			for (int i = 1; i <= dto.getDuration(); i++) {
+				PackageScheduleRequestDTO s = new PackageScheduleRequestDTO();
+				s.setPackageId(packageId);
+				s.setDayNumber(i);
+				s.setActivity(trimOrNull(request.getParameter("day" + i + "_activity")));
+				s.setDescription(trimOrNull(request.getParameter("day" + i + "_desc")));
+				schedules.add(s);
+			}
+		}
+		dto.setPackageSchedule(schedules);
+
+		if (!isScheduleSubmit) {
+			PackageResponseDTO respDto = Mapper.convertToResponseDTO(dto, schedules);
+			request.setAttribute("packageData", respDto);
+			request.setAttribute("scheduleList", respDto.getPackageSchedule());
+			request.getRequestDispatcher("template/agency/addPackage.jsp").forward(request, response);
+			return;
+		}
+
+		Map<String, String> errors = authServiceImpl.validatePackageFields(dto);
+		if (!errors.isEmpty()) {
+			PackageResponseDTO respDto = Mapper.convertToResponseDTO(dto, schedules);
+			request.setAttribute("errors", errors);
+			request.setAttribute("packageData", respDto);
+			request.setAttribute("scheduleList", respDto.getPackageSchedule());
+			request.getRequestDispatcher("template/agency/addPackage.jsp").forward(request, response);
+			return;
+		}
+		System.err.println(dto);
+		boolean updated = packageService.updatePackage(dto);
+		if (updated) {
+			request.getSession().setAttribute("successMessage", "Package updated successfully!");
+		} else {
+			request.getSession().setAttribute("errorMessage", "Failed to update package!");
+		}
+
+		response.sendRedirect("agency?button=viewPackages");
+	}
+
+	private void packageAction(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
+			throws Exception {
+
+		String actionType = request.getParameter("actionType");
+		String packageIdParam = request.getParameter("packageId");
+
+		if (actionType == null || actionType.trim().isEmpty()) {
+			request.getSession().setAttribute("errorMessage", "Invalid action: action type missing.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		if (packageIdParam == null || packageIdParam.trim().isEmpty()) {
+			request.getSession().setAttribute("errorMessage", "Invalid action: package ID missing.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		int packageId = 0;
+		try {
+			packageId = Integer.parseInt(packageIdParam);
+		} catch (NumberFormatException e) {
+			request.getSession().setAttribute("errorMessage", "Invalid package ID format.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		PackageResponseDTO packageBelongsToAgency = packageService.getPackageById(packageId);
+
+		if (packageBelongsToAgency.getAgencyId() != agency.getAgencyId()) {
+			request.getSession().setAttribute("errorMessage", "You are not authorized to modify this package.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+
+		try {
+			switch (actionType.toLowerCase()) {
+			case "toggle":
+				boolean toggled = packageService.togglePackageStatus(packageId);
+				if (toggled)
+					request.getSession().setAttribute("successMessage", "Package status updated successfully.");
+				else
+					request.getSession().setAttribute("errorMessage", "Failed to update package status.");
+				break;
+
+			case "delete":
+				boolean deleted = packageService.deletePackage(packageId);
+				if (deleted)
+					request.getSession().setAttribute("successMessage", "Package deleted successfully.");
+				else
+					request.getSession().setAttribute("errorMessage", "Failed to delete package.");
+				break;
+
+			default:
+				request.getSession().setAttribute("errorMessage", "Invalid action type: " + actionType);
+				break;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errorMessage", "Something went wrong: " + e.getMessage());
+		}
+
+		String keyword = trimOrNull(request.getParameter("keyword"));
+//		String location = trimOrNull(request.getParameter("location"));
+//		String dateFrom = trimOrNull(request.getParameter("dateFrom"));
+//		String dateTo = trimOrNull(request.getParameter("dateTo"));
+		String page = trimOrNull(request.getParameter("page"));
+		String pageSize = trimOrNull(request.getParameter("pageSize"));
+		String active = trimOrNull(request.getParameter("active"));
+
+		StringBuilder redirectURL = new StringBuilder("agency?button=viewPackages");
+
+		if (keyword != null && !keyword.isEmpty())
+			redirectURL.append("&keyword=").append(URLEncoder.encode(keyword, "UTF-8"));
+//		if (location != null && !location.isEmpty())
+//			redirectURL.append("&location=").append(URLEncoder.encode(location, "UTF-8"));
+//		if (dateFrom != null && !dateFrom.isEmpty())
+//			redirectURL.append("&dateFrom=").append(URLEncoder.encode(dateFrom, "UTF-8"));
+//		if (dateTo != null && !dateTo.isEmpty())
+//			redirectURL.append("&dateTo=").append(URLEncoder.encode(dateTo, "UTF-8"));
+		if (page != null && !page.isEmpty())
+			redirectURL.append("&page=").append(page);
+		if (pageSize != null && !pageSize.isEmpty())
+			redirectURL.append("&pageSize=").append(pageSize);
+		if (active != null && !active.isEmpty())
+			redirectURL.append("&active=").append(active);
+
+		response.sendRedirect(redirectURL.toString());
+
+	}
 
 	private void showDashboard(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
 			throws Exception {
@@ -144,7 +369,7 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		Map<String, String> errors = new AuthServiceImpl().validatePackageFields(packageRegisterDTO);
+		Map<String, String> errors = authServiceImpl.validatePackageFields(packageRegisterDTO);
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("oldData", packageRegisterDTO);
@@ -225,18 +450,6 @@ public class AgencyServlet extends HttpServlet {
 		return;
 	}
 
-//	private void deletePackage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//		int id = Integer.parseInt(request.getParameter("id"));
-//		packageService.deletePackage(id);
-//		response.sendRedirect("agency?button=managePackages");
-//	}
-//
-//	private void togglePackage(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//		int id = Integer.parseInt(request.getParameter("id"));
-//		packageService.togglePackageStatus(id);
-//		response.sendRedirect("agency?button=managePackages");
-//	}
-
 	private void viewBookings(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
 			throws Exception {
 
@@ -253,15 +466,6 @@ public class AgencyServlet extends HttpServlet {
 		request.setAttribute("packageId", packageId);
 		request.getRequestDispatcher("template/agency/manageBooking.jsp").forward(request, response);
 	}
-
-//	private void viewTravellers(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//		int bookingId = Integer.parseInt(request.getParameter("bookingId"));
-//		List<TravelerResponseDTO> travelers = travelerService.getAllTravelers(null, bookingId, null, null, null, null,
-//				null, 100, 0);
-//		request.setAttribute("travelers", travelers);
-//		request.setAttribute("bookingId", bookingId);
-//		request.getRequestDispatcher("travellersList.jsp").forward(request, response);
-//	}
 
 	private String trimOrNull(String param) {
 		return (param != null && !param.trim().isEmpty()) ? param.trim() : null;

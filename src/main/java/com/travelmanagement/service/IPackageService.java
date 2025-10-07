@@ -5,14 +5,10 @@ import java.util.List;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
-import com.travelmanagement.model.PackageSchedule;
-import com.travelmanagement.model.Packages;
 
 public interface IPackageService {
 
 	PackageResponseDTO getPackageById(int id) throws Exception;
-
-	boolean updatePackage(Packages pkg) throws Exception;
 
 	boolean deletePackage(int id) throws Exception;
 

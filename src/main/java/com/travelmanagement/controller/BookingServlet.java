@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.razorpay.Order;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.requestDTO.PaymentRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
@@ -18,13 +19,16 @@ import com.travelmanagement.dto.responseDTO.PaymentResponseDTO;
 import com.travelmanagement.dto.responseDTO.TravelerResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.scheduler.BookingScheduler;
+import com.travelmanagement.service.IUserService;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
+import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.BookingInvoiceUtil;
 import com.travelmanagement.util.Constants;
+import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -42,6 +46,7 @@ public class BookingServlet extends HttpServlet {
 	private PackageServiceImpl packageService = new PackageServiceImpl();
 	private PaymentServiceImpl paymentService = new PaymentServiceImpl();
 	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
+	private IUserService userService = new UserServiceImpl();
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -59,19 +64,18 @@ public class BookingServlet extends HttpServlet {
 			case Constants.ACTION_CREATE_BOOKING:
 				createBooking(request, response);
 				break;
-//			case Constants.ACTION_AUTO_CANCEL_BOOKING:
-//				autoCancelBooking(request, response);
-//				break;
-//			case Constants.ACTION_VERIFY_PAYMENT:
-//				verifyPayment(request, response);
-//				break;
+			case Constants.ACTION_AUTO_CANCEL_BOOKING:
+				autoCancelBooking(request, response);
+				break;
+			case Constants.ACTION_VERIFY_PAYMENT:
+				verifyPayment(request, response);
+				break;
 			case Constants.ACTION_PAYMENT_CONFIRM:
 				processPayment(request, response, true);
 				break;
 			case Constants.ACTION_PAYMENT_REJECT:
 				processPayment(request, response, false);
 				break;
-
 			case Constants.ACTION_CANCEL_BOOKING:
 				cancelBooking(request, response);
 				break;
@@ -284,7 +288,7 @@ public class BookingServlet extends HttpServlet {
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
 
 				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
-				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 				return;
 			}
 			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
@@ -293,7 +297,7 @@ public class BookingServlet extends HttpServlet {
 //				showBookingHistory(request, response);
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
 				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 				return;
 			}
 
@@ -305,7 +309,7 @@ public class BookingServlet extends HttpServlet {
 //				showBookingHistory(request, response);
 //				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
 				request.getSession().setAttribute("errorMessage", Constants.ERROR_CANNOT_CANCEL_PAST_BOOKINGS);
-				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 
 				return;
 			}
@@ -355,7 +359,7 @@ public class BookingServlet extends HttpServlet {
 
 			request.getSession().setAttribute("successMessage",
 					Constants.SUCCESS_BOOKING_CANCELLED + String.format("%.2f", refundAmount));
-			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 			return;
 
 		} catch (Exception e) {
@@ -364,7 +368,7 @@ public class BookingServlet extends HttpServlet {
 //			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
 //			showBookingHistory(request, response);
 			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 			return;
 		}
 	}
@@ -675,17 +679,17 @@ public class BookingServlet extends HttpServlet {
 			double totalAmount = packageResponseDTO.getPrice() * bookingDTO.getNumberOfTravelers();
 
 ////			 Razorpay Order Create
-//			Order order = PaymentGatewayUtil.createOrder(totalAmount, "INR", "for booking " + createdBookingId);
-//			request.setAttribute("razorpayOrderId", order.get("id"));
-//			request.setAttribute("razorpayKey", "rzp_test_RNQiHnsfjn3up2");
+			Order order = PaymentGatewayUtil.createOrder(totalAmount, "INR", "for booking " + createdBookingId);
+			request.setAttribute("razorpayOrderId", order.get("id"));
+			request.setAttribute("razorpayKey", "rzp_test_RNQiHnsfjn3up2");
 
 			request.setAttribute("bookingId", createdBookingId);
 			request.setAttribute("amount", totalAmount);
 			session.setAttribute("bookingId", createdBookingId);
 			session.setAttribute("amount", totalAmount);
-
+// //========================= for payment gateway ========
 //			request.getRequestDispatcher("template/user/paymentGate.jsp").forward(request, response);
-
+////===================for normal  payment===========
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
 		} else {
@@ -745,6 +749,8 @@ public class BookingServlet extends HttpServlet {
 			bookingResponseDTO.setPackageName(packageResponseDTO.getTitle());
 			bookingResponseDTO.setPackageImage(packageResponseDTO.getImageurl());
 			bookingResponseDTO.setTravelers(travelers);
+			bookingResponseDTO.setDepartureDateAndTime(packageResponseDTO.getDepartureDate());
+		
 			request.setAttribute("confirmedBooking", bookingResponseDTO);
 			request.setAttribute("message", Constants.SUCCESS_PAYMENT_CONFIRMED);
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
@@ -834,6 +840,7 @@ public class BookingServlet extends HttpServlet {
 			totalPages = (totalPages == 0) ? 1 : totalPages;
 
 			for (BookingResponseDTO booking : bookings) {
+
 				PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
 				if (pkg != null) {
 					booking.setPackageName(pkg.getTitle());
@@ -842,6 +849,11 @@ public class BookingServlet extends HttpServlet {
 					booking.setAmount(pkg.getPrice() * booking.getNoOfTravellers());
 					booking.setDepartureDateAndTime(pkg.getDepartureDate());
 					booking.setLastBookingDate(pkg.getLastBookingDate());
+				}
+
+				UserResponseDTO bookedUser = userService.getById(booking.getUserId());
+				if (bookedUser != null) {
+					booking.setUserName(bookedUser.getUserName());
 				}
 			}
 
@@ -995,123 +1007,123 @@ public class BookingServlet extends HttpServlet {
 			}
 		}
 	}
-//
-//	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		try {
-//			String paymentId = request.getParameter("razorpay_payment_id");
-//			String orderId = request.getParameter("razorpay_order_id");
-//			String signature = request.getParameter("razorpay_signature");
-//
-//			System.err.println("Verify Payment -> ");
-//
-//			if (paymentId == null || orderId == null || signature == null) {
-//				System.out.println("Payment verification failed: Missing parameters.");
-//				response.getWriter().print(Constants.ERROR_PAYMENT_PROCESSING_FAILED);
-//				return;
-//			}
-//
-//			Map<String, String> params = Map.of("razorpay_order_id", orderId, "razorpay_payment_id", paymentId,
-//					"razorpay_signature", signature);
-//			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
-//
-//			// Get booking info (from session or request fallback)
-//			HttpSession session = request.getSession(false);
-//			Integer bookingId = session != null ? (Integer) session.getAttribute("bookingId") : null;
-//			Double amount = session != null ? (Double) session.getAttribute("amount") : null;
-//
-//			if (bookingId == null) {
-//				try {
-//					bookingId = Integer.valueOf(request.getParameter("bookingId"));
-//				} catch (Exception ex) {
-//					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
-//					return;
-//				}
-//			}
-//			if (amount == null) {
-//				try {
-//					amount = Double.valueOf(request.getParameter("amount"));
-//				} catch (Exception ex) {
-//					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
-//					return;
-//				}
-//			}
-//
-//			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-//
-//			if (!isValid) {
-//				System.out.println("Payment verification failed!");
-//				response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED);
-//				return;
-//			}
-//
-//			if (booking == null || "CANCELLED".equalsIgnoreCase(booking.getStatus())) {
-//				try {
-//					PaymentGatewayUtil.refundPayment(paymentId, amount);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//
-//				PaymentRequestDTO refundPayment = new PaymentRequestDTO();
-//				refundPayment.setBookingId(bookingId);
-//				refundPayment.setAmount(amount);
-//				refundPayment.setStatus("REFUNDED");
-//				refundPayment.setRazorpayPaymentId(paymentId);
-//				paymentService.addPayment(refundPayment);
-//
-//				System.out.println("Booking already cancelled. Payment refunded.");
-//				response.getWriter().print(Constants.ERROR_BOOKING_ALREADY_CANCELLED);
-//				return;
-//			}
-//
-//			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-//			paymentDTO.setBookingId(bookingId);
-//			paymentDTO.setAmount(amount);
-//			paymentDTO.setStatus("SUCCESSFUL");
-//			paymentDTO.setRazorpayPaymentId(paymentId);
-//			paymentService.addPayment(paymentDTO);
-//
-//			bookingService.updateBookingStatus(bookingId, "CONFIRMED");
-//
-//			System.out.println("Payment Successful & Booking Confirmed!");
-//			response.getWriter().print(Constants.SUCCESS_PAYMENT_CONFIRMED);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			System.out.println("Payment verification failed: " + e.getMessage());
-//			response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED + e.getMessage());
-//		}
-//	}
-//
-//	private void autoCancelBooking(HttpServletRequest request, HttpServletResponse response)
-//			throws IOException, Exception {
-//		HttpSession session = request.getSession();
-//		UserResponseDTO sessionUser = (UserResponseDTO) session.getAttribute("user");
-//
-//		Integer bookingId = (Integer) session.getAttribute("bookingId");
-//		if (bookingId == null) {
-//			response.getWriter().write("No booking to cancel.");
-//			return;
-//		}
-//		System.err.println("AutoCancel Booking -> ");
-//		BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-//		if (booking != null && "PENDING".equalsIgnoreCase(booking.getStatus())
-//				&& booking.getUserId() == sessionUser.getUserId()) {
-//
-//			packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-//			bookingService.updateBookingStatus(bookingId, "CANCELLED");
-//			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
-//			PaymentRequestDTO failedPayment = new PaymentRequestDTO();
-//			failedPayment.setBookingId(bookingId);
-//			failedPayment.setAmount(
-//					booking.getNoOfTravellers() * packageService.getPackageById(booking.getPackageId()).getPrice());
-//			failedPayment.setStatus("FAILED");
-//			paymentService.addPayment(failedPayment);
-//			response.getWriter().write("Booking auto-cancelled successfully.");
-//		} else {
-//			response.getWriter().write("Booking cannot be cancelled.");
-//		}
-//	}
-//
+
+	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		try {
+			String paymentId = request.getParameter("razorpay_payment_id");
+			String orderId = request.getParameter("razorpay_order_id");
+			String signature = request.getParameter("razorpay_signature");
+
+			System.err.println("Verify Payment -> ");
+
+			if (paymentId == null || orderId == null || signature == null) {
+				System.out.println("Payment verification failed: Missing parameters.");
+				response.getWriter().print(Constants.ERROR_PAYMENT_PROCESSING_FAILED);
+				return;
+			}
+
+			Map<String, String> params = Map.of("razorpay_order_id", orderId, "razorpay_payment_id", paymentId,
+					"razorpay_signature", signature);
+			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
+
+			// Get booking info (from session or request fallback)
+			HttpSession session = request.getSession(false);
+			Integer bookingId = session != null ? (Integer) session.getAttribute("bookingId") : null;
+			Double amount = session != null ? (Double) session.getAttribute("amount") : null;
+
+			if (bookingId == null) {
+				try {
+					bookingId = Integer.valueOf(request.getParameter("bookingId"));
+				} catch (Exception ex) {
+					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
+					return;
+				}
+			}
+			if (amount == null) {
+				try {
+					amount = Double.valueOf(request.getParameter("amount"));
+				} catch (Exception ex) {
+					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
+					return;
+				}
+			}
+
+			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+
+			if (!isValid) {
+				System.out.println("Payment verification failed!");
+				response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED);
+				return;
+			}
+
+			if (booking == null || "CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+				try {
+					PaymentGatewayUtil.refundPayment(paymentId, amount);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				PaymentRequestDTO refundPayment = new PaymentRequestDTO();
+				refundPayment.setBookingId(bookingId);
+				refundPayment.setAmount(amount);
+				refundPayment.setStatus("REFUNDED");
+				refundPayment.setRazorpayPaymentId(paymentId);
+				paymentService.addPayment(refundPayment);
+
+				System.out.println("Booking already cancelled. Payment refunded.");
+				response.getWriter().print(Constants.ERROR_BOOKING_ALREADY_CANCELLED);
+				return;
+			}
+
+			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+			paymentDTO.setBookingId(bookingId);
+			paymentDTO.setAmount(amount);
+			paymentDTO.setStatus("SUCCESSFUL");
+			paymentDTO.setRazorpayPaymentId(paymentId);
+			paymentService.addPayment(paymentDTO);
+
+			bookingService.updateBookingStatus(bookingId, "CONFIRMED");
+
+			System.out.println("Payment Successful & Booking Confirmed!");
+			response.getWriter().print(Constants.SUCCESS_PAYMENT_CONFIRMED);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Payment verification failed: " + e.getMessage());
+			response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED + e.getMessage());
+		}
+	}
+
+	private void autoCancelBooking(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, Exception {
+		HttpSession session = request.getSession();
+		UserResponseDTO sessionUser = (UserResponseDTO) session.getAttribute("user");
+
+		Integer bookingId = (Integer) session.getAttribute("bookingId");
+		if (bookingId == null) {
+			response.getWriter().write("No booking to cancel.");
+			return;
+		}
+		System.err.println("AutoCancel Booking -> ");
+		BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+		if (booking != null && "PENDING".equalsIgnoreCase(booking.getStatus())
+				&& booking.getUserId() == sessionUser.getUserId()) {
+
+			packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+			bookingService.updateBookingStatus(bookingId, "CANCELLED");
+			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
+			PaymentRequestDTO failedPayment = new PaymentRequestDTO();
+			failedPayment.setBookingId(bookingId);
+			failedPayment.setAmount(
+					booking.getNoOfTravellers() * packageService.getPackageById(booking.getPackageId()).getPrice());
+			failedPayment.setStatus("FAILED");
+			paymentService.addPayment(failedPayment);
+			response.getWriter().write("Booking auto-cancelled successfully.");
+		} else {
+			response.getWriter().write("Booking cannot be cancelled.");
+		}
+	}
+
 //	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
 //			throws ServletException, IOException {
 //
@@ -1121,14 +1133,14 @@ public class BookingServlet extends HttpServlet {
 //
 //			if (booking == null) {
 //				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
-//				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 //				return;
 //			}
 //
 //			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
 //			if (pkg == null) {
 //				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-//				response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 //				return;
 //			}
 //
@@ -1185,13 +1197,13 @@ public class BookingServlet extends HttpServlet {
 //						Constants.SUCCESS_BOOKING_CANCELLED + " Refund: " + String.format("%.2f", refundAmount));
 //			}
 //
-//			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 //			return;
 //
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-//			response.sendRedirect(request.getContextPath() + "/booking?button=bookingHistroy");
+//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
 //		}
 //
 //	}

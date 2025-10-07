@@ -176,10 +176,14 @@ if (successMessage != null && !successMessage.isEmpty()) {
 							UserResponseDTO sessionUser = (UserResponseDTO) session.getAttribute("user");
 							if (booking.getUserId() == sessionUser.getUserId()) {
 							%>
+							<%
+							if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+							%>
 							<a
 								href="<%=request.getContextPath()%>/booking?button=downloadInvoice&bookingId=<%=booking.getBookingId()%>"
 								class="btn btn-sm btn-success flex-grow-1">Download Invoice</a>
 							<%
+							}
 							}
 							%>
 
@@ -193,8 +197,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 									&& departure != null && departure.isAfter(now)) {
 							%>
 							<button type="button" class="btn btn-sm btn-danger flex-grow-1"
-								onclick="showCancelModal(<%=booking.getBookingId()%>, '<%=booking.getLastBookingDate()%>', <%=booking.getAmount()%>, '<%=booking.getStatus()%>')"
->
+								onclick="showCancelModal(<%=booking.getBookingId()%>, '<%=booking.getLastBookingDate()%>', <%=booking.getAmount()%>, '<%=booking.getStatus()%>')">
 								Cancel Booking</button>
 							<%
 							}

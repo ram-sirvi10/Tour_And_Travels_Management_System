@@ -21,6 +21,15 @@ public class Packages {
 	private int version;
 	private LocalDateTime departureDate;
 	private int totalBookings;
+	private Boolean isDelete;
+
+	public Boolean getIsDelete() {
+		return isDelete;
+	}
+
+	public void setIsDelete(Boolean isDelete) {
+		this.isDelete = isDelete;
+	}
 
 	public int getTotalBookings() {
 		return totalBookings;
@@ -148,6 +157,16 @@ public class Packages {
 
 	public void setUpdatedAt(LocalDate updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	@Override
+	public String toString() {
+		return "Packages [packageId=" + packageId + ", title=" + title + ", agencyId=" + agencyId + ", description="
+				+ description + ", price=" + price + ", location=" + location + ", duration=" + duration + ", isActive="
+				+ isActive + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", totalSeats=" + totalSeats
+				+ ", imageurl=" + imageurl + ", lastBookingDate=" + lastBookingDate + ", version=" + version
+				+ ", departureDate=" + departureDate + ", totalBookings=" + totalBookings + ", isDelete=" + isDelete
+				+ "]";
 	}
 
 }

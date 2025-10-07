@@ -63,7 +63,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			preparedStatement.setString(2, "PENDING");
 			preparedStatement.setString(3, "APPROVED");
 
-			 resultSet = preparedStatement.executeQuery();
+			resultSet = preparedStatement.executeQuery();
 			if (resultSet.next()) {
 				Agency agency = new Agency();
 				agency.setAgencyId(resultSet.getInt("agency_id"));
@@ -105,7 +105,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setInt(1, id);
 //			preparedStatement.setBoolean(2, false);
-			 resultSet = preparedStatement.executeQuery();
+			resultSet = preparedStatement.executeQuery();
 
 			if (resultSet.next()) {
 				agency = new Agency();
@@ -140,20 +140,17 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	public boolean updateAgency(Agency agency) throws Exception {
 		try {
 
-			String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, email=?, phone=?, city=?, state=?, country=?, pincode=?, registration_number=?, password=? , imageurl = ? WHERE agency_id=?";
+			String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, phone=?, city=?, state=?, country=?, pincode=?, imageurl = ? WHERE agency_id=?";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, agency.getAgencyName());
 			preparedStatement.setString(2, agency.getOwnerName());
-			preparedStatement.setString(3, agency.getEmail());
-			preparedStatement.setString(4, agency.getPhone());
-			preparedStatement.setString(5, agency.getCity());
-			preparedStatement.setString(6, agency.getState());
-			preparedStatement.setString(7, agency.getCountry());
-			preparedStatement.setString(8, agency.getPincode());
-			preparedStatement.setString(9, agency.getRegistrationNumber());
-			preparedStatement.setString(10, agency.getPassword());
-			preparedStatement.setObject(11, agency.getImageurl());
-			preparedStatement.setInt(12, agency.getAgencyId());
+			preparedStatement.setString(3, agency.getPhone());
+			preparedStatement.setString(4, agency.getCity());
+			preparedStatement.setString(5, agency.getState());
+			preparedStatement.setString(6, agency.getCountry());
+			preparedStatement.setString(7, agency.getPincode());
+			preparedStatement.setObject(8, agency.getImageurl());
+			preparedStatement.setInt(9, agency.getAgencyId());
 
 			int affectedRows = preparedStatement.executeUpdate();
 			return affectedRows > 0;

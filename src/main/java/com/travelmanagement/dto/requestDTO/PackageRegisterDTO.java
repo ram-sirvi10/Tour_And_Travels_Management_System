@@ -125,4 +125,13 @@ public class PackageRegisterDTO {
 		this.isActive = isActive;
 	}
 
+	@Override
+	public String toString() {
+		return "PackageRegisterDTO [packageId=" + packageId + ", title=" + title + ", agencyId=" + agencyId
+				+ ", description=" + description + ", price=" + price + ", location=" + location + ", duration="
+				+ duration + ", isActive=" + isActive + ", totalSeats=" + totalSeats + ", imageurl=" + imageurl
+				+ ", departureDate=" + departureDate + ", packageSchedule=" + packageSchedule + ", lastBookingDate="
+				+ lastBookingDate + "]";
+	}
+
 }

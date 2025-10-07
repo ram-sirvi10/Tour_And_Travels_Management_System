@@ -474,10 +474,7 @@ public class AuthServlet extends HttpServlet {
 		dto.setConfirmPassword(request.getParameter("confirm_password"));
 		dto.setArea(request.getParameter("area"));
 		Map<String, String> errors = authService.validateRegisterAgencyDto(dto);
-		Map<String, String> locationErrors = authService.validateLocation(dto);
-		errors.putAll(locationErrors);
 
-		System.out.println(locationErrors);
 		try {
 			Part filePart = request.getPart("profileImage");
 			String imageUrl = CloudinaryUtil.uploadImage(filePart);
@@ -513,8 +510,7 @@ public class AuthServlet extends HttpServlet {
 				System.out.println("OTP: " + otp);
 				System.out.println("Email sent: " + sent);
 				request.setAttribute("showOtp", true);
-				request.setAttribute("message",
-						Constants.SUCCESS_OTP_SENT +" OTP -> " + otp);
+				request.setAttribute("message", Constants.SUCCESS_OTP_SENT + " OTP -> " + otp);
 			} else {
 				request.setAttribute("error", Constants.ERROR_OTP_FAILED);
 			}

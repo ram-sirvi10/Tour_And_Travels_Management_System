@@ -160,7 +160,8 @@ public class AuthRoleFilter implements Filter {
 //		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
-		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage", "managePackages", "addSchedule"));
+		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage", "managePackages", "addSchedule",
+				"packageAction", "editPackageForm","updatePackage"));
 		subAdminAccess.put(context + "/booking", List.of("bookingHistroy", "viewTravelers", "viewBookings"));
 		subAdminAccess.put(context + "/package", List.of("viewPackages"));
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));

@@ -3,6 +3,7 @@ package com.travelmanagement.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +22,10 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public int addPackage(Packages pkg) throws Exception {
+	public int addPackage(Packages pkg) {
 		int generatedId = 0;
-		String sql = "INSERT INTO travel_packages (title, agency_id, description, price, location, duration, is_active, total_seats, imageurl, departure_date, last_booking_date, created_at, updated_at, version) "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW(), NOW(), ?)";
+		String sql = "INSERT INTO travel_packages (title, agency_id, description, price, location, duration, is_active, total_seats, imageurl, departure_date, last_booking_date, version,is_delete) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?, ?,?)";
 
 		try {
 			preparedStatement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -40,6 +41,7 @@ public class PackageDAOImpl implements IPackageDAO {
 			preparedStatement.setObject(10, pkg.getDepartureDate());
 			preparedStatement.setObject(11, pkg.getLastBookingDate());
 			preparedStatement.setInt(12, pkg.getVersion());
+			preparedStatement.setBoolean(13, false);
 			int rows = preparedStatement.executeUpdate();
 			if (rows > 0) {
 				resultSet = preparedStatement.getGeneratedKeys();
@@ -48,50 +50,76 @@ public class PackageDAOImpl implements IPackageDAO {
 				}
 			}
 		} catch (Exception e) {
-			throw e;
+			e.printStackTrace();
 		}
 		return generatedId;
 	}
 
 	@Override
-	public boolean updatePackage(Packages pkg) throws Exception {
-		String sql = "UPDATE travel_packages SET title=?, agency_id=?, description=?, price=?, location=?, duration=?, is_active=?, updated_at = NOW() WHERE package_id=?";
+	public boolean updatePackage(Packages pkg) {
+		String sql = "UPDATE travel_packages SET title=?, agency_id=?, description=?, price=?, location=?, duration=?, is_active=?, total_seats=?, imageurl=?, departure_date=?, last_booking_date=? WHERE package_id=?";
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql);
+		try {
+			preparedStatement = connection.prepareStatement(sql);
+			System.err.println(preparedStatement);
+			preparedStatement.setString(1, pkg.getTitle());
+			preparedStatement.setInt(2, pkg.getAgencyId());
+			preparedStatement.setString(3, pkg.getDescription());
+			preparedStatement.setDouble(4, pkg.getPrice());
+			preparedStatement.setString(5, pkg.getLocation());
+			preparedStatement.setInt(6, pkg.getDuration());
+			preparedStatement.setBoolean(7, pkg.isActive());
+			preparedStatement.setInt(8, pkg.getTotalSeats());
+			preparedStatement.setString(9, pkg.getImageurl());
+			preparedStatement.setObject(10, pkg.getDepartureDate());
+			preparedStatement.setObject(11, pkg.getLastBookingDate());
+			preparedStatement.setInt(12, pkg.getPackageId());
 
-		preparedStatement.setString(1, pkg.getTitle());
-		preparedStatement.setInt(2, pkg.getAgencyId());
-		preparedStatement.setString(3, pkg.getDescription());
-		preparedStatement.setDouble(4, pkg.getPrice());
-		preparedStatement.setString(5, pkg.getLocation());
-		preparedStatement.setInt(6, pkg.getDuration());
-		preparedStatement.setBoolean(7, pkg.isActive());
-		preparedStatement.setInt(8, pkg.getPackageId());
+			return preparedStatement.executeUpdate() > 0;
+		} catch (SQLException e) {
 
-		return preparedStatement.executeUpdate() > 0;
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override
-	public boolean deletePackage(int packageId) throws Exception {
-		String sql = "DELETE FROM travel_packages WHERE package_id=?";
+	public boolean deletePackage(int packageId) {
+		String sql = "update travel_packages set is_active=? , is_delete=? WHERE package_id=?";
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql);
-		preparedStatement.setInt(1, packageId);
+		try {
+			preparedStatement = connection.prepareStatement(sql);
 
-		return preparedStatement.executeUpdate() > 0;
+			preparedStatement.setBoolean(1, false);
+			preparedStatement.setBoolean(2, true);
+			preparedStatement.setInt(3, packageId);
+
+			return preparedStatement.executeUpdate() > 0;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override
-	public boolean togglePackageStatus(int packageId) throws Exception {
-		String sql = "UPDATE travel_packages SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END, updated_at = NOW() WHERE package_id=?";
+	public boolean togglePackageStatus(int packageId) {
+		String sql = "UPDATE travel_packages SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END WHERE package_id=?";
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql);
-		preparedStatement.setInt(1, packageId);
+		try {
+			preparedStatement = connection.prepareStatement(sql);
 
-		return preparedStatement.executeUpdate() > 0;
+			preparedStatement.setInt(1, packageId);
+
+			return preparedStatement.executeUpdate() > 0;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override
@@ -132,36 +160,43 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public Packages getPackageById(int packageId) throws Exception {
+	public Packages getPackageById(int packageId) {
 		String sql = "SELECT * FROM travel_packages WHERE package_id = ?";
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql);
-		preparedStatement.setInt(1, packageId);
-		resultSet = preparedStatement.executeQuery();
+		try {
+			preparedStatement = connection.prepareStatement(sql);
 
-		if (resultSet.next()) {
-			Packages pkg = new Packages();
-			pkg.setPackageId(resultSet.getInt("package_id"));
-			pkg.setTitle(resultSet.getString("title"));
-			pkg.setAgencyId(resultSet.getInt("agency_id"));
-			pkg.setDescription(resultSet.getString("description"));
-			pkg.setPrice(resultSet.getDouble("price"));
-			pkg.setLocation(resultSet.getString("location"));
-			pkg.setDuration(resultSet.getInt("duration"));
-			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("total_seats"));
-			pkg.setVersion(resultSet.getInt("version"));
-			if (resultSet.getString("imageurl") != null) {
-				pkg.setImageurl(resultSet.getString("imageurl"));
+			preparedStatement.setInt(1, packageId);
+			resultSet = preparedStatement.executeQuery();
+
+			if (resultSet.next()) {
+				Packages pkg = new Packages();
+				pkg.setPackageId(resultSet.getInt("package_id"));
+				pkg.setTitle(resultSet.getString("title"));
+				pkg.setAgencyId(resultSet.getInt("agency_id"));
+				pkg.setDescription(resultSet.getString("description"));
+				pkg.setPrice(resultSet.getDouble("price"));
+				pkg.setLocation(resultSet.getString("location"));
+				pkg.setDuration(resultSet.getInt("duration"));
+				pkg.setActive(resultSet.getBoolean("is_active"));
+				pkg.setTotalSeats(resultSet.getInt("total_seats"));
+				pkg.setIsDelete(resultSet.getBoolean("is_delete"));
+				pkg.setVersion(resultSet.getInt("version"));
+				if (resultSet.getString("imageurl") != null) {
+					pkg.setImageurl(resultSet.getString("imageurl"));
+				}
+				if (resultSet.getTimestamp("departure_date") != null) {
+					pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
+				}
+				if (resultSet.getTimestamp("last_booking_date") != null) {
+					pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+				}
+				return pkg;
 			}
-			if (resultSet.getTimestamp("departure_date") != null) {
-				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
-			}
-			if (resultSet.getTimestamp("last_booking_date") != null) {
-				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
-			}
-			return pkg;
+		} catch (SQLException e) {
+
+			e.printStackTrace();
 		}
 
 		return null;
@@ -170,7 +205,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	@Override
 	public List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword,
 			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
-			Boolean isAgencyView) throws Exception {
+			Boolean isAgencyView) {
 
 		List<Packages> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM travel_packages WHERE 1=1");
@@ -209,70 +244,75 @@ public class PackageDAOImpl implements IPackageDAO {
 		sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql.toString());
+		try {
+			preparedStatement = connection.prepareStatement(sql.toString());
 
-		int index = 1;
-		if (title != null && !title.isEmpty()) {
-			preparedStatement.setString(index++, "%" + title + "%");
-		}
-		if (agencyId != null) {
-			preparedStatement.setInt(index++, agencyId);
-		}
-		if (location != null && !location.isEmpty()) {
-			preparedStatement.setString(index++, "%" + location + "%");
-		}
-		if (keyword != null && !keyword.isEmpty()) {
-			String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
-			preparedStatement.setString(index++, kw);
-
-			preparedStatement.setString(index++, kw);
-		}
-		if (dateFrom != null && !dateFrom.isEmpty()) {
-			preparedStatement.setString(index++, dateFrom);
-		}
-		if (dateTo != null && !dateTo.isEmpty()) {
-			preparedStatement.setString(index++, dateTo);
-		}
-		if (totalSeats != null) {
-			preparedStatement.setInt(index++, totalSeats);
-		}
-		if (isActive != null) {
-			preparedStatement.setBoolean(index++, isActive);
-		}
-
-		preparedStatement.setInt(index++, limit);
-		preparedStatement.setInt(index++, offset);
-
-		resultSet = preparedStatement.executeQuery();
-		while (resultSet.next()) {
-			Packages pkg = new Packages();
-			pkg.setPackageId(resultSet.getInt("package_id"));
-			pkg.setTitle(resultSet.getString("title"));
-			pkg.setAgencyId(resultSet.getInt("agency_id"));
-			pkg.setDescription(resultSet.getString("description"));
-			pkg.setPrice(resultSet.getDouble("price"));
-			pkg.setLocation(resultSet.getString("location"));
-			pkg.setDuration(resultSet.getInt("duration"));
-			pkg.setActive(resultSet.getBoolean("is_active"));
-			pkg.setTotalSeats(resultSet.getInt("total_seats"));
-			if (resultSet.getString("imageurl") != null) {
-				pkg.setImageurl(resultSet.getString("imageurl"));
+			int index = 1;
+			if (title != null && !title.isEmpty()) {
+				preparedStatement.setString(index++, "%" + title + "%");
 			}
-			if (resultSet.getTimestamp("departure_date") != null) {
-				pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
+			if (agencyId != null) {
+				preparedStatement.setInt(index++, agencyId);
 			}
-			if (resultSet.getTimestamp("last_booking_date") != null) {
-				pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+			if (location != null && !location.isEmpty()) {
+				preparedStatement.setString(index++, "%" + location + "%");
+			}
+			if (keyword != null && !keyword.isEmpty()) {
+				String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+				preparedStatement.setString(index++, kw);
 
+				preparedStatement.setString(index++, kw);
 			}
-			list.add(pkg);
+			if (dateFrom != null && !dateFrom.isEmpty()) {
+				preparedStatement.setString(index++, dateFrom);
+			}
+			if (dateTo != null && !dateTo.isEmpty()) {
+				preparedStatement.setString(index++, dateTo);
+			}
+			if (totalSeats != null) {
+				preparedStatement.setInt(index++, totalSeats);
+			}
+			if (isActive != null) {
+				preparedStatement.setBoolean(index++, isActive);
+			}
+
+			preparedStatement.setInt(index++, limit);
+			preparedStatement.setInt(index++, offset);
+
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				Packages pkg = new Packages();
+				pkg.setPackageId(resultSet.getInt("package_id"));
+				pkg.setTitle(resultSet.getString("title"));
+				pkg.setAgencyId(resultSet.getInt("agency_id"));
+				pkg.setDescription(resultSet.getString("description"));
+				pkg.setPrice(resultSet.getDouble("price"));
+				pkg.setLocation(resultSet.getString("location"));
+				pkg.setDuration(resultSet.getInt("duration"));
+				pkg.setActive(resultSet.getBoolean("is_active"));
+				pkg.setTotalSeats(resultSet.getInt("total_seats"));
+				pkg.setIsDelete(resultSet.getBoolean("is_delete"));
+				if (resultSet.getString("imageurl") != null) {
+					pkg.setImageurl(resultSet.getString("imageurl"));
+				}
+				if (resultSet.getTimestamp("departure_date") != null) {
+					pkg.setDepartureDate(resultSet.getTimestamp("departure_date").toLocalDateTime());
+				}
+				if (resultSet.getTimestamp("last_booking_date") != null) {
+					pkg.setLastBookingDate(resultSet.getTimestamp("last_booking_date").toLocalDateTime());
+
+				}
+				list.add(pkg);
+			}
+		} catch (SQLException e) {
+
+			e.printStackTrace();
 		}
-
 		return list;
 	}
 
 	@Override
-	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
+	public boolean adjustSeats(int packageId, int seatsChange) {
 		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats + ?, updated_at = NOW() "
 				+ "WHERE package_id = ? AND total_seats + ? >= 0";
 
@@ -292,7 +332,7 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception {
+			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) {
 
 		int count = 0;
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS total FROM travel_packages WHERE 1=1");
@@ -329,47 +369,51 @@ public class PackageDAOImpl implements IPackageDAO {
 		}
 
 		connection = DatabaseConfig.getConnection();
-		preparedStatement = connection.prepareStatement(sql.toString());
+		try {
+			preparedStatement = connection.prepareStatement(sql.toString());
 
-		int index = 1;
-		if (title != null && !title.isEmpty()) {
-			preparedStatement.setString(index++, "%" + title + "%");
-		}
-		if (agencyId != null) {
-			preparedStatement.setInt(index++, agencyId);
-		}
-		if (location != null && !location.isEmpty()) {
-			preparedStatement.setString(index++, "%" + location + "%");
-		}
-		if (keyword != null && !keyword.isEmpty()) {
-			String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
-			preparedStatement.setString(index++, kw);
-			preparedStatement.setString(index++, kw);
-			preparedStatement.setString(index++, kw);
-		}
-		if (dateFrom != null && !dateFrom.isEmpty()) {
-			preparedStatement.setString(index++, dateFrom);
-		}
-		if (dateTo != null && !dateTo.isEmpty()) {
-			preparedStatement.setString(index++, dateTo);
-		}
-		if (totalSeats != null) {
-			preparedStatement.setInt(index++, totalSeats);
-		}
-		if (isActive != null) {
-			preparedStatement.setBoolean(index++, isActive);
-		}
+			int index = 1;
+			if (title != null && !title.isEmpty()) {
+				preparedStatement.setString(index++, "%" + title + "%");
+			}
+			if (agencyId != null) {
+				preparedStatement.setInt(index++, agencyId);
+			}
+			if (location != null && !location.isEmpty()) {
+				preparedStatement.setString(index++, "%" + location + "%");
+			}
+			if (keyword != null && !keyword.isEmpty()) {
+				String kw = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+				preparedStatement.setString(index++, kw);
+				preparedStatement.setString(index++, kw);
+				preparedStatement.setString(index++, kw);
+			}
+			if (dateFrom != null && !dateFrom.isEmpty()) {
+				preparedStatement.setString(index++, dateFrom);
+			}
+			if (dateTo != null && !dateTo.isEmpty()) {
+				preparedStatement.setString(index++, dateTo);
+			}
+			if (totalSeats != null) {
+				preparedStatement.setInt(index++, totalSeats);
+			}
+			if (isActive != null) {
+				preparedStatement.setBoolean(index++, isActive);
+			}
 
-		resultSet = preparedStatement.executeQuery();
-		if (resultSet.next()) {
-			count = resultSet.getInt("total");
+			resultSet = preparedStatement.executeQuery();
+			if (resultSet.next()) {
+				count = resultSet.getInt("total");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
 		return count;
 	}
 
 	@Override
-	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception {
+	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) {
 		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats - ?, version = version + 1 "
 				+ "WHERE package_id = ? AND version = ? AND total_seats >= ?";
 		try {

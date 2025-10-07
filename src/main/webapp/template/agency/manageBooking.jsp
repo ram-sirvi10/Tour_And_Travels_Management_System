@@ -58,8 +58,8 @@
 	</div>
 	<div class="col-md-1">
 
-    <a href="booking?button=viewBookings" class="btn btn-secondary w-100">Reset</a>
-</div>
+		<a href="booking?button=viewBookings" class="btn btn-secondary w-100">Reset</a>
+	</div>
 </form>
 
 <table class="table table-hover shadow-sm">
@@ -69,7 +69,6 @@
 			<th>User</th>
 			<th>Package</th>
 			<th>Status</th>
-			<th>No. of Travellers</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -80,8 +79,8 @@
 			for (BookingResponseDTO booking : bookings) {
 		%>
 		<tr>
-			<td><%=booking.getBookingId()%></td>
-			<td>User #<%=booking.getUserId()%></td>
+			<td><%=booking.getUserName() != null ? booking.getUserName() : ("User #" + booking.getUserId())%></td>
+			<td><%=booking.getPackageName() != null ? booking.getPackageName() : ("Package #" + booking.getPackageId())%></td>
 			<td>Package #<%=booking.getPackageId()%></td>
 			<td><span
 				class="badge 
@@ -90,7 +89,7 @@
 				: "CANCELLED".equals(booking.getStatus()) ? "bg-danger" : "bg-secondary"%>">
 					<%=booking.getStatus()%>
 			</span></td>
-			<td><%=booking.getNoOfTravellers()%></td>
+
 			<td><a
 				href="<%=request.getContextPath()%>/booking?button=viewTravelers&bookingId=<%=booking.getBookingId()%>"
 				class="btn btn-sm btn-info">View Travelers</a></td>

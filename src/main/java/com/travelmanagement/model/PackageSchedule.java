@@ -47,4 +47,11 @@ public class PackageSchedule {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	@Override
+	public String toString() {
+		return "PackageSchedule [scheduleId=" + scheduleId + ", packageId=" + packageId + ", dayNumber=" + dayNumber
+				+ ", activity=" + activity + ", description=" + description + "]";
+	}
+	
 }

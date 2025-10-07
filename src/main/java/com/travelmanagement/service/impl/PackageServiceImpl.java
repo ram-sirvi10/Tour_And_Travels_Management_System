@@ -1,7 +1,9 @@
 package com.travelmanagement.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.travelmanagement.dao.IBookingDAO;
 import com.travelmanagement.dao.IPackageDAO;
@@ -60,6 +62,7 @@ public class PackageServiceImpl implements IPackageService {
 		}
 	}
 
+	@Override
 	public List<PackageScheduleResponseDTO> getScheduleByPackage(int packageId) {
 		List<PackageScheduleResponseDTO> packageScheduleResponseDTOs = new ArrayList<PackageScheduleResponseDTO>();
 		try {
@@ -80,10 +83,47 @@ public class PackageServiceImpl implements IPackageService {
 		packageDAO.addPackage(pkg);
 	}
 
-	@Override
-	public boolean updatePackage(Packages pkg) throws Exception {
-		validatePackage(pkg);
-		return packageDAO.updatePackage(pkg);
+	public boolean updatePackage(PackageRegisterDTO dto) throws Exception {
+
+		Packages pkg = Mapper.mapToModel(dto);
+System.out.println("Package details in packageservice update --> "+pkg);
+
+		boolean packageUpdated = packageDAO.updatePackage(pkg);
+		System.out.println("Update Package In  Package service--> " + packageUpdated);
+		if (!packageUpdated)
+			return false;
+
+		List<PackageScheduleRequestDTO> newSchedules = dto.getPackageSchedule();
+		List<PackageSchedule> existingSchedules = scheduleDAO.getScheduleByPackage(dto.getPackageId());
+
+		Map<Integer, PackageSchedule> existingMap = new HashMap<>();
+		for (PackageSchedule ps : existingSchedules) {
+			existingMap.put(ps.getDayNumber(), ps);
+		}
+
+		List<PackageSchedule> toUpdate = new ArrayList<>();
+		List<PackageSchedule> toAdd = new ArrayList<>();
+		List<Integer> toDelete = new ArrayList<>();
+
+		for (PackageScheduleRequestDTO s : newSchedules) {
+			if (existingMap.containsKey(s.getDayNumber())) {
+				PackageSchedule ps = existingMap.get(s.getDayNumber());
+				ps.setActivity(s.getActivity());
+				ps.setDescription(s.getDescription());
+				toUpdate.add(ps);
+				existingMap.remove(s.getDayNumber());
+			} else {
+				PackageSchedule ps = Mapper.mapPackageScheduleRequestDTOToModel(s);
+				ps.setPackageId(dto.getPackageId());
+				toAdd.add(ps);
+			}
+		}
+		toDelete.addAll(existingMap.keySet());
+
+		boolean updatePackageSchedules = scheduleDAO.updatePackageSchedules(dto.getPackageId(), toUpdate, toAdd,
+				toDelete);
+		System.out.println("Update package schedule in package service --> " + updatePackageSchedules);
+		return updatePackageSchedules;
 	}
 
 	// -------------------- Delete Package --------------------

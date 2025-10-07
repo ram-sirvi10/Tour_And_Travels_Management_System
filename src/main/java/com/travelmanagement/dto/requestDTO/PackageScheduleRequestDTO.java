@@ -6,6 +6,15 @@ public class PackageScheduleRequestDTO {
 	private int dayNumber;
 	private String activity;
 	private String description;
+	private int scheduleId;
+
+	public int getScheduleId() {
+		return scheduleId;
+	}
+
+	public void setScheduleId(int scheduleId) {
+		this.scheduleId = scheduleId;
+	}
 
 	public int getPackageId() {
 		return packageId;
@@ -37,6 +46,12 @@ public class PackageScheduleRequestDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@Override
+	public String toString() {
+		return "PackageScheduleRequestDTO [packageId=" + packageId + ", dayNumber=" + dayNumber + ", activity="
+				+ activity + ", description=" + description + "]";
 	}
 
 }

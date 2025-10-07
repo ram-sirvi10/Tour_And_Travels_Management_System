@@ -3,6 +3,8 @@ package com.travelmanagement.util;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
@@ -118,7 +120,7 @@ public class Mapper {
 
 	public static Packages mapToModel(PackageRegisterDTO dto) {
 		Packages pkg = new Packages();
-
+		pkg.setPackageId(dto.getPackageId());
 		pkg.setTitle(dto.getTitle());
 		pkg.setAgencyId(dto.getAgencyId());
 		pkg.setDescription(dto.getDescription());
@@ -148,6 +150,7 @@ public class Mapper {
 		dto.setVersion(pkg.getVersion());
 		dto.setDepartureDate(pkg.getDepartureDate());
 		dto.setLastBookingDate(pkg.getLastBookingDate());
+		dto.setIsDelete(pkg.getIsDelete());
 		return dto;
 	}
 
@@ -194,6 +197,7 @@ public class Mapper {
 		dto.setStatus(payment.getStatus());
 		dto.setPaymentDate(payment.getPaymentDate());
 		dto.setRazorpayPaymentId(payment.getRazorpayPaymentId());
+
 		return dto;
 
 	}
@@ -236,7 +240,41 @@ public class Mapper {
 		packageSchedule.setDayNumber(requestDTO.getDayNumber());
 		packageSchedule.setDescription(requestDTO.getDescription());
 		packageSchedule.setPackageId(requestDTO.getPackageId());
+		packageSchedule.setScheduleId(requestDTO.getScheduleId());
 		return packageSchedule;
 
 	}
+
+	public static PackageResponseDTO convertToResponseDTO(PackageRegisterDTO dto,
+			List<PackageScheduleRequestDTO> schedules) {
+		PackageResponseDTO resp = new PackageResponseDTO();
+		resp.setPackageId(dto.getPackageId());
+		resp.setAgencyId(dto.getAgencyId());
+		resp.setTitle(dto.getTitle());
+		resp.setLocation(dto.getLocation());
+		resp.setPrice(dto.getPrice());
+		resp.setDuration(dto.getDuration());
+		resp.setTotalSeats(dto.getTotalSeats());
+		resp.setDescription(dto.getDescription());
+		resp.setIsActive(dto.getIsActive());
+		resp.setDepartureDate(dto.getDepartureDate());
+		resp.setLastBookingDate(dto.getLastBookingDate());
+
+		List<PackageScheduleResponseDTO> scheduleRespList = new ArrayList<>();
+		if (schedules != null) {
+			for (PackageScheduleRequestDTO s : schedules) {
+				PackageScheduleResponseDTO sr = new PackageScheduleResponseDTO();
+				sr.setPackageId(s.getPackageId());
+				sr.setDayNumber(s.getDayNumber());
+				sr.setActivity(s.getActivity() != null ? s.getActivity() : "");
+				sr.setDescription(s.getDescription() != null ? s.getDescription() : "");
+				sr.setScheduleId(s.getScheduleId());
+				scheduleRespList.add(sr);
+			}
+		}
+		resp.setPackageSchedule(scheduleRespList);
+
+		return resp;
+	}
+
 }

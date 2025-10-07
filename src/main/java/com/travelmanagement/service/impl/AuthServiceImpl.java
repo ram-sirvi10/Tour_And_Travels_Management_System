@@ -35,17 +35,14 @@ public class AuthServiceImpl implements IAuthService {
 			errors.put("title", "Invalid title");
 		}
 
-
 		if (dto.getLocation() == null || dto.getLocation().trim().isEmpty()
 				|| !ValidationUtil.isValidCityOrState(dto.getLocation())) {
 			errors.put("location", "Invalid location");
 		}
 
-	
 		if (dto.getPrice() == null || dto.getPrice() <= 0) {
 			errors.put("price", "Price must be greater than zero");
 		}
-
 
 		if (dto.getDuration() == null || dto.getDuration() <= 0) {
 			errors.put("duration", "Duration must be at least 1 day");
@@ -55,10 +52,8 @@ public class AuthServiceImpl implements IAuthService {
 			errors.put("totalseats", "Total seats must be at least 1");
 		}
 
-	
 		LocalDateTime now = LocalDateTime.now();
 
-	
 		if (dto.getDepartureDate() == null) {
 			errors.put("departureDate", "Departure date is required");
 		} else if (dto.getDepartureDate().isBefore(now)) {
@@ -71,20 +66,18 @@ public class AuthServiceImpl implements IAuthService {
 			errors.put("lastBookingDate", "Last booking date must be in the future");
 		}
 
-	
 		if (dto.getDepartureDate() != null && dto.getLastBookingDate() != null) {
 			if (dto.getLastBookingDate().isAfter(dto.getDepartureDate())) {
 				errors.put("lastBookingDate", "Last booking date cannot be after departure date");
 			}
 		}
 
-	
 		if (dto.getDescription() == null || !ValidationUtil.isValidDescription(dto.getDescription())) {
 			errors.put("description", "Description must have at least 10 words");
 		}
 
 		if (dto.getIsActive() == null) {
-		    errors.put("isActive", "Package status is required");
+			errors.put("isActive", "Package status is required");
 		}
 
 		List<PackageScheduleRequestDTO> scheduleList = dto.getPackageSchedule();
@@ -94,12 +87,10 @@ public class AuthServiceImpl implements IAuthService {
 			for (int i = 0; i < scheduleList.size(); i++) {
 				PackageScheduleRequestDTO day = scheduleList.get(i);
 
-		
 				if (day.getActivity() == null || !ValidationUtil.isValidPackageActivity(day.getActivity())) {
 					errors.put("day" + (i + 1) + "_activity", "Activity for day " + (i + 1) + " is invalid or empty");
 				}
 
-				
 				if (day.getDescription() == null || !ValidationUtil.isValidDescription(day.getDescription())) {
 					errors.put("day" + (i + 1) + "_desc",
 							"Description for day " + (i + 1) + " must have at least 10 words");
@@ -107,7 +98,7 @@ public class AuthServiceImpl implements IAuthService {
 			}
 		}
 
-		return errors; 
+		return errors;
 	}
 
 	@Override
@@ -147,7 +138,8 @@ public class AuthServiceImpl implements IAuthService {
 		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
 			errors.put("password", "Password cannot be empty");
 		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-			errors.put("password", "Invalid password");
+			errors.put("password",
+					"Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
 		}
 
 		if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
@@ -171,9 +163,6 @@ public class AuthServiceImpl implements IAuthService {
 
 		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
 			errors.put("password", "Password cannot be empty");
-		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
-			errors.put("password",
-					"Invalid password (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1 special char)");
 		}
 
 		return errors;
@@ -183,14 +172,12 @@ public class AuthServiceImpl implements IAuthService {
 	public Map<String, String> validateRegisterAgencyDto(AgencyRegisterRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();
 
-		// Agency Name
 		if (dto.getAgencyName() == null || dto.getAgencyName().trim().isEmpty()) {
 			errors.put("agencyName", "Agency name cannot be empty");
 		} else if (!ValidationUtil.isValidName(dto.getAgencyName())) {
 			errors.put("agencyName", "Invalid agency name");
 		}
 
-		// Owner Name
 		if (dto.getOwnerName() == null || dto.getOwnerName().trim().isEmpty()) {
 			errors.put("ownerName", "Owner name cannot be empty");
 		} else if (!ValidationUtil.isValidName(dto.getOwnerName())) {
@@ -199,7 +186,6 @@ public class AuthServiceImpl implements IAuthService {
 
 		IAgencyDAO agencyDAO = new AgencyDAOImpl();
 
-		// Email
 		if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
 			errors.put("email", "Email cannot be empty");
 		} else if (!ValidationUtil.isValidEmail(dto.getEmail())) {
@@ -227,42 +213,36 @@ public class AuthServiceImpl implements IAuthService {
 			}
 		}
 
-		// Phone
 		if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
 			errors.put("phone", "Phone number cannot be empty");
 		} else if (!ValidationUtil.isValidMob(dto.getPhone())) {
 			errors.put("phone", "Invalid phone number");
 		}
 
-		// City
 		if (dto.getCity() == null || dto.getCity().trim().isEmpty()) {
 			errors.put("city", "City cannot be empty");
 		} else if (!ValidationUtil.isValidCityOrState(dto.getCity())) {
 			errors.put("city", "Invalid city");
 		}
 
-		// State
 		if (dto.getState() == null || dto.getState().trim().isEmpty()) {
 			errors.put("state", "State cannot be empty");
 		} else if (!ValidationUtil.isValidCityOrState(dto.getState())) {
 			errors.put("state", "Invalid state");
 		}
 
-		// Country
 		if (dto.getCountry() == null || dto.getCountry().trim().isEmpty()) {
 			errors.put("country", "Country cannot be empty");
 		} else if (!ValidationUtil.isValidCityOrState(dto.getCountry())) {
 			errors.put("country", "Invalid country");
 		}
 
-		// Pincode
 		if (dto.getPincode() == null || dto.getPincode().trim().isEmpty()) {
 			errors.put("pincode", "Pincode cannot be empty");
 		} else if (!ValidationUtil.isValidPincode(dto.getPincode())) {
 			errors.put("pincode", "Invalid pincode");
 		}
 
-		// Registration Number
 		if (dto.getRegistrationNumber() == null || dto.getRegistrationNumber().trim().isEmpty()) {
 			errors.put("registrationNumber", "Registration number cannot be empty");
 		} else if (!ValidationUtil.isValidRegistrationNumber(dto.getRegistrationNumber())) {
@@ -288,22 +268,22 @@ public class AuthServiceImpl implements IAuthService {
 			}
 		}
 
-		// Password
 		if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
 			errors.put("password", "Password cannot be empty");
 		} else if (!ValidationUtil.isValidPassword(dto.getPassword())) {
 			errors.put("password", "Password must contain min 6 chars, 1 upper, 1 lower, 1 digit, 1 special char");
 		}
 
-		// Confirm Password
 		if (dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
 			errors.put("confirmPassword", "Confirm password cannot be empty");
 		} else if (!dto.getPassword().equals(dto.getConfirmPassword())) {
 			errors.put("confirmPassword", "Passwords do not match");
 		}
-
+		errors.putAll(validateLocation(dto));
 		return errors;
 	}
+
+	
 
 	public Map<String, String> validateLocation(AgencyRegisterRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();

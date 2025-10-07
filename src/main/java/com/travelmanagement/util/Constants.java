@@ -111,7 +111,7 @@ public class Constants {
 	public static final String ERROR_BOOKING_FAILED = "Booking failed. Please try again.";
 	public static final String SUCCESS_TRAVELER_CANCELLED = "Traveler cancelled successfully! Refund: ";
 	public static final String SUCCESS_BOOKING_CANCELLED = "Your booking is canceled! Refund: ";
-	public static final String SUCCESS_PAYMENT_CONFIRMED = "Payment successful! Booking Confirmed";
+	public static final String SUCCESS_PAYMENT_CONFIRMED = "Payment Successful ! Booking Confirmed";
 	public static final String SUCCESS_PAYMENT_REJECTED = "Payment rejected. Booking cancelled.";
 	public static final String SUCCESS_AUTO_CANCELLED = "Booking auto-cancelled successfully.";
 	public static final String SUCCESS_BOOKING_CONFIRMED = "Payment Successful & Booking Confirmed!";

@@ -56,20 +56,59 @@ public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 	}
 
 	@Override
-	public boolean updateSchedule(PackageSchedule schedule) throws Exception {
-		String sql = "UPDATE package_schedule SET day_number=?, activity=?, description=? WHERE schedule_id=?";
-		try {
-			Connection con = DatabaseConfig.getConnection();
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setInt(1, schedule.getDayNumber());
-			ps.setString(2, schedule.getActivity());
-			ps.setString(3, schedule.getDescription());
-			ps.setInt(4, schedule.getScheduleId());
-			return ps.executeUpdate() > 0;
-		} catch (Exception e) {
+	public boolean updatePackageSchedules(Integer packageId, List<PackageSchedule> updates, List<PackageSchedule> adds,
+			List<Integer> deletes) throws Exception {
 
+		boolean success = false;
+		try {
+			connection.setAutoCommit(false);
+
+			if (!updates.isEmpty()) {
+				String updateSql = "UPDATE package_schedule SET activity=?, description=? WHERE package_id=? AND day_number=?";
+				preparedStatement = connection.prepareStatement(updateSql);
+				for (PackageSchedule s : updates) {
+					preparedStatement.setString(1, s.getActivity());
+					preparedStatement.setString(2, s.getDescription());
+					preparedStatement.setInt(3, s.getPackageId());
+					preparedStatement.setInt(4, s.getDayNumber());
+					preparedStatement.addBatch();
+				}
+				preparedStatement.executeBatch();
+			}
+
+			if (!adds.isEmpty()) {
+				String insertSql = "INSERT INTO package_schedule(package_id, day_number, activity, description) VALUES (?, ?, ?, ?)";
+				preparedStatement = connection.prepareStatement(insertSql);
+				for (PackageSchedule s : adds) {
+					preparedStatement.setInt(1, s.getPackageId());
+					preparedStatement.setInt(2, s.getDayNumber());
+					preparedStatement.setString(3, s.getActivity());
+					preparedStatement.setString(4, s.getDescription());
+					preparedStatement.addBatch();
+				}
+				preparedStatement.executeBatch();
+			}
+
+			if (!deletes.isEmpty()) {
+				String deleteSql = "DELETE FROM package_schedule WHERE package_id=? AND day_number=?";
+				preparedStatement = connection.prepareStatement(deleteSql);
+				for (Integer day : deletes) {
+					preparedStatement.setInt(1, packageId);
+					preparedStatement.setInt(2, day);
+					preparedStatement.addBatch();
+				}
+				preparedStatement.executeBatch();
+			}
+
+			connection.commit();
+			success = true;
+		} catch (Exception e) {
+			connection.rollback();
+			throw e;
+		} finally {
+			connection.setAutoCommit(true);
 		}
-		return false;
+		return success;
 	}
 
 	@Override
@@ -109,4 +148,6 @@ public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 		}
 		return schedules;
 	}
+
+
 }

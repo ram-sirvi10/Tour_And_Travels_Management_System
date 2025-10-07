@@ -119,7 +119,7 @@ window.onload = function() {
                     icon: success ? 'success' : 'error',
                     confirmButtonText: 'OK'
                 }).then(() => {
-                    window.location.href='<%=request.getContextPath()%>/booking?button=bookingHistroy';
+                    window.location.href='<%=request.getContextPath()%>/booking?button=viewBookings';
                 });
             });
         },

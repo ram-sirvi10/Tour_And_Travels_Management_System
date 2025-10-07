@@ -13,22 +13,31 @@ public class PackageResponseDTO {
 				+ ", lastBookingDate=" + lastBookingDate + ", totalBookings=" + totalBookings + "]";
 	}
 
-	private int packageId;
+	private Integer packageId;
 	private String title;
-	private int agencyId;
+	private Integer agencyId;
 	private String description;
-	private double price;
+	private Double price;
 	private String location;
-	private int duration;
-	private boolean isActive;
+	private Integer duration;
+	private Boolean isActive;
 	private String imageurl;
-	private int totalSeats;
+	private Integer totalSeats;
 	private List<PackageScheduleResponseDTO> packageSchedule;
-	private int version;
+	private Integer version;
+	private Boolean isDelete;
 
 	private LocalDateTime departureDate;
 
 	private LocalDateTime lastBookingDate;
+
+	public Boolean getIsDelete() {
+		return isDelete;
+	}
+
+	public void setIsDelete(Boolean isDelete) {
+		this.isDelete = isDelete;
+	}
 
 	public List<PackageScheduleResponseDTO> getPackageSchedule() {
 		return packageSchedule;
@@ -38,7 +47,7 @@ public class PackageResponseDTO {
 		this.packageSchedule = packageSchedule;
 	}
 
-	public void setActive(boolean isActive) {
+	public void setActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
 
@@ -58,19 +67,19 @@ public class PackageResponseDTO {
 		this.departureDate = departureDate;
 	}
 
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(Integer version) {
 		this.version = version;
 	}
 
-	public int getTotalSeats() {
+	public Integer getTotalSeats() {
 		return totalSeats;
 	}
 
-	public void setTotalSeats(int totalSeats) {
+	public void setTotalSeats(Integer totalSeats) {
 		this.totalSeats = totalSeats;
 	}
 
@@ -82,11 +91,11 @@ public class PackageResponseDTO {
 		this.imageurl = imageurl;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 
@@ -98,11 +107,11 @@ public class PackageResponseDTO {
 		this.title = title;
 	}
 
-	public int getAgencyId() {
+	public Integer getAgencyId() {
 		return agencyId;
 	}
 
-	public void setAgencyId(int agencyId) {
+	public void setAgencyId(Integer agencyId) {
 		this.agencyId = agencyId;
 	}
 
@@ -114,11 +123,11 @@ public class PackageResponseDTO {
 		this.description = description;
 	}
 
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 
@@ -130,11 +139,11 @@ public class PackageResponseDTO {
 		this.location = location;
 	}
 
-	public int getDuration() {
+	public Integer getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public void setDuration(Integer duration) {
 		this.duration = duration;
 	}
 
@@ -142,28 +151,18 @@ public class PackageResponseDTO {
 		return isActive;
 	}
 
-	public void setIsActive(boolean isActive) {
+	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
 
-	public void setPackageId(Package[] packages) {
-		// TODO Auto-generated method stub
+	private Integer totalBookings;
 
-	}
-
-	private int totalBookings;
-
-	public int getTotalBookings() {
+	public Integer getTotalBookings() {
 		return totalBookings;
 	}
 
-	public void setTotalBookings(int totalBookings) {
+	public void setTotalBookings(Integer totalBookings) {
 		this.totalBookings = totalBookings;
-	}
-
-	public void setTotalRevenue(double totalRevenue) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

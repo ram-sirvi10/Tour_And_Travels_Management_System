@@ -18,19 +18,29 @@ public class BookingResponseDTO {
 	private LocalDateTime created_at;
 	private LocalDateTime departureDateAndTime;
 	private LocalDateTime lastBookingDate;
+	private String userName;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
 	private List<TravelerResponseDTO> travelers;
 
-    public List<TravelerResponseDTO> getTravelers() {
-        return travelers;
-    }
+	public List<TravelerResponseDTO> getTravelers() {
+		return travelers;
+	}
 
-    public void setTravelers(List<TravelerResponseDTO> travelers) {
-        this.travelers = travelers;
-    }
+	public void setTravelers(List<TravelerResponseDTO> travelers) {
+		this.travelers = travelers;
+	}
+
 	public LocalDateTime getLastBookingDate() {
 		return lastBookingDate;
-		}
+	}
 
 	public void setLastBookingDate(LocalDateTime lastBookingDate) {
 		this.lastBookingDate = lastBookingDate;

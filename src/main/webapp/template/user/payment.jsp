@@ -54,8 +54,12 @@
 			<strong>Departure:</strong>
 			<%= confirmedBooking.getDepartureDateAndTime() %></p>
 		<p>
+			<strong>Booking Date:</strong>
+			<%= confirmedBooking.getBookingDate()%></p>
+
+		<p>
 			<strong>No of Travelers:</strong>
-			<%= confirmedBooking.getNoOfTravellers() %></p>
+			<%= confirmedBooking.getNoOfTravellers()%></p>
 		<p>
 			<strong>Total Amount:</strong> ₹
 			<%= confirmedBooking.getAmount() %></p>

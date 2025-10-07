@@ -10,15 +10,68 @@
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
 <%@ page import="com.travelmanagement.dto.responseDTO.AgencyResponseDTO"%>
+
+
+
+<%
+String errorMessage = (String) session.getAttribute("errorMessage");
+session.removeAttribute("errorMessage");
+if (errorMessage == null) {
+	errorMessage = (String) request.getAttribute("errorMessage");
+}
+if (errorMessage != null && !errorMessage.isEmpty()) {
+%>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div class="toast show align-items-center text-bg-danger border-0"
+		role="alert" aria-live="assertive" aria-atomic="true"
+		data-bs-delay="3000" data-bs-autohide="true">
+		<div class="d-flex">
+			<div class="toast-body"><%=errorMessage%></div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+<%
+}
+%>
+<%
+String successMessage = (String) session.getAttribute("successMessage");
+session.removeAttribute("successMessage");
+if (successMessage == null) {
+	successMessage = (String) request.getAttribute("successMessage");
+}
+%>
+
+
+<%
+if (successMessage != null && !successMessage.isEmpty()) {
+%>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div class="toast show align-items-center text-bg-success border-0"
+		role="alert" aria-live="assertive" aria-atomic="true"
+		data-bs-delay="3000" data-bs-autohide="true">
+		<div class="d-flex">
+			<div class="toast-body">
+				<%=successMessage%>
+			</div>
+			<button type="button" class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	</div>
+</div>
+<%
+}
+%>
+
+
 <%
 int agencyId = ((AgencyResponseDTO) session.getAttribute("agency")).getAgencyId();
 List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
 
 String keyword = request.getAttribute("keyword") != null ? (String) request.getAttribute("keyword") : "";
 String title = request.getAttribute("title") != null ? (String) request.getAttribute("title") : "";
-String location = request.getAttribute("location") != null ? (String) request.getAttribute("location") : "";
-String dateFrom = request.getAttribute("dateFrom") != null ? (String) request.getAttribute("dateFrom") : "";
-String dateTo = request.getAttribute("dateTo") != null ? (String) request.getAttribute("dateTo") : "";
+
 
 int currentPage = request.getAttribute("currentPage") != null ? (int) request.getAttribute("currentPage") : 1;
 int totalPages = request.getAttribute("totalPages") != null ? (int) request.getAttribute("totalPages") : 1;
@@ -31,8 +84,7 @@ int endPage = Math.min(startPage + windowSize - 1, totalPages);
 String buttonParam = "viewPackages";
 
 String queryParams = "keyword=" + (keyword != null ? keyword : "") + "&title=" + (title != null ? title : "")
-		+ "&location=" + (location != null ? location : "") + "&dateFrom=" + (dateFrom != null ? dateFrom : "")
-		+ "&dateTo=" + (dateTo != null ? dateTo : "") + "&pageSize=" + pageSize + "&active="
+		+ "&pageSize=" + pageSize + "&active="
 		+ (request.getParameter("active") != null ? request.getParameter("active") : "");
 %>
 
@@ -79,11 +131,12 @@ if (request.getAttribute("error") != null) {
 
 		<div class="col-md-2 d-flex align-items-end">
 			<button type="submit" class="btn btn-primary w-100">Apply</button>
-			
+
 		</div>
-			<div class="col-md-2  d-flex align-items-end">
-		<a href="agency?button=<%=buttonParam%>"
-			class="btn btn-secondary w-100">Reset</a></div>
+		<div class="col-md-2  d-flex align-items-end">
+			<a href="agency?button=<%=buttonParam%>"
+				class="btn btn-secondary w-100">Reset</a>
+		</div>
 		<div class="col-md-2 d-flex align-items-end">
 			<label for="pageSize">Records per page: </label> <select
 				name="pageSize" id="pageSize" onchange="this.form.submit()">
@@ -110,80 +163,128 @@ if (request.getAttribute("error") != null) {
 	</thead>
 	<tbody>
 		<%
-		for (PackageResponseDTO p : packages) {
+		for (PackageResponseDTO pkg : packages) {
 		%>
 		<tr>
-			<td><%=p.getPackageId()%></td>
-			<td><%=p.getTitle()%></td>
-			<td><%=p.getLocation()%></td>
-			<td>₹<%=p.getPrice()%></td>
+			<td><%=pkg.getPackageId()%></td>
+			<td><%=pkg.getTitle()%></td>
+			<td><%=pkg.getLocation()%></td>
+			<td>₹<%=pkg.getPrice()%></td>
+
 			<td>
+				<%-- ✅ Toggle Active/Inactive --%>
 				<form action="agency" method="post" style="display: inline;">
-					<input type="hidden" name="action" value="toggleStatus"> <input
-						type="hidden" name="packageId" value="<%=p.getPackageId()%>">
+					<input type="hidden" name="button" value="packageAction"> <input
+						type="hidden" name="actionType" value="toggle"> <input
+						type="hidden" name="packageId" value="<%=pkg.getPackageId()%>">
+
+					<%-- Preserve filters + pagination --%>
+					<input type="hidden" name="keyword"
+						value="<%=request.getParameter("keyword") != null ? request.getParameter("keyword") : ""%>">
+					<%-- <input type="hidden" name="location"
+						value="<%=request.getParameter("location") != null ? request.getParameter("location") : ""%>">
+					<input type="hidden" name="dateFrom"
+						value="<%=request.getParameter("dateFrom") != null ? request.getParameter("dateFrom") : ""%>">
+					<input type="hidden" name="dateTo"
+						value="<%=request.getParameter("dateTo") != null ? request.getParameter("dateTo") : ""%>"> --%>
+					<input type="hidden" name="page"
+						value="<%=request.getParameter("page") != null ? request.getParameter("page") : "1"%>">
+					<input type="hidden" name="pageSize"
+						value="<%=request.getParameter("pageSize") != null ? request.getParameter("pageSize") : "10"%>">
+					<input type="hidden" name="active"
+						value="<%=request.getParameter("active") != null ? request.getParameter("active") : ""%>">
+
 					<div class="form-check form-switch">
-						<input class="form-check-input" type="checkbox" name="isActive"
-							onchange="this.form.submit();"
-							<%=p.getIsActive() ? "checked" : ""%>>
+						<input class="form-check-input" type="checkbox"
+							id="switch<%=pkg.getPackageId()%>"
+							<%=pkg.getIsActive() ? "checked" : ""%>
+							onchange="if(confirm('Are you sure you want to <%=pkg.getIsActive() ? "deactivate" : "activate"%> this package?')) { this.form.submit(); } else { this.checked = !this.checked; }">
+						<label
+							class="form-check-label fw-bold <%=pkg.getIsActive() ? "text-success" : "text-danger"%>"
+							for="switch<%=pkg.getPackageId()%>"> <%=pkg.getIsActive() ? "Active" : "Inactive"%>
+						</label>
 					</div>
 				</form>
+
+
+
 			</td>
 			<td>
 				<!-- Details Button -->
 				<button type="button" class="btn btn-sm btn-secondary"
 					data-bs-toggle="modal"
-					data-bs-target="#detailsModal<%=p.getPackageId()%>">
+					data-bs-target="#detailsModal<%=pkg.getPackageId()%>">
 					Details</button> <!-- Edit Button --> <a
-				href="agency?action=editPackage&id=<%=p.getPackageId()%>"
+				href="agency?button=editPackageForm&id=<%=pkg.getPackageId()%>"
 				class="btn btn-sm btn-info">Edit</a> <!-- Delete Button --> <a
-				href="<%=request.getContextPath()%>/agency?button=viewBookings&packageId=<%=p.getPackageId()%>"
+				href="<%=request.getContextPath()%>/agency?button=viewBookings&packageId=<%=pkg.getPackageId()%>"
 				class="btn btn-sm btn-primary">View Bookings</a>
 
 				<form action="agency" method="post" style="display: inline;">
-					<input type="hidden" name="action" value="deletePackage"> <input
-						type="hidden" name="packageId" value="<%=p.getPackageId()%>">
+					<input type="hidden" name="button" value="packageAction"> <input
+						type="hidden" name="actionType" value="delete"> <input
+						type="hidden" name="packageId" value="<%=pkg.getPackageId()%>">
+
+					<!-- Preserve filters -->
+					<input type="hidden" name="keyword"
+						value="<%=request.getParameter("keyword") != null ? request.getParameter("keyword") : ""%>">
+					<%-- <input type="hidden" name="location"
+						value="<%=request.getParameter("location") != null ? request.getParameter("location") : ""%>">
+					<input type="hidden" name="dateFrom"
+						value="<%=request.getParameter("dateFrom") != null ? request.getParameter("dateFrom") : ""%>">
+					<input type="hidden" name="dateTo"
+						value="<%=request.getParameter("dateTo") != null ? request.getParameter("dateTo") : ""%>"> --%>
+					<input type="hidden" name="page"
+						value="<%=request.getParameter("page") != null ? request.getParameter("page") : "1"%>">
+					<input type="hidden" name="pageSize"
+						value="<%=request.getParameter("pageSize") != null ? request.getParameter("pageSize") : "10"%>">
+					<input type="hidden" name="active"
+						value="<%=request.getParameter("active") != null ? request.getParameter("active") : ""%>">
+
 					<button type="submit" class="btn btn-sm btn-danger"
-						onclick="return confirm('Are you sure you want to delete this package?');">Delete</button>
+						onclick="return confirm('Are you sure you want to delete this package?');">
+						Delete</button>
 				</form>
+
 			</td>
 		</tr>
 
 		<!-- Details Modal -->
-		<div class="modal fade" id="detailsModal<%=p.getPackageId()%>"
+		<div class="modal fade" id="detailsModal<%=pkg.getPackageId()%>"
 			tabindex="-1"
-			aria-labelledby="detailsModalLabel<%=p.getPackageId()%>"
+			aria-labelledby="detailsModalLabel<%=pkg.getPackageId()%>"
 			aria-hidden="true">
 			<div class="modal-dialog modal-lg modal-dialog-scrollable">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title"
-							id="detailsModalLabel<%=p.getPackageId()%>">
+							id="detailsModalLabel<%=pkg.getPackageId()%>">
 							Package Details:
-							<%=p.getTitle()%></h5>
+							<%=pkg.getTitle()%></h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						<p>
 							<strong>Departure Date:</strong>
-							<%=p.getDepartureDate()%></p>
+							<%=pkg.getDepartureDate()%></p>
 						<p>
 							<strong>Last Booking Date:</strong>
-							<%=p.getLastBookingDate()%></p>
+							<%=pkg.getLastBookingDate()%></p>
 						<p>
 							<strong>Total Seats:</strong>
-							<%=p.getTotalSeats()%></p>
+							<%=pkg.getTotalSeats()%></p>
 						<p>
 							<strong>Description:</strong>
-							<%=p.getDescription()%></p>
+							<%=pkg.getDescription()%></p>
 						<hr>
 						<h6>Day-wise Schedule:</h6>
 						<ul>
 							<%
-							if (p.getPackageSchedule() != null && !p.getPackageSchedule().isEmpty()) {
+							if (pkg.getPackageSchedule() != null && !pkg.getPackageSchedule().isEmpty()) {
 							%>
 							<%
-							for (PackageScheduleResponseDTO schedule : p.getPackageSchedule()) {
+							for (PackageScheduleResponseDTO schedule : pkg.getPackageSchedule()) {
 							%>
 							<li><strong>Day <%=schedule.getDayNumber()%>:
 							</strong> <%=schedule.getActivity()%> - <%=schedule.getDescription()%></li>
@@ -201,7 +302,7 @@ if (request.getAttribute("error") != null) {
 
 					</div>
 					<div class="modal-footer">
-						<a href="agency?action=editPackage&id=<%=p.getPackageId()%>"
+						<a href="agency?action=editPackageForm&id=<%=pkg.getPackageId()%>"
 							class="btn btn-primary">Edit Package</a>
 						<button type="button" class="btn btn-secondary"
 							data-bs-dismiss="modal">Close</button>
