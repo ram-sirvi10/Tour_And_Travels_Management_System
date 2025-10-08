@@ -3,7 +3,7 @@ package com.travelmanagement.model;
 import java.time.LocalDate;
 
 public class Agency {
-	private int agencyId;
+	private Integer agencyId;
 	private String agencyName;
 	private String ownerName;
 	private String email;
@@ -15,12 +15,20 @@ public class Agency {
 	private String registrationNumber;
 	private String password;
 	private String status; 
-	private boolean isActive;
-	private boolean isDelete;
+	private Boolean isActive;
+	private Boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 private String imageurl;
-	
+	public String area;
+
+public String getArea() {
+		return area;
+	}
+
+	public void setArea(String area) {
+		this.area = area;
+	}
 
 public String getImageurl() {
 	return imageurl;
@@ -31,12 +39,12 @@ public void setImageurl(String imageurl) {
 }
 
 
-	public int getAgencyId() {
+	public Integer getAgencyId() {
 		return agencyId;
 	}
 
 
-	public void setAgencyId(int agencyId) {
+	public void setAgencyId(Integer agencyId) {
 		this.agencyId = agencyId;
 	}
 
@@ -128,19 +136,19 @@ public void setImageurl(String imageurl) {
 		this.status = status;
 	}
 
-	public boolean isActive() {
+	public Boolean isActive() {
 		return isActive;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(Boolean active) {
 		isActive = active;
 	}
 
-	public boolean isDelete() {
+	public Boolean isDelete() {
 		return isDelete;
 	}
 
-	public void setDelete(boolean delete) {
+	public void setDelete(Boolean delete) {
 		isDelete = delete;
 	}
 
@@ -168,4 +176,6 @@ public void setImageurl(String imageurl) {
 				+ ", status=" + status + ", isActive=" + isActive + ", isDelete=" + isDelete + ", createdAt="
 				+ createdAt + ", updatedAt=" + updatedAt + "]";
 	}
+
+	
 }

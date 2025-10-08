@@ -3,12 +3,12 @@ package com.travelmanagement.model;
 import java.time.LocalDateTime;
 
 public class Booking {
-	private int bookingId;
-	private int userId;
-	private int packageId;
+	private Integer bookingId;
+	private Integer userId;
+	private Integer packageId;
 	private LocalDateTime bookingDate;
 	private String status;
-	private int noOfTravellers;
+	private Integer noOfTravellers;
 	private LocalDateTime created_at;
 
 	public LocalDateTime getCreated_at() {
@@ -19,35 +19,35 @@ public class Booking {
 		this.created_at = created_at;
 	}
 
-	public int getNoOfTravellers() {
+	public Integer getNoOfTravellers() {
 		return noOfTravellers;
 	}
 
-	public void setNoOfTravellers(int noOfTravellers) {
+	public void setNoOfTravellers(Integer noOfTravellers) {
 		this.noOfTravellers = noOfTravellers;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 

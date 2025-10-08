@@ -168,7 +168,12 @@ public class AdminServlet extends HttpServlet {
 				e.printStackTrace();
 				errors.put("profileImage", e.getMessage());
 			}
-			dto.setImageurl(imageUrl);
+			if (imageUrl != null) {
+
+				dto.setImageurl(imageUrl);
+			} else {
+				dto.setImageurl(currentUser.getImageurl());
+			}
 			if (!errors.isEmpty()) {
 				request.setAttribute("actionType", Constants.ACTION_UPDATE_PROFILE);
 				request.setAttribute("errors", errors);
@@ -552,7 +557,9 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("totalPages", totalPages);
 			request.setAttribute("pageSize", pageSize);
 			request.setAttribute("keyword", keyword);
-			List<AgencyResponseDTO> deletedAgencies = agencyService.getDeletedAgencies(keyword, pageSize, offset);
+			List<AgencyResponseDTO> deletedAgencies = agencyService.filterAgencies(null, null, null, null, keyword,
+					true, pageSize, offset);
+//			List<AgencyResponseDTO> deletedAgencies = agencyService.getDeletedAgencies(keyword, pageSize, offset);
 			request.setAttribute("agenciesList", deletedAgencies);
 			request.setAttribute("listType", "Deleted Agencies");
 			request.getRequestDispatcher("template/admin/manageAgencies.jsp").forward(request, response);

@@ -55,7 +55,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	}
 
 	@Override
-	public Traveler getTravelerById(int travelerId) throws Exception {
+	public Traveler getTravelerById(Integer travelerId) throws Exception {
 		try {
 			preparedStatement = connection.prepareStatement("SELECT * FROM travelers WHERE traveler_id = ?");
 			preparedStatement.setInt(1, travelerId);
@@ -98,7 +98,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	}
 
 	@Override
-	public boolean deleteTraveler(int travelerId) throws Exception {
+	public boolean deleteTraveler(Integer travelerId) throws Exception {
 		try {
 			preparedStatement = connection.prepareStatement("DELETE FROM travelers WHERE traveler_id = ?");
 			preparedStatement.setInt(1, travelerId);
@@ -210,7 +210,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 	}
 
 	@Override
-	public int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
+	public long getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
 			Integer agencyId, String bookingStatus, String keyword) throws Exception {
 		int count = 0;
 		try {
@@ -268,7 +268,8 @@ public class TravelerDAOImpl implements ITravelerDAO {
 		return count;
 	}
 
-	public boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception {
+	@Override
+	public boolean isTravelerAlreadyBooked(String email, Integer packageId) throws Exception {
 		boolean exists = false;
 		try {
 			String sql = "SELECT COUNT(*) AS total " + "FROM travelers t "
@@ -288,5 +289,7 @@ public class TravelerDAOImpl implements ITravelerDAO {
 		}
 		return exists;
 	}
+
+	
 
 }

@@ -4,21 +4,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class BookingRequestDTO {
-	private int userId;
-	private int packageId;
+	private Integer userId;
+	private Integer packageId;
 	private LocalDateTime bookingDate;
-	private int numberOfTravelers;
+	private Integer numberOfTravelers;
 	private List<TravelerRequestDTO> travelers;
 	private String status;
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
@@ -30,7 +30,7 @@ public class BookingRequestDTO {
 		this.status = status;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 
@@ -46,7 +46,7 @@ public class BookingRequestDTO {
 		return numberOfTravelers;
 	}
 
-	public void setNumberOfTravelers(int numberOfTravelers) {
+	public void setNumberOfTravelers(Integer numberOfTravelers) {
 		this.numberOfTravelers = numberOfTravelers;
 	}
 

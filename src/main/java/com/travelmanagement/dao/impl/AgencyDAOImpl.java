@@ -24,8 +24,8 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	@Override
 	public boolean createAgency(Agency agency) throws Exception {
 		try {
-			String sql = "INSERT INTO travelAgency (agency_name, owner_name, email, phone, city, state, country, pincode, registration_number, password, is_active, is_delete,imageurl) "
-					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)";
+			String sql = "INSERT INTO travelAgency (agency_name, owner_name, email, phone, city, state, country, pincode, registration_number, password, is_active, is_delete,imageurl,area) "
+					+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?,?)";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, agency.getAgencyName());
 			preparedStatement.setString(2, agency.getOwnerName());
@@ -40,6 +40,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			preparedStatement.setBoolean(11, false);
 			preparedStatement.setBoolean(12, true);
 			preparedStatement.setObject(13, agency.getImageurl());
+			preparedStatement.setString(14, agency.getArea());
 			int affectedRows = preparedStatement.executeUpdate();
 			return affectedRows > 0;
 		} catch (Exception e) {
@@ -80,6 +81,8 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				agency.setActive(resultSet.getBoolean("is_active"));
 				agency.setDelete(resultSet.getBoolean("is_delete"));
 				agency.setStatus(resultSet.getString("status"));
+				agency.setArea(resultSet.getString("area"));
+
 				if (resultSet.getString("imageurl") != null)
 					agency.setImageurl(resultSet.getString("imageurl"));
 				if (resultSet.getDate("created_at") != null)
@@ -98,7 +101,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public Agency getAgencyById(int id) throws Exception {
+	public Agency getAgencyById(Integer id) throws Exception {
 		Agency agency = null;
 		try {
 			String sql = "SELECT * FROM travelAgency WHERE agency_id=? ";
@@ -123,6 +126,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				agency.setActive(resultSet.getBoolean("is_active"));
 				agency.setDelete(resultSet.getBoolean("is_delete"));
 				agency.setStatus(resultSet.getString("status"));
+				agency.setArea(resultSet.getString("area"));
 				if (resultSet.getString("imageurl") != null)
 					agency.setImageurl(resultSet.getString("imageurl"));
 				if (resultSet.getDate("created_at") != null)
@@ -140,7 +144,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	public boolean updateAgency(Agency agency) throws Exception {
 		try {
 
-			String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, phone=?, city=?, state=?, country=?, pincode=?, imageurl = ? WHERE agency_id=?";
+			String sql = "UPDATE travelAgency SET agency_name=?, owner_name=?, phone=?, city=?, state=?, country=?, pincode=?, imageurl = ? , area=? WHERE agency_id=?";
 			preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, agency.getAgencyName());
 			preparedStatement.setString(2, agency.getOwnerName());
@@ -150,8 +154,8 @@ public class AgencyDAOImpl implements IAgencyDAO {
 			preparedStatement.setString(6, agency.getCountry());
 			preparedStatement.setString(7, agency.getPincode());
 			preparedStatement.setObject(8, agency.getImageurl());
-			preparedStatement.setInt(9, agency.getAgencyId());
-
+			preparedStatement.setString(9, agency.getArea());
+			preparedStatement.setInt(10, agency.getAgencyId());
 			int affectedRows = preparedStatement.executeUpdate();
 			return affectedRows > 0;
 		} catch (Exception e) {
@@ -161,7 +165,27 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public boolean deleteAgency(int id) throws Exception {
+	public boolean changePassword(Integer agencyId, String newPassword) throws Exception {
+		String sql = "UPDATE travelagency SET password=?  WHERE agency_id=?";
+		try {
+			preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setString(1, newPassword);
+			preparedStatement.setInt(2, agencyId);
+
+			int affectedRows = preparedStatement.executeUpdate();
+			if (affectedRows > 0) {
+				return true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return false;
+	}
+
+	@Override
+	public boolean deleteAgency(Integer id) throws Exception {
 		try {
 
 			String sql = "UPDATE travelAgency SET is_delete=? , is_active=? WHERE agency_id=?";
@@ -179,7 +203,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public boolean updateAgencyStatus(int agencyId, String status) throws Exception {
+	public boolean updateAgencyStatus(Integer agencyId, String status) throws Exception {
 		try {
 			String sql = "UPDATE travelAgency SET status = ?, is_active = ?, is_delete = ? WHERE agency_id = ?";
 
@@ -207,7 +231,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 	}
 
 	@Override
-	public boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception {
+	public boolean updateAgencyActiveState(Integer agencyId, Boolean active) throws Exception {
 		try {
 			String sql = "UPDATE travelAgency SET is_active=? WHERE agency_id=? AND is_delete=?";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -224,247 +248,252 @@ public class AgencyDAOImpl implements IAgencyDAO {
 		return false;
 	}
 
-	@Override
-	public List<Agency> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
-		List<Agency> agencies = new ArrayList<>();
+//	@Override
+//	public List<Agency> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
+//		List<Agency> agencies = new ArrayList<>();
+//
+//		String sql = "SELECT * FROM travelAgency WHERE is_delete = false AND ("
+//				+ "agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? OR phone LIKE ? "
+//				+ "OR city LIKE ? OR state LIKE ? OR country LIKE ? OR pincode LIKE ? OR registration_number LIKE ?) "
+//				+ "ORDER BY created_at DESC LIMIT ? OFFSET ?";
+//		if (keyword != null) {
+//
+//		}
+//
+//		try {
+//			preparedStatement = connection.prepareStatement(sql);
+//			String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+//
+//			for (int i = 1; i <= 9; i++)
+//				preparedStatement.setString(i, likeKeyword);
+//			preparedStatement.setInt(10, limit);
+//			preparedStatement.setInt(11, offset);
+//
+//			resultSet = preparedStatement.executeQuery();
+//			while (resultSet.next()) {
+//				Agency agency = new Agency();
+//				agency.setAgencyId(resultSet.getInt("agency_id"));
+//				agency.setAgencyName(resultSet.getString("agency_name"));
+//				agency.setOwnerName(resultSet.getString("owner_name"));
+//				agency.setEmail(resultSet.getString("email"));
+//				agency.setPhone(resultSet.getString("phone"));
+//				agency.setCity(resultSet.getString("city"));
+//				agency.setState(resultSet.getString("state"));
+//				agency.setCountry(resultSet.getString("country"));
+//				agency.setPincode(resultSet.getString("pincode"));
+//				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+//				agency.setStatus(resultSet.getString("status"));
+//				agency.setActive(resultSet.getBoolean("is_active"));
+//				agency.setDelete(resultSet.getBoolean("is_delete"));
+//				agency.setArea(resultSet.getString("area"));
+//				if (resultSet.getString("imageurl") != null)
+//					agency.setImageurl(resultSet.getString("imageurl"));
+//				if (resultSet.getDate("created_at") != null)
+//					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+//				if (resultSet.getDate("updated_at") != null)
+//					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+//
+//				agencies.add(agency);
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		return agencies;
+//	}
 
-		String sql = "SELECT * FROM travelAgency WHERE is_delete = false AND ("
-				+ "agency_name LIKE ? OR owner_name LIKE ? OR email LIKE ? OR phone LIKE ? "
-				+ "OR city LIKE ? OR state LIKE ? OR country LIKE ? OR pincode LIKE ? OR registration_number LIKE ?) "
-				+ "ORDER BY created_at DESC LIMIT ? OFFSET ?";
-		if (keyword != null) {
+//	@Override
+//	public List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
+//		List<Agency> list = new ArrayList<>();
+//		try {
+//
+//			String sql = "SELECT * FROM travelAgency  WHERE  status = ? limit ? offset ?";
+//			preparedStatement = connection.prepareStatement(sql);
+//
+//			preparedStatement.setString(1, status);
+//			preparedStatement.setInt(2, limit);
+//			preparedStatement.setInt(3, offset);
+//			resultSet = preparedStatement.executeQuery();
+//
+//			while (resultSet.next()) {
+//				Agency agency = new Agency();
+//				agency.setAgencyId(resultSet.getInt("agency_id"));
+//				agency.setAgencyName(resultSet.getString("agency_name"));
+//				agency.setOwnerName(resultSet.getString("owner_name"));
+//				agency.setEmail(resultSet.getString("email"));
+//				agency.setPhone(resultSet.getString("phone"));
+//				agency.setCity(resultSet.getString("city"));
+//				agency.setState(resultSet.getString("state"));
+//				agency.setCountry(resultSet.getString("country"));
+//				agency.setPincode(resultSet.getString("pincode"));
+//				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+//				agency.setPassword(resultSet.getString("password"));
+//				agency.setActive(resultSet.getBoolean("is_active"));
+//				agency.setDelete(resultSet.getBoolean("is_delete"));
+//				agency.setStatus(resultSet.getString("status"));
+//				agency.setArea(resultSet.getString("area"));
+//				if (resultSet.getString("imageurl") != null)
+//					agency.setImageurl(resultSet.getString("imageurl"));
+//				if (resultSet.getDate("created_at") != null)
+//					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+//				if (resultSet.getDate("updated_at") != null)
+//					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+//
+//				list.add(agency);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return list;
+//	}
 
-		}
+//	@Override
+//	public List<Agency> getAgenciesByActiveState(Boolean isActive, int limit, int offset) throws Exception {
+//		List<Agency> agencies = new ArrayList<>();
+//		try {
+//			String sql = "SELECT * FROM travelAgency WHERE is_active = ?  LIMIT ? OFFSET ?";
+//			preparedStatement = connection.prepareStatement(sql);
+//			preparedStatement.setBoolean(1, isActive);
+//
+//			preparedStatement.setInt(2, limit);
+//			preparedStatement.setInt(3, offset);
+//
+//			resultSet = preparedStatement.executeQuery();
+//
+//			while (resultSet.next()) {
+//				Agency agency = new Agency();
+//				agency.setAgencyId(resultSet.getInt("agency_id"));
+//				agency.setAgencyName(resultSet.getString("agency_name"));
+//				agency.setOwnerName(resultSet.getString("owner_name"));
+//				agency.setEmail(resultSet.getString("email"));
+//				agency.setPhone(resultSet.getString("phone"));
+//				agency.setCity(resultSet.getString("city"));
+//				agency.setState(resultSet.getString("state"));
+//				agency.setCountry(resultSet.getString("country"));
+//				agency.setPincode(resultSet.getString("pincode"));
+//				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+//				agency.setStatus(resultSet.getString("status"));
+//				agency.setActive(resultSet.getBoolean("is_active"));
+//				agency.setDelete(resultSet.getBoolean("is_delete"));
+//				agency.setArea(resultSet.getString("area"));
+//				if (resultSet.getString("imageurl") != null)
+//					agency.setImageurl(resultSet.getString("imageurl"));
+//				if (resultSet.getDate("created_at") != null)
+//					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+//				if (resultSet.getDate("updated_at") != null)
+//					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+//				agencies.add(agency);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return agencies;
+//	}
 
-		try {
-			preparedStatement = connection.prepareStatement(sql);
-			String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+//	@Override
+//	public List<Agency> getAllAgencies(int limit, int offset) {
+//		List<Agency> agencies = new ArrayList<>();
+//		try {
+//
+//			String sql = "SELECT * FROM travelAgency WHERE is_delete=? and status = ? LIMIT ? OFFSET ?";
+//			preparedStatement = connection.prepareStatement(sql);
+//			preparedStatement.setBoolean(1, false);
+//			preparedStatement.setString(2, "APPROVED");
+//			preparedStatement.setInt(3, limit);
+//			preparedStatement.setInt(4, offset);
+//			resultSet = preparedStatement.executeQuery();
+//
+//			while (resultSet.next()) {
+//				Agency agency = new Agency();
+//				agency.setAgencyId(resultSet.getInt("agency_id"));
+//				agency.setAgencyName(resultSet.getString("agency_name"));
+//				agency.setOwnerName(resultSet.getString("owner_name"));
+//				agency.setEmail(resultSet.getString("email"));
+//				agency.setPhone(resultSet.getString("phone"));
+//				agency.setCity(resultSet.getString("city"));
+//				agency.setState(resultSet.getString("state"));
+//				agency.setCountry(resultSet.getString("country"));
+//				agency.setPincode(resultSet.getString("pincode"));
+//				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+//				agency.setPassword(resultSet.getString("password"));
+//				agency.setActive(resultSet.getBoolean("is_active"));
+//				agency.setDelete(resultSet.getBoolean("is_delete"));
+//				agency.setArea(resultSet.getString("area"));
+//				if (resultSet.getString("imageurl") != null)
+//					agency.setImageurl(resultSet.getString("imageurl"));
+//				if (resultSet.getDate("created_at") != null)
+//					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+//				if (resultSet.getDate("updated_at") != null)
+//					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+//				agencies.add(agency);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return agencies;
+//	}
 
-			for (int i = 1; i <= 9; i++)
-				preparedStatement.setString(i, likeKeyword);
-			preparedStatement.setInt(10, limit);
-			preparedStatement.setInt(11, offset);
-
-			resultSet = preparedStatement.executeQuery();
-			while (resultSet.next()) {
-				Agency agency = new Agency();
-				agency.setAgencyId(resultSet.getInt("agency_id"));
-				agency.setAgencyName(resultSet.getString("agency_name"));
-				agency.setOwnerName(resultSet.getString("owner_name"));
-				agency.setEmail(resultSet.getString("email"));
-				agency.setPhone(resultSet.getString("phone"));
-				agency.setCity(resultSet.getString("city"));
-				agency.setState(resultSet.getString("state"));
-				agency.setCountry(resultSet.getString("country"));
-				agency.setPincode(resultSet.getString("pincode"));
-				agency.setRegistrationNumber(resultSet.getString("registration_number"));
-				agency.setStatus(resultSet.getString("status"));
-				agency.setActive(resultSet.getBoolean("is_active"));
-				agency.setDelete(resultSet.getBoolean("is_delete"));
-				if (resultSet.getString("imageurl") != null)
-					agency.setImageurl(resultSet.getString("imageurl"));
-				if (resultSet.getDate("created_at") != null)
-					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-				agencies.add(agency);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return agencies;
-	}
-
-	@Override
-	public List<Agency> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
-		List<Agency> list = new ArrayList<>();
-		try {
-
-			String sql = "SELECT * FROM travelAgency  WHERE  status = ? limit ? offset ?";
-			preparedStatement = connection.prepareStatement(sql);
-
-			preparedStatement.setString(1, status);
-			preparedStatement.setInt(2, limit);
-			preparedStatement.setInt(3, offset);
-			resultSet = preparedStatement.executeQuery();
-
-			while (resultSet.next()) {
-				Agency agency = new Agency();
-				agency.setAgencyId(resultSet.getInt("agency_id"));
-				agency.setAgencyName(resultSet.getString("agency_name"));
-				agency.setOwnerName(resultSet.getString("owner_name"));
-				agency.setEmail(resultSet.getString("email"));
-				agency.setPhone(resultSet.getString("phone"));
-				agency.setCity(resultSet.getString("city"));
-				agency.setState(resultSet.getString("state"));
-				agency.setCountry(resultSet.getString("country"));
-				agency.setPincode(resultSet.getString("pincode"));
-				agency.setRegistrationNumber(resultSet.getString("registration_number"));
-				agency.setPassword(resultSet.getString("password"));
-				agency.setActive(resultSet.getBoolean("is_active"));
-				agency.setDelete(resultSet.getBoolean("is_delete"));
-				agency.setStatus(resultSet.getString("status"));
-				if (resultSet.getString("imageurl") != null)
-					agency.setImageurl(resultSet.getString("imageurl"));
-				if (resultSet.getDate("created_at") != null)
-					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-				list.add(agency);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-
-	@Override
-	public List<Agency> getAgenciesByActiveState(boolean isActive, int limit, int offset) throws Exception {
-		List<Agency> agencies = new ArrayList<>();
-		try {
-			String sql = "SELECT * FROM travelAgency WHERE is_active = ?  LIMIT ? OFFSET ?";
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setBoolean(1, isActive);
-
-			preparedStatement.setInt(2, limit);
-			preparedStatement.setInt(3, offset);
-
-			resultSet = preparedStatement.executeQuery();
-
-			while (resultSet.next()) {
-				Agency agency = new Agency();
-				agency.setAgencyId(resultSet.getInt("agency_id"));
-				agency.setAgencyName(resultSet.getString("agency_name"));
-				agency.setOwnerName(resultSet.getString("owner_name"));
-				agency.setEmail(resultSet.getString("email"));
-				agency.setPhone(resultSet.getString("phone"));
-				agency.setCity(resultSet.getString("city"));
-				agency.setState(resultSet.getString("state"));
-				agency.setCountry(resultSet.getString("country"));
-				agency.setPincode(resultSet.getString("pincode"));
-				agency.setRegistrationNumber(resultSet.getString("registration_number"));
-				agency.setStatus(resultSet.getString("status"));
-				agency.setActive(resultSet.getBoolean("is_active"));
-				agency.setDelete(resultSet.getBoolean("is_delete"));
-				if (resultSet.getString("imageurl") != null)
-					agency.setImageurl(resultSet.getString("imageurl"));
-				if (resultSet.getDate("created_at") != null)
-					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-				agencies.add(agency);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return agencies;
-	}
-
-	@Override
-	public List<Agency> getAllAgencies(int limit, int offset) {
-		List<Agency> agencies = new ArrayList<>();
-		try {
-
-			String sql = "SELECT * FROM travelAgency WHERE is_delete=? and status = ? LIMIT ? OFFSET ?";
-			preparedStatement = connection.prepareStatement(sql);
-			preparedStatement.setBoolean(1, false);
-			preparedStatement.setString(2, "APPROVED");
-			preparedStatement.setInt(3, limit);
-			preparedStatement.setInt(4, offset);
-			resultSet = preparedStatement.executeQuery();
-
-			while (resultSet.next()) {
-				Agency agency = new Agency();
-				agency.setAgencyId(resultSet.getInt("agency_id"));
-				agency.setAgencyName(resultSet.getString("agency_name"));
-				agency.setOwnerName(resultSet.getString("owner_name"));
-				agency.setEmail(resultSet.getString("email"));
-				agency.setPhone(resultSet.getString("phone"));
-				agency.setCity(resultSet.getString("city"));
-				agency.setState(resultSet.getString("state"));
-				agency.setCountry(resultSet.getString("country"));
-				agency.setPincode(resultSet.getString("pincode"));
-				agency.setRegistrationNumber(resultSet.getString("registration_number"));
-				agency.setPassword(resultSet.getString("password"));
-				agency.setActive(resultSet.getBoolean("is_active"));
-				agency.setDelete(resultSet.getBoolean("is_delete"));
-				if (resultSet.getString("imageurl") != null)
-					agency.setImageurl(resultSet.getString("imageurl"));
-				if (resultSet.getDate("created_at") != null)
-					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-				agencies.add(agency);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return agencies;
-	}
-
-	@Override
-	public List<Agency> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
-		List<Agency> list = new ArrayList<>();
-		try {
-			String sql = "SELECT * FROM travelAgency WHERE is_delete = true and status = 'APPROVED'";
-
-			if (keyword != null && !keyword.isEmpty()) {
-				sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
-						+ "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "
-						+ "OR LOWER(pincode) LIKE ? OR LOWER(registration_number) LIKE ?)";
-			}
-
-			sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-
-			preparedStatement = connection.prepareStatement(sql);
-			int index = 1;
-
-			if (keyword != null && !keyword.isEmpty()) {
-				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
-
-				for (int i = 0; i < 9; i++) {
-					preparedStatement.setString(index++, likeKeyword);
-				}
-			}
-
-			preparedStatement.setInt(index++, limit);
-			preparedStatement.setInt(index++, offset);
-
-			resultSet = preparedStatement.executeQuery();
-
-			while (resultSet.next()) {
-				Agency agency = new Agency();
-				agency.setAgencyId(resultSet.getInt("agency_id"));
-				agency.setAgencyName(resultSet.getString("agency_name"));
-				agency.setOwnerName(resultSet.getString("owner_name"));
-				agency.setEmail(resultSet.getString("email"));
-				agency.setPhone(resultSet.getString("phone"));
-				agency.setCity(resultSet.getString("city"));
-				agency.setState(resultSet.getString("state"));
-				agency.setCountry(resultSet.getString("country"));
-				agency.setPincode(resultSet.getString("pincode"));
-				agency.setRegistrationNumber(resultSet.getString("registration_number"));
-				agency.setStatus(resultSet.getString("status"));
-				agency.setActive(resultSet.getBoolean("is_active"));
-				agency.setDelete(resultSet.getBoolean("is_delete"));
-				if (resultSet.getString("imageurl") != null)
-					agency.setImageurl(resultSet.getString("imageurl"));
-				if (resultSet.getDate("created_at") != null)
-					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
-				if (resultSet.getDate("updated_at") != null)
-					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
-
-				list.add(agency);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
+//	@Override
+//	public List<Agency> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
+//		List<Agency> list = new ArrayList<>();
+//		try {
+//			String sql = "SELECT * FROM travelAgency WHERE is_delete = true and status = 'APPROVED'";
+//
+//			if (keyword != null && !keyword.isEmpty()) {
+//				sql += " AND (LOWER(agency_name) LIKE ? OR LOWER(owner_name) LIKE ? OR LOWER(email) LIKE ? "
+//						+ "OR LOWER(phone) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(country) LIKE ? "
+//						+ "OR LOWER(pincode) LIKE ? OR LOWER(registration_number) LIKE ?)";
+//			}
+//
+//			sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+//
+//			preparedStatement = connection.prepareStatement(sql);
+//			int index = 1;
+//
+//			if (keyword != null && !keyword.isEmpty()) {
+//				String likeKeyword = "%" + keyword.replaceAll("[^A-Za-z0-9]", "") + "%";
+//
+//				for (int i = 0; i < 9; i++) {
+//					preparedStatement.setString(index++, likeKeyword);
+//				}
+//			}
+//
+//			preparedStatement.setInt(index++, limit);
+//			preparedStatement.setInt(index++, offset);
+//
+//			resultSet = preparedStatement.executeQuery();
+//
+//			while (resultSet.next()) {
+//				Agency agency = new Agency();
+//				agency.setAgencyId(resultSet.getInt("agency_id"));
+//				agency.setAgencyName(resultSet.getString("agency_name"));
+//				agency.setOwnerName(resultSet.getString("owner_name"));
+//				agency.setEmail(resultSet.getString("email"));
+//				agency.setPhone(resultSet.getString("phone"));
+//				agency.setCity(resultSet.getString("city"));
+//				agency.setState(resultSet.getString("state"));
+//				agency.setCountry(resultSet.getString("country"));
+//				agency.setPincode(resultSet.getString("pincode"));
+//				agency.setRegistrationNumber(resultSet.getString("registration_number"));
+//				agency.setStatus(resultSet.getString("status"));
+//				agency.setActive(resultSet.getBoolean("is_active"));
+//				agency.setDelete(resultSet.getBoolean("is_delete"));
+//				agency.setArea(resultSet.getString("area"));
+//				if (resultSet.getString("imageurl") != null)
+//					agency.setImageurl(resultSet.getString("imageurl"));
+//				if (resultSet.getDate("created_at") != null)
+//					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
+//				if (resultSet.getDate("updated_at") != null)
+//					agency.setUpdatedAt(resultSet.getDate("updated_at").toLocalDate());
+//
+//				list.add(agency);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return list;
+//	}
 
 	@Override
 	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword, String startDate,
@@ -621,6 +650,7 @@ public class AgencyDAOImpl implements IAgencyDAO {
 				agency.setActive(resultSet.getBoolean("is_active"));
 				agency.setDelete(resultSet.getBoolean("is_delete"));
 				agency.setImageurl(resultSet.getString("imageurl"));
+				agency.setArea(resultSet.getString("area"));
 				if (resultSet.getDate("created_at") != null)
 					agency.setCreatedAt(resultSet.getDate("created_at").toLocalDate());
 				if (resultSet.getDate("updated_at") != null)

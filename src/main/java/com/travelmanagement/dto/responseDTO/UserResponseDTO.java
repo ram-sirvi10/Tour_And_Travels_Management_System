@@ -3,13 +3,13 @@ package com.travelmanagement.dto.responseDTO;
 import java.time.LocalDate;
 
 public class UserResponseDTO {
-	private int userId;
+	private Integer userId;
 	private String userName;
 	private String userEmail;
 	private String userPassword;
 	private String userRole; 
-	private boolean isActive;
-	private boolean isDelete;
+	private Boolean isActive;
+	private Boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 	private String imageurl;
@@ -27,10 +27,10 @@ public class UserResponseDTO {
 	public void setImageurl(String imageurl) {
 		this.imageurl = imageurl;
 	}
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 	public String getUserName() {
@@ -57,16 +57,16 @@ public class UserResponseDTO {
 	public void setUserRole(String userRole) {
 		this.userRole = userRole;
 	}
-	public boolean isActive() {
+	public Boolean isActive() {
 		return isActive;
 	}
-	public void setActive(boolean isActive) {
+	public void setActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
-	public boolean isDelete() {
+	public Boolean isDelete() {
 		return isDelete;
 	}
-	public void setDelete(boolean isDelete) {
+	public void setDelete(Boolean isDelete) {
 		this.isDelete = isDelete;
 	}
 	public LocalDate getCreatedAt() {

@@ -94,6 +94,8 @@ public class Mapper {
 		agency.setRegistrationNumber(dto.getRegistrationNumber());
 		agency.setPassword(dto.getPassword());
 		agency.setImageurl(dto.getImageurl());
+		agency.setArea(dto.getArea());
+		agency.setAgencyId(dto.getAgencyId());
 		return agency;
 	}
 
@@ -115,6 +117,8 @@ public class Mapper {
 		dto.setCreatedAt(agency.getCreatedAt());
 		dto.setUpdatedAt(agency.getUpdatedAt());
 		dto.setImageurl(agency.getImageurl());
+		dto.setArea(agency.getArea());
+		dto.setPassword(agency.getPassword());
 		return dto;
 	}
 

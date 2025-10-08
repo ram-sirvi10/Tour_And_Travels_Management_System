@@ -6,10 +6,10 @@
 <%@ page
 	import="com.travelmanagement.service.impl.PackageServiceImpl,com.travelmanagement.service.impl.BookingServiceImpl"%>
 <%
-int totalPackages = request.getAttribute("totalPackages") != null ? (Integer) request.getAttribute("totalPackages") : 0;
-int activePackages = request.getAttribute("activePackages") != null ? (Integer) request.getAttribute("activePackages")
+long totalPackages = request.getAttribute("totalPackages") != null ? (long) request.getAttribute("totalPackages") : 0;
+long activePackages = request.getAttribute("activePackages") != null ? (long) request.getAttribute("activePackages")
 		: 0;
-int totalBookings = request.getAttribute("totalBookings") != null ? (Integer) request.getAttribute("totalBookings") : 0;
+long totalBookings = request.getAttribute("totalBookings") != null ? (long) request.getAttribute("totalBookings") : 0;
 %>
 
 <h2 class="mb-4">📊 Dashboard Overview</h2>

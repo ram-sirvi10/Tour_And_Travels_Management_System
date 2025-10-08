@@ -1,9 +1,20 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
+<%@ page import="com.travelmanagement.dto.responseDTO.AgencyResponseDTO"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<%
+AgencyResponseDTO agency = (AgencyResponseDTO) session.getAttribute("agency");
+if (agency == null) {
+	response.sendRedirect("login.jsp");
+	return;
+}
+%>
 <title>Agency Dashboard</title>
+<!-- Add this in <head> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
 	rel="stylesheet">
@@ -45,6 +56,26 @@ body {
 .navbar {
 	margin-left: 250px;
 }
+
+.profile-img {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid #fff;
+	cursor: pointer;
+	transition: transform 0.2s;
+}
+
+.profile-img:hover {
+	transform: scale(1.1);
+}
+
+.profile-icon {
+	font-size: 1.5rem;
+	color: white;
+	cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -63,20 +94,34 @@ body {
 	</div>
 
 	<!-- Top Navbar -->
+
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
 		<div class="container-fluid">
 			<a class="navbar-brand" href="agencyDashboard.jsp">Travel
 				Management</a>
-			<div class="d-flex">
-				<span class="text-white me-3"> Welcome, <%=((com.travelmanagement.dto.responseDTO.AgencyResponseDTO) session.getAttribute("agency")).getAgencyName()%>
-				</span> <a href="<%=request.getContextPath()%>/auth?button=logout"
-					class="btn btn-sm btn-outline-light"
-					onclick="event.preventDefault(); 
-            fetch(this.href, {method:'POST'}).then(()=>{window.location='<%=request.getContextPath()%>/login.jsp'});">
-					Logout </a>
-			</div>
+			<div class="d-flex align-items-center gap-3 ms-auto">
+                <span class="text-white">Welcome, <%= agency.getAgencyName() %></span>
+                <a href="<%=request.getContextPath()%>/agency?button=viewProfile">
+                    <%
+                    if (agency.getImageurl() != null && !agency.getImageurl().isEmpty()) {
+                    %>
+                        <img src="<%= agency.getImageurl() %>" alt="Profile" class="profile-img">
+                    <%
+                    } else {
+                    %>
+                        <i class="bi bi-person-circle profile-icon"></i>
+                    <%
+                    }
+                    %>
+                </a>
+            </div>
 		</div>
 	</nav>
+
+	<!-- Make sure to include Bootstrap JS at the bottom of the page -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 	<!-- Page Content Wrapper -->
 	<div class="content">

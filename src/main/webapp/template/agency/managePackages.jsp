@@ -1,5 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page
+	import="java.time.LocalDateTime, java.time.ZoneId, java.time.ZonedDateTime, java.time.format.DateTimeFormatter"%>
 
+<%
+ZoneId istZone = ZoneId.of("Asia/Kolkata");
+DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a"); // Example: 08-Oct-2025 03:30 PM
+%>
 <%@ include file="header.jsp"%>
 
 <button type="button" class="btn btn-secondary"
@@ -71,7 +77,6 @@ List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttrib
 
 String keyword = request.getAttribute("keyword") != null ? (String) request.getAttribute("keyword") : "";
 String title = request.getAttribute("title") != null ? (String) request.getAttribute("title") : "";
-
 
 int currentPage = request.getAttribute("currentPage") != null ? (int) request.getAttribute("currentPage") : 1;
 int totalPages = request.getAttribute("totalPages") != null ? (int) request.getAttribute("totalPages") : 1;
@@ -162,8 +167,20 @@ if (request.getAttribute("error") != null) {
 		</tr>
 	</thead>
 	<tbody>
-		<%
+		<%String departureDateIST = "";
+		String lastBookingDateIST = "";
 		for (PackageResponseDTO pkg : packages) {
+			
+
+			if (pkg.getDepartureDate() != null) {
+				departureDateIST = pkg.getDepartureDate().atZone(ZoneId.systemDefault()).withZoneSameInstant(istZone)
+				.format(displayFormatter);
+			}
+
+			if (pkg.getLastBookingDate() != null) {
+				lastBookingDateIST = pkg.getLastBookingDate().atZone(ZoneId.systemDefault()).withZoneSameInstant(istZone)
+				.format(displayFormatter);
+			}
 		%>
 		<tr>
 			<td><%=pkg.getPackageId()%></td>
@@ -264,13 +281,23 @@ if (request.getAttribute("error") != null) {
 						<button type="button" class="btn-close" data-bs-dismiss="modal"
 							aria-label="Close"></button>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body ">
+						<%-- Package Image --%>
+						<%
+						String imageUrl = pkg.getImageurl();
+						if (imageUrl != null && !imageUrl.isEmpty()) {
+						%>
+						<img src="<%=imageUrl%>" alt="Package Image"
+							style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 15px;">
+						<%
+						}
+						%>
 						<p>
 							<strong>Departure Date:</strong>
-							<%=pkg.getDepartureDate()%></p>
+							<%=departureDateIST%></p>
 						<p>
 							<strong>Last Booking Date:</strong>
-							<%=pkg.getLastBookingDate()%></p>
+							<%=lastBookingDateIST%></p>
 						<p>
 							<strong>Total Seats:</strong>
 							<%=pkg.getTotalSeats()%></p>

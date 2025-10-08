@@ -147,7 +147,7 @@ public class PackageResponseDTO {
 		this.duration = duration;
 	}
 
-	public boolean getIsActive() {
+	public Boolean getIsActive() {
 		return isActive;
 	}
 

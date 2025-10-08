@@ -57,7 +57,7 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public UserResponseDTO getById(int id) throws Exception {
+	public UserResponseDTO getById(Integer id) throws Exception {
 		User user = userDAO.getUserById(id);
 		if (user == null) {
 			throw new UserNotFoundException("User not found with id: " + id);
@@ -97,13 +97,13 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public boolean changePassword(int userId, String newPassword) throws Exception {
+	public boolean changePassword(Integer userId, String newPassword) throws Exception {
 		String hashedPassword = PasswordHashing.ecryptPassword(newPassword);
 		return userDAO.changePassword(userId, hashedPassword);
 	}
 
 	@Override
-	public boolean delete(int id) throws Exception {
+	public boolean delete(Integer id) throws Exception {
 		User user = userDAO.getUserById(id);
 		if (user == null) {
 			throw new UserNotFoundException("USER NOT FOUND ! ");
@@ -114,7 +114,7 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
+	public boolean updateUserActiveState(Integer userId, Boolean active) throws Exception {
 		User user = userDAO.getUserById(userId);
 		if (user == null) {
 			throw new UserNotFoundException("USER NOT FOUND ! ");

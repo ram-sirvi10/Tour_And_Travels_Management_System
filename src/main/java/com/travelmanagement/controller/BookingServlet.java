@@ -31,6 +31,7 @@ import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/booking")
+
 public class BookingServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -426,7 +428,7 @@ public class BookingServlet extends HttpServlet {
 
 			}
 
-			int totalRecords = paymentService.getPaymentHistoryCount(user.getUserId(), null, null, status,
+			long totalRecords = paymentService.getPaymentHistoryCount(user.getUserId(), null, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null);
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
@@ -750,7 +752,7 @@ public class BookingServlet extends HttpServlet {
 			bookingResponseDTO.setPackageImage(packageResponseDTO.getImageurl());
 			bookingResponseDTO.setTravelers(travelers);
 			bookingResponseDTO.setDepartureDateAndTime(packageResponseDTO.getDepartureDate());
-		
+
 			request.setAttribute("confirmedBooking", bookingResponseDTO);
 			request.setAttribute("message", Constants.SUCCESS_PAYMENT_CONFIRMED);
 			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
@@ -833,7 +835,7 @@ public class BookingServlet extends HttpServlet {
 			List<BookingResponseDTO> bookings = bookingService.getAllBookings(agencyId, userId, packageId, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null, pageSize, offset);
 
-			int totalRecords = bookingService.getAllBookingsCount(agencyId, userId, packageId, null, status,
+			long totalRecords = bookingService.getAllBookingsCount(agencyId, userId, packageId, null, status,
 					start != null ? start.toString() : null, end != null ? end.toString() : null);
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
@@ -965,7 +967,7 @@ public class BookingServlet extends HttpServlet {
 
 		try {
 
-			int totalRecords = travelerService.getTravelerCount(null, bookingId, userId, packageId, agencyId,
+			long totalRecords = travelerService.getTravelerCount(null, bookingId, userId, packageId, agencyId,
 					bookingStatus, keyword);
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);

@@ -5,22 +5,22 @@ import java.time.LocalDateTime;
 
 public class Packages {
 
-	private int packageId;
+	private Integer packageId;
 	private String title;
-	private int agencyId;
+	private Integer agencyId;
 	private String description;
-	private double price;
+	private Double price;
 	private String location;
-	private int duration;
-	private boolean isActive;
+	private Integer duration;
+	private Boolean isActive;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
-	private int totalSeats;
+	private Integer totalSeats;
 	private String imageurl;
 	private LocalDateTime lastBookingDate;
-	private int version;
+	private Integer version;
 	private LocalDateTime departureDate;
-	private int totalBookings;
+	private Integer totalBookings;
 	private Boolean isDelete;
 
 	public Boolean getIsDelete() {
@@ -31,11 +31,11 @@ public class Packages {
 		this.isDelete = isDelete;
 	}
 
-	public int getTotalBookings() {
+	public Integer getTotalBookings() {
 		return totalBookings;
 	}
 
-	public void setTotalBookings(int totalBookings) {
+	public void setTotalBookings(Integer totalBookings) {
 		this.totalBookings = totalBookings;
 	}
 
@@ -55,19 +55,19 @@ public class Packages {
 		this.departureDate = departureDate;
 	}
 
-	public int getVersion() {
+	public Integer getVersion() {
 		return version;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(Integer version) {
 		this.version = version;
 	}
 
-	public int getTotalSeats() {
+	public Integer getTotalSeats() {
 		return totalSeats;
 	}
 
-	public void setTotalSeats(int totalSeats) {
+	public void setTotalSeats(Integer totalSeats) {
 		this.totalSeats = totalSeats;
 	}
 
@@ -79,11 +79,11 @@ public class Packages {
 		this.imageurl = imageurl;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 
@@ -95,11 +95,11 @@ public class Packages {
 		this.title = title;
 	}
 
-	public int getAgencyId() {
+	public Integer getAgencyId() {
 		return agencyId;
 	}
 
-	public void setAgencyId(int agencyId) {
+	public void setAgencyId(Integer agencyId) {
 		this.agencyId = agencyId;
 	}
 
@@ -111,11 +111,11 @@ public class Packages {
 		this.description = description;
 	}
 
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
 
@@ -127,19 +127,19 @@ public class Packages {
 		this.location = location;
 	}
 
-	public int getDuration() {
+	public Integer getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public void setDuration(Integer duration) {
 		this.duration = duration;
 	}
 
-	public boolean isActive() {
+	public Boolean isActive() {
 		return isActive;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(Boolean active) {
 		isActive = active;
 	}
 

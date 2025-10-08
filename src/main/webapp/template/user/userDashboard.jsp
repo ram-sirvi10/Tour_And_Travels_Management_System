@@ -9,6 +9,13 @@
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
+<%@ page
+	import="java.time.LocalDateTime, java.time.ZoneId, java.time.ZonedDateTime, java.time.format.DateTimeFormatter"%>
+
+<%
+ZoneId istZone = ZoneId.of("Asia/Kolkata");
+DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a"); // Example: 08-Oct-2025 03:30 PM
+%>
 <%@ include file="header.jsp"%>
 
 <%
@@ -109,6 +116,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 											<small class="d-block">Status: <%=userBooking.getStatus()%></small>
 											<small class="d-block"
 												id="carousel-countdown-<%=pkg.getPackageId()%>"></small>
+												
 										</div>
 
 										<script>
@@ -133,12 +141,19 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 										<%
 										} else {
 										java.time.LocalDateTime lastBookingDate = pkg.getLastBookingDate(); // <-- yeh field use karna hoga
+
+										String lastBookingIST = "N/A";
+										if (lastBookingDate != null) {
+											lastBookingIST = lastBookingDate.atZone(ZoneId.systemDefault()) // backend ka timezone (default JVM timezone)
+											.withZoneSameInstant(istZone) // IST me convert
+											.format(displayFormatter); // 12-hour format
+										}
 										%>
 
 										<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
 											<small class="d-block fw-bold">Last Booking Till:</small> <small
-												class="d-block"><%=lastBookingDate != null ? lastBookingDate.toLocalDate() + " " + lastBookingDate.toLocalTime() : "N/A"%></small>
-											<small class="d-block text-danger"
+												class="d-block"><%=lastBookingIST%></small> <small
+												class="d-block text-danger"
 												id="lastbooking-countdown-<%=pkg.getPackageId()%>"></small>
 										</div>
 

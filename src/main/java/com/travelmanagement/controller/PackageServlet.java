@@ -108,7 +108,7 @@ public class PackageServlet extends HttpServlet {
 					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
 					limit, offset, false);
 
-			int totalPackages = packageService.countPackages(title, agencyId, location, keyword,
+			long totalPackages = packageService.countPackages(title, agencyId, location, keyword,
 					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
 					false);
 

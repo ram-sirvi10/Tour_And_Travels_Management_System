@@ -51,7 +51,7 @@ public class BookingDAOImpl implements IBookingDAO {
 	}
 
 	@Override
-	public Booking getBookingById(int bookingId) throws Exception {
+	public Booking getBookingById(Integer bookingId) throws Exception {
 		String sql = "SELECT * FROM bookings WHERE booking_id = ?";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, bookingId);
@@ -74,7 +74,7 @@ public class BookingDAOImpl implements IBookingDAO {
 	}
 
 	@Override
-	public boolean updateBookingStatus(int bookingId, String status) throws Exception {
+	public boolean updateBookingStatus(Integer bookingId, String status) throws Exception {
 		String sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setString(1, status);
@@ -85,151 +85,149 @@ public class BookingDAOImpl implements IBookingDAO {
 
 	@Override
 	public List<Booking> getAllBookings(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
-	        String status, String startDate, String endDate, int limit, int offset) throws Exception {
+			String status, String startDate, String endDate, int limit, int offset) throws Exception {
 
-	    List<Booking> bookings = new ArrayList<>();
+		List<Booking> bookings = new ArrayList<>();
 
-	    String sql = "SELECT b.* FROM bookings b " +
-	                 "INNER JOIN travel_packages p ON b.package_id = p.package_id " +
-	                 "WHERE 1=1";
+		String sql = "SELECT b.* FROM bookings b " + "INNER JOIN travel_packages p ON b.package_id = p.package_id "
+				+ "WHERE 1=1";
 
-	    if (agencyId != null)
-	        sql += " AND p.agency_id = ?";
-	    if (userId != null)
-	        sql += " AND b.user_id = ?";
-	    if (packageId != null)
-	        sql += " AND b.package_id = ?";
-	    if (status != null && !status.isEmpty())
-	        sql += " AND b.status = ?";
+		if (agencyId != null)
+			sql += " AND p.agency_id = ?";
+		if (userId != null)
+			sql += " AND b.user_id = ?";
+		if (packageId != null)
+			sql += " AND b.package_id = ?";
+		if (status != null && !status.isEmpty())
+			sql += " AND b.status = ?";
 
-	    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) BETWEEN ? AND ?";
-	    } else if (startDate != null && !startDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) >= ?";
-	    } else if (endDate != null && !endDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) <= ?";
-	    }
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) BETWEEN ? AND ?";
+		} else if (startDate != null && !startDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) >= ?";
+		} else if (endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) <= ?";
+		}
 
-	    sql += " ORDER BY b.created_at DESC LIMIT ? OFFSET ?";
+		sql += " ORDER BY b.created_at DESC LIMIT ? OFFSET ?";
 
-	    preparedStatement = connection.prepareStatement(sql);
+		preparedStatement = connection.prepareStatement(sql);
 
-	    int index = 1;
-	    if (agencyId != null)
-	        preparedStatement.setInt(index++, agencyId);
-	    if (userId != null)
-	        preparedStatement.setInt(index++, userId);
-	    if (packageId != null)
-	        preparedStatement.setInt(index++, packageId);
-	    if (status != null && !status.isEmpty())
-	        preparedStatement.setString(index++, status);
+		int index = 1;
+		if (agencyId != null)
+			preparedStatement.setInt(index++, agencyId);
+		if (userId != null)
+			preparedStatement.setInt(index++, userId);
+		if (packageId != null)
+			preparedStatement.setInt(index++, packageId);
+		if (status != null && !status.isEmpty())
+			preparedStatement.setString(index++, status);
 
-	    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    } else if (startDate != null && !startDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    } else if (endDate != null && !endDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    }
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (startDate != null && !startDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		}
 
-	    preparedStatement.setInt(index++, limit);
-	    preparedStatement.setInt(index++, offset);
+		preparedStatement.setInt(index++, limit);
+		preparedStatement.setInt(index++, offset);
 
-	    resultSet = preparedStatement.executeQuery();
+		resultSet = preparedStatement.executeQuery();
 
-	    while (resultSet.next()) {
-	        Booking booking = new Booking();
-	        booking.setBookingId(resultSet.getInt("booking_id"));
-	        booking.setUserId(resultSet.getInt("user_id"));
-	        booking.setPackageId(resultSet.getInt("package_id"));
-	        booking.setBookingDate(resultSet.getTimestamp("booking_date").toLocalDateTime());
-	        booking.setStatus(resultSet.getString("status"));
-	        booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
-	        if (resultSet.getTimestamp("created_at") != null)
-	            booking.setCreated_at(resultSet.getTimestamp("created_at").toLocalDateTime());
+		while (resultSet.next()) {
+			Booking booking = new Booking();
+			booking.setBookingId(resultSet.getInt("booking_id"));
+			booking.setUserId(resultSet.getInt("user_id"));
+			booking.setPackageId(resultSet.getInt("package_id"));
+			booking.setBookingDate(resultSet.getTimestamp("booking_date").toLocalDateTime());
+			booking.setStatus(resultSet.getString("status"));
+			booking.setNoOfTravellers(resultSet.getInt("no_of_travellers"));
+			if (resultSet.getTimestamp("created_at") != null)
+				booking.setCreated_at(resultSet.getTimestamp("created_at").toLocalDateTime());
 
-	        bookings.add(booking);
-	    }
+			bookings.add(booking);
+		}
 
-	    return bookings;
-	}
-	@Override
-	public int getAllBookingsCount(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
-	        String status, String startDate, String endDate) throws Exception {
-
-	    int count = 0;
-
-	    String sql = "SELECT COUNT(*) AS total FROM bookings b " +
-	                 "INNER JOIN travel_packages p ON b.package_id = p.package_id " +
-	                 "WHERE 1=1";
-
-	    if (agencyId != null)
-	        sql += " AND p.agency_id = ?";
-	    if (userId != null)
-	        sql += " AND b.user_id = ?";
-	    if (packageId != null)
-	        sql += " AND b.package_id = ?";
-	    if (noOfTravellers != null)
-	        sql += " AND b.no_of_travellers = ?";
-	    if (status != null && !status.isEmpty())
-	        sql += " AND b.status = ?";
-
-	    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) BETWEEN ? AND ?";
-	    } else if (startDate != null && !startDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) >= ?";
-	    } else if (endDate != null && !endDate.isEmpty()) {
-	        sql += " AND DATE(b.booking_date) <= ?";
-	    }
-
-	    preparedStatement = connection.prepareStatement(sql);
-
-	    int index = 1;
-	    if (agencyId != null)
-	        preparedStatement.setInt(index++, agencyId);
-	    if (userId != null)
-	        preparedStatement.setInt(index++, userId);
-	    if (packageId != null)
-	        preparedStatement.setInt(index++, packageId);
-	    if (noOfTravellers != null)
-	        preparedStatement.setInt(index++, noOfTravellers);
-	    if (status != null && !status.isEmpty())
-	        preparedStatement.setString(index++, status);
-
-	    if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    } else if (startDate != null && !startDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    } else if (endDate != null && !endDate.isEmpty()) {
-	        preparedStatement.setDate(index++,
-	                Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
-	    }
-
-	    resultSet = preparedStatement.executeQuery();
-	    if (resultSet.next()) {
-	        count = resultSet.getInt("total");
-	    }
-
-	    return count;
+		return bookings;
 	}
 
+	@Override
+	public long getAllBookingsCount(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
+			String status, String startDate, String endDate) throws Exception {
+
+		int count = 0;
+
+		String sql = "SELECT COUNT(*) AS total FROM bookings b "
+				+ "INNER JOIN travel_packages p ON b.package_id = p.package_id " + "WHERE 1=1";
+
+		if (agencyId != null)
+			sql += " AND p.agency_id = ?";
+		if (userId != null)
+			sql += " AND b.user_id = ?";
+		if (packageId != null)
+			sql += " AND b.package_id = ?";
+		if (noOfTravellers != null)
+			sql += " AND b.no_of_travellers = ?";
+		if (status != null && !status.isEmpty())
+			sql += " AND b.status = ?";
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) BETWEEN ? AND ?";
+		} else if (startDate != null && !startDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) >= ?";
+		} else if (endDate != null && !endDate.isEmpty()) {
+			sql += " AND DATE(b.booking_date) <= ?";
+		}
+
+		preparedStatement = connection.prepareStatement(sql);
+
+		int index = 1;
+		if (agencyId != null)
+			preparedStatement.setInt(index++, agencyId);
+		if (userId != null)
+			preparedStatement.setInt(index++, userId);
+		if (packageId != null)
+			preparedStatement.setInt(index++, packageId);
+		if (noOfTravellers != null)
+			preparedStatement.setInt(index++, noOfTravellers);
+		if (status != null && !status.isEmpty())
+			preparedStatement.setString(index++, status);
+
+		if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (startDate != null && !startDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		} else if (endDate != null && !endDate.isEmpty()) {
+			preparedStatement.setDate(index++,
+					Date.valueOf(LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+		}
+
+		resultSet = preparedStatement.executeQuery();
+		if (resultSet.next()) {
+			count = resultSet.getInt("total");
+		}
+
+		return count;
+	}
 
 	@Override
-	public boolean cancelBooking(int bookingId) throws Exception {
+	public boolean cancelBooking(Integer bookingId) throws Exception {
 		return updateBookingStatus(bookingId, "CANCELLED");
 	}
 
 	@Override
-	public void decrementTravelerCount(int bookingId) throws Exception {
+	public void decrementTravelerCount(Integer bookingId) throws Exception {
 		try {
 			preparedStatement = connection.prepareStatement(
 					"UPDATE bookings SET no_of_travellers = no_of_travellers - 1 WHERE booking_id = ?");
@@ -239,37 +237,6 @@ public class BookingDAOImpl implements IBookingDAO {
 			e.printStackTrace();
 			throw e;
 		}
-	}
-
-	@Override
-	public int getTotalBookingsByPackage(int packageId) throws Exception {
-		int totalBookings = 0;
-		String sql = "SELECT SUM(no_of_travellers) as totalBookings FROM bookings WHERE package_id = ?";
-		try (Connection conn = DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-			ps.setInt(1, packageId);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				totalBookings = rs.getInt("totalBookings");
-			}
-		}
-		return totalBookings;
-	}
-
-	@Override
-	public double getRevenueByPackage(int packageId) throws Exception {
-		double totalRevenue = 0;
-		String sql = "SELECT SUM(amount) as revenue FROM payments p "
-				+ "JOIN bookings b ON p.booking_id = b.booking_id " + "WHERE b.package_id = ?";
-		try (Connection conn = DatabaseConfig.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-			ps.setInt(1, packageId);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				totalRevenue = rs.getDouble("revenue");
-			}
-		}
-		return totalRevenue;
 	}
 
 }

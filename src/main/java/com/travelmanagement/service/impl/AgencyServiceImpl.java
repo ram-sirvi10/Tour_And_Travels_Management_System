@@ -24,7 +24,7 @@ public class AgencyServiceImpl implements IAgencyService {
 		Agency dbAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
 		if (dbAgency == null) {
 			throw new UserNotFoundException("Agency not found!");
-		}
+		}System.out.println("agency password in dp login "+dbAgency.getPassword());
 		if (!PasswordHashing.checkPassword(dto.getPassword(), dbAgency.getPassword())) {
 			throw new BadRequestException("Invalid password ! ");
 		}
@@ -79,7 +79,7 @@ public class AgencyServiceImpl implements IAgencyService {
 //  
 
 	@Override
-	public AgencyResponseDTO getAgencyById(int agencyId) throws Exception {
+	public AgencyResponseDTO getAgencyById(Integer agencyId) throws Exception {
 		Agency agency = agencyDAO.getAgencyById(agencyId);
 		if (agency == null) {
 			throw new UserNotFoundException("Agency not found with ID: " + agencyId);
@@ -87,6 +87,11 @@ public class AgencyServiceImpl implements IAgencyService {
 		return Mapper.mapAgencyToAgencyResponseDTO(agency);
 	}
 
+	@Override
+	public boolean changePassword(Integer agencyId, String newPassword) throws Exception {
+		String hashedPassword = PasswordHashing.ecryptPassword(newPassword);
+		return agencyDAO.changePassword(agencyId, hashedPassword);
+	}
 //    @Override
 //    public AgencyResponseDTO getAgencyByEmail(String email) throws Exception {
 //        Agency agency = agencyDAO.getAgencyByEmail(email);
@@ -96,39 +101,40 @@ public class AgencyServiceImpl implements IAgencyService {
 //        return Mapper.mapAgencyToAgencyResponseDTO(agency);
 //    }
 
+//	@Override
+//	public List<AgencyResponseDTO> getAllAgencies(int limit, int offset) throws Exception {
+//		List<Agency> agencies = agencyDAO.getAllAgencies(limit, offset);
+//		if (agencies == null) {
+//			agencies = new ArrayList<>();
+//		}
+//		List<AgencyResponseDTO> responseList = new ArrayList<>();
+//		for (Agency a : agencies) {
+//			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+//		}
+//		return responseList;
+//	}
+//
+//	@Override
+//	public List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
+//
+//		List<Agency> agencies = agencyDAO.getAgenciesByStatus(status.toUpperCase(), limit, offset);
+//		System.out.println("agency service agencyListBy status " + agencies.toString());
+//		List<AgencyResponseDTO> responseList = new ArrayList<>();
+//		for (Agency a : agencies) {
+//			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+//		}
+//
+//		return responseList;
+//	}
+
 	@Override
-	public List<AgencyResponseDTO> getAllAgencies(int limit, int offset) throws Exception {
-		List<Agency> agencies = agencyDAO.getAllAgencies(limit, offset);
-		if (agencies == null) {
-			agencies = new ArrayList<>();
-		}
-		List<AgencyResponseDTO> responseList = new ArrayList<>();
-		for (Agency a : agencies) {
-			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-		}
-		return responseList;
+	public boolean updateAgency(AgencyRegisterRequestDTO dto) throws Exception {
+		System.out.println("Agency Service Update Agency dto === " + dto);
+		return agencyDAO.updateAgency(Mapper.mapRegisterAgencyDtoToAgency(dto));
 	}
 
 	@Override
-	public List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception {
-
-		List<Agency> agencies = agencyDAO.getAgenciesByStatus(status.toUpperCase(), limit, offset);
-		System.out.println("agency service agencyListBy status " + agencies.toString());
-		List<AgencyResponseDTO> responseList = new ArrayList<>();
-		for (Agency a : agencies) {
-			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-		}
-
-		return responseList;
-	}
-
-	@Override
-	public boolean updateAgency(Agency agency) throws Exception {
-		return agencyDAO.updateAgency(agency);
-	}
-
-	@Override
-	public boolean deleteAgency(int agencyId) throws Exception {
+	public boolean deleteAgency(Integer agencyId) throws Exception {
 		Agency agency = agencyDAO.getAgencyById(agencyId);
 		if (agency != null) {
 			if (agency.isDelete()) {
@@ -143,7 +149,7 @@ public class AgencyServiceImpl implements IAgencyService {
 	}
 
 	@Override
-	public boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception {
+	public boolean updateAgencyActiveState(Integer agencyId, Boolean active) throws Exception {
 		Agency agency = agencyDAO.getAgencyById(agencyId);
 		if (agency != null) {
 			if (agency.isActive() == active) {
@@ -164,7 +170,7 @@ public class AgencyServiceImpl implements IAgencyService {
 	}
 
 	@Override
-	public boolean updateAgencyStatus(int agencyId, String status) throws Exception {
+	public boolean updateAgencyStatus(Integer agencyId, String status) throws Exception {
 		Agency agency = agencyDAO.getAgencyById(agencyId);
 		if (agency != null) {
 			if (agency.getStatus().equalsIgnoreCase(status)) {
@@ -182,25 +188,25 @@ public class AgencyServiceImpl implements IAgencyService {
 		return agencyDAO.updateAgencyStatus(agencyId, status);
 	}
 
-	@Override
-	public List<AgencyResponseDTO> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
-		List<Agency> agencies = agencyDAO.getDeletedAgencies(keyword, limit, offset);
-		List<AgencyResponseDTO> responseList = new ArrayList<>();
-		for (Agency a : agencies) {
-			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-		}
-		return responseList;
-	}
-
-	@Override
-	public List<AgencyResponseDTO> getAgenciesByActiveState(boolean isActive, int limit, int offset) throws Exception {
-		List<Agency> agencies = agencyDAO.getAgenciesByActiveState(isActive, limit, offset);
-		List<AgencyResponseDTO> responseList = new ArrayList<>();
-		for (Agency a : agencies) {
-			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-		}
-		return responseList;
-	}
+//	@Override
+//	public List<AgencyResponseDTO> getDeletedAgencies(String keyword, int limit, int offset) throws Exception {
+//		List<Agency> agencies = agencyDAO.getDeletedAgencies(keyword, limit, offset);
+//		List<AgencyResponseDTO> responseList = new ArrayList<>();
+//		for (Agency a : agencies) {
+//			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+//		}
+//		return responseList;
+//	}
+//
+//	@Override
+//	public List<AgencyResponseDTO> getAgenciesByActiveState(Boolean isActive, int limit, int offset) throws Exception {
+//		List<Agency> agencies = agencyDAO.getAgenciesByActiveState(isActive, limit, offset);
+//		List<AgencyResponseDTO> responseList = new ArrayList<>();
+//		for (Agency a : agencies) {
+//			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+//		}
+//		return responseList;
+//	}
 
 	@Override
 	public List<AgencyResponseDTO> filterAgencies(String status, Boolean active, String startDate, String endDate,
@@ -214,15 +220,15 @@ public class AgencyServiceImpl implements IAgencyService {
 		return responseList;
 	}
 
-	@Override
-	public List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
-		List<Agency> agencies = agencyDAO.searchAgenciesByKeyword(keyword, limit, offset);
-		List<AgencyResponseDTO> responseList = new ArrayList<>();
-		for (Agency a : agencies) {
-			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
-		}
-		return responseList;
-	}
+//	@Override
+//	public List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception {
+//		List<Agency> agencies = agencyDAO.searchAgenciesByKeyword(keyword, limit, offset);
+//		List<AgencyResponseDTO> responseList = new ArrayList<>();
+//		for (Agency a : agencies) {
+//			responseList.add(Mapper.mapAgencyToAgencyResponseDTO(a));
+//		}
+//		return responseList;
+//	}
 
 	@Override
 	public long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword, String startDate,

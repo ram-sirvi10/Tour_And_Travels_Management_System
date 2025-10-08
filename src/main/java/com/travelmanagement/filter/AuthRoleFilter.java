@@ -1,6 +1,8 @@
 package com.travelmanagement.filter;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +19,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 //@WebFilter({ "/AdminServlet/*", "/AgencyServlet/*", "/UserServlet/*", "/BookingServlet/*", "/PackageServlet/*" })
 //public class AuthRoleFilter implements Filter {
@@ -143,13 +145,28 @@ public class AuthRoleFilter implements Filter {
 
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
 		String path = req.getRequestURI();
-		String button = req.getParameter("button"); // get the button param
+		String button = req.getParameter("button");
+		String agencyName = req.getParameter("agencyName");
 		if (button == null) {
 			button = req.getParameter("action");
 		}
 		if (button != null)
 			button = button.trim();
+
+		if (req.getContentType() != null && req.getContentType().startsWith("multipart/")) {
+			for (Part part : req.getParts()) {
+				if ("button".equals(part.getName())) {
+					InputStream is = part.getInputStream();
+					byte[] bytes = is.readAllBytes();
+					button = new String(bytes, StandardCharsets.UTF_8).trim();
+					break;
+				}
+			}
+		}
+
 		System.out.println("filter button value -> " + button);
+		System.out.println("filter agency_name value -> " + agencyName);
+
 		String context = req.getContextPath();
 
 		Map<String, List<String>> adminAccess = new HashMap<>();
@@ -160,8 +177,9 @@ public class AuthRoleFilter implements Filter {
 //		adminAccess.put(context + "/user", List.of("dashboard"));
 
 		Map<String, List<String>> subAdminAccess = new HashMap<>();
-		subAdminAccess.put(context + "/agency", List.of("dashboard", "addPackage", "managePackages", "addSchedule",
-				"packageAction", "editPackageForm","updatePackage"));
+		subAdminAccess.put(context + "/agency",
+				List.of("dashboard", "addPackage", "managePackages", "addSchedule", "packageAction", "editPackageForm",
+						"updatePackage", "updateProfile", "updateProfilePage", "viewProfile"));
 		subAdminAccess.put(context + "/booking", List.of("bookingHistroy", "viewTravelers", "viewBookings"));
 		subAdminAccess.put(context + "/package", List.of("viewPackages"));
 		subAdminAccess.put(context + "/user", List.of("viewUsers"));

@@ -9,32 +9,29 @@ import com.travelmanagement.model.Agency;
 
 public interface IAgencyService {
 
-    AgencyResponseDTO register(AgencyRegisterRequestDTO dto) throws Exception;
+	AgencyResponseDTO register(AgencyRegisterRequestDTO dto) throws Exception;
 
-    AgencyResponseDTO login(LoginRequestDTO dto) throws Exception;
+	AgencyResponseDTO login(LoginRequestDTO dto) throws Exception;
 
-	boolean deleteAgency(int agencyId) throws Exception;
+	boolean deleteAgency(Integer agencyId) throws Exception;
 
-	boolean updateAgency(Agency agency) throws Exception;
-
-	List<AgencyResponseDTO> getAllAgencies(int limit,int offset) throws Exception;
+//	List<AgencyResponseDTO> getAllAgencies(int limit, int offset) throws Exception;
 
 	AgencyResponseDTO getAgencyByEmail(String email) throws Exception;
 
-	AgencyResponseDTO getAgencyById(int agencyId) throws Exception;
+	AgencyResponseDTO getAgencyById(Integer agencyId) throws Exception;
 
-	boolean updateAgencyActiveState(int agencyId, boolean active) throws Exception;
+	boolean updateAgencyActiveState(Integer agencyId, Boolean active) throws Exception;
 
-	List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception;
+//	List<AgencyResponseDTO> getAgenciesByStatus(String status, int limit, int offset) throws Exception;
 
-	boolean updateAgencyStatus(int agencyId, String status) throws Exception;
+	boolean updateAgencyStatus(Integer agencyId, String status) throws Exception;
 
-	List<AgencyResponseDTO> getAgenciesByActiveState(boolean isActive, int limit, int offset) throws Exception;
-
-	List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception;
-
-	
-	List<AgencyResponseDTO> getDeletedAgencies(String keyword, int limit, int offset) throws Exception;
+//	List<AgencyResponseDTO> getAgenciesByActiveState(Boolean isActive, int limit, int offset) throws Exception;
+//
+//	List<AgencyResponseDTO> searchAgenciesByKeyword(String keyword, int limit, int offset) throws Exception;
+//
+//	List<AgencyResponseDTO> getDeletedAgencies(String keyword, int limit, int offset) throws Exception;
 
 	AgencyResponseDTO getAgencyByRegistrationNumber(String regNo) throws Exception;
 
@@ -43,5 +40,9 @@ public interface IAgencyService {
 
 	long countAgencies(String status, Boolean activeState, Boolean isDeleted, String keyword, String startDate,
 			String endDate) throws Exception;
+
+	boolean updateAgency(AgencyRegisterRequestDTO dto) throws Exception;
+
+	boolean changePassword(Integer agencyId, String newPassword) throws Exception;
 
 }

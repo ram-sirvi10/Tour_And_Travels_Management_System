@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class Payment {
 
-	private int paymentId;
-	private int bookingId;
+	private Integer paymentId;
+	private Integer bookingId;
 	private LocalDateTime paymentDate;
 	private String status;
-	private double amount;
+	private Double amount;
 	private String razorpayPaymentId;
 
 	public String getRazorpayPaymentId() {
@@ -19,19 +19,19 @@ public class Payment {
 		this.razorpayPaymentId = razorpayPaymentId;
 	}
 
-	public int getPaymentId() {
+	public Integer getPaymentId() {
 		return paymentId;
 	}
 
-	public void setPaymentId(int paymentId) {
+	public void setPaymentId(Integer paymentId) {
 		this.paymentId = paymentId;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
@@ -51,11 +51,11 @@ public class Payment {
 		this.status = status;
 	}
 
-	public double getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

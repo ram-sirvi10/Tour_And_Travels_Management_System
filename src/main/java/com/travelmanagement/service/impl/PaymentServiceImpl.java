@@ -51,7 +51,7 @@ public class PaymentServiceImpl implements IPaymentService {
 	}
 
 	@Override
-	public int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
+	public long getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
 			String startDate, String endDate) throws Exception {
 
 		return paymentDAO.getPaymentHistoryCount(userId, agencyId, packageId, status, startDate, endDate);

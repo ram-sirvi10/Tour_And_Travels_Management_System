@@ -28,6 +28,7 @@ public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 					"INSERT INTO package_schedule(package_id, day_number, activity, description) VALUES (?, ?, ?, ?)");
 
 			for (PackageSchedule s : schedules) {
+				System.out.println("Packages id in scheulde impl "+ s.getPackageId());
 				preparedStatement.setInt(1, s.getPackageId());
 				preparedStatement.setInt(2, s.getDayNumber());
 				preparedStatement.setString(3, s.getActivity());
@@ -111,22 +112,22 @@ public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 		return success;
 	}
 
-	@Override
-	public boolean deleteSchedule(int scheduleId) throws Exception {
-		String sql = "DELETE FROM package_schedule WHERE schedule_id=?";
-		try {
-			Connection con = DatabaseConfig.getConnection();
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setInt(1, scheduleId);
-			return ps.executeUpdate() > 0;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+//	@Override
+//	public boolean deleteSchedule(Integer scheduleId) throws Exception {
+//		String sql = "DELETE FROM package_schedule WHERE schedule_id=?";
+//		try {
+//			Connection con = DatabaseConfig.getConnection();
+//			PreparedStatement ps = con.prepareStatement(sql);
+//			ps.setInt(1, scheduleId);
+//			return ps.executeUpdate() > 0;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return false;
+//	}
 
 	@Override
-	public List<PackageSchedule> getScheduleByPackage(int packageId) throws Exception {
+	public List<PackageSchedule> getScheduleByPackage(Integer packageId) throws Exception {
 		List<PackageSchedule> schedules = new ArrayList<>();
 		String sql = "SELECT * FROM package_schedule WHERE package_id=? ORDER BY day_number";
 		try {

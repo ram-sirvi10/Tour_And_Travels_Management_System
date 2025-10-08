@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class PaymentResponseDTO {
 
-	private int paymentId;
-	private int bookingId;
+	private Integer paymentId;
+	private Integer bookingId;
 	private LocalDateTime paymentDate;
 	private String status;
-	private double amount;
+	private Double amount;
 	private String packageName;
 	private String razorpayPaymentId;
 
@@ -19,7 +19,7 @@ public class PaymentResponseDTO {
 	public void setRazorpayPaymentId(String razorpayPaymentId) {
 		this.razorpayPaymentId = razorpayPaymentId;
 	}
-	public int getPaymentId() {
+	public Integer getPaymentId() {
 		return paymentId;
 	}
 
@@ -31,15 +31,15 @@ public class PaymentResponseDTO {
 		this.packageName = packageName;
 	}
 
-	public void setPaymentId(int paymentId) {
+	public void setPaymentId(Integer paymentId) {
 		this.paymentId = paymentId;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
@@ -59,11 +59,11 @@ public class PaymentResponseDTO {
 		this.status = status;
 	}
 
-	public double getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 

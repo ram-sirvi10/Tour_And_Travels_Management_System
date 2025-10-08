@@ -45,8 +45,11 @@ public class PackageServiceImpl implements IPackageService {
 			List<PackageScheduleRequestDTO> schedules = dto.getPackageSchedule();
 			List<PackageSchedule> packageSchedules = new ArrayList<PackageSchedule>();
 			for (PackageScheduleRequestDTO schedule : schedules) {
+				System.err.println("<----- in PackageServiceImpl package id after package  add ------- > ");
+				System.out.println(packageId);
 				PackageSchedule packageSchedule = Mapper.mapPackageScheduleRequestDTOToModel(schedule);
-				schedule.setPackageId(packageId);
+				packageSchedule.setPackageId(packageId);
+				System.err.println("(packageservice) Package IDs in package Schudle for add package schedule  " + schedule.getPackageId());
 				packageSchedules.add(packageSchedule);
 			}
 
@@ -63,7 +66,7 @@ public class PackageServiceImpl implements IPackageService {
 	}
 
 	@Override
-	public List<PackageScheduleResponseDTO> getScheduleByPackage(int packageId) {
+	public List<PackageScheduleResponseDTO> getScheduleByPackage(Integer packageId) {
 		List<PackageScheduleResponseDTO> packageScheduleResponseDTOs = new ArrayList<PackageScheduleResponseDTO>();
 		try {
 			List<PackageSchedule> packageSchedule = scheduleDAO.getScheduleByPackage(packageId);
@@ -77,16 +80,16 @@ public class PackageServiceImpl implements IPackageService {
 		return packageScheduleResponseDTOs;
 	}
 
-	public void createPackage(PackageRegisterDTO dto) throws Exception {
-		Packages pkg = Mapper.mapToModel(dto);
-		validatePackage(pkg);
-		packageDAO.addPackage(pkg);
-	}
+//	public void createPackage(PackageRegisterDTO dto) throws Exception {
+//		Packages pkg = Mapper.mapToModel(dto);
+//		validatePackage(pkg);
+//		packageDAO.addPackage(pkg);
+//	}
 
 	public boolean updatePackage(PackageRegisterDTO dto) throws Exception {
 
 		Packages pkg = Mapper.mapToModel(dto);
-System.out.println("Package details in packageservice update --> "+pkg);
+		System.out.println("Package details in packageservice update --> " + pkg);
 
 		boolean packageUpdated = packageDAO.updatePackage(pkg);
 		System.out.println("Update Package In  Package service--> " + packageUpdated);
@@ -126,58 +129,55 @@ System.out.println("Package details in packageservice update --> "+pkg);
 		return updatePackageSchedules;
 	}
 
-	// -------------------- Delete Package --------------------
 	@Override
-	public boolean deletePackage(int id) throws Exception {
+	public boolean deletePackage(Integer id) throws Exception {
 		return packageDAO.deletePackage(id);
 	}
 
-	// -------------------- Toggle Package Status --------------------
-	public boolean togglePackageStatus(int packageId) throws Exception {
+	public boolean togglePackageStatus(Integer packageId) throws Exception {
 		return packageDAO.togglePackageStatus(packageId);
 	}
 
-	// -------------------- Private Validation --------------------
-	private void validatePackage(Packages pkg) throws Exception {
-		if (!ValidationUtil.isValidName(pkg.getTitle()))
-			throw new Exception("Invalid Title");
-		if (!ValidationUtil.isValidPrice(String.valueOf(pkg.getPrice())))
-			throw new Exception("Invalid Price");
-		if (!ValidationUtil.isValidName(pkg.getLocation()))
-			throw new Exception("Invalid Location");
-		if (pkg.getDuration() <= 0)
-			throw new Exception("Invalid Duration");
-	}
+//	private void validatePackage(Packages pkg) throws Exception {
+//		if (!ValidationUtil.isValidName(pkg.getTitle()))
+//			throw new Exception("Invalid Title");
+//		if (!ValidationUtil.isValidPrice(String.valueOf(pkg.getPrice())))
+//			throw new Exception("Invalid Price");
+//		if (!ValidationUtil.isValidName(pkg.getLocation()))
+//			throw new Exception("Invalid Location");
+//		if (pkg.getDuration() <= 0)
+//			throw new Exception("Invalid Duration");
+//	}
+
+//	@Override
+//	public List<PackageResponseDTO> getAllPackages(Integer agencyId) throws Exception {
+//		List<Packages> list = packageDAO.getAllPackages();
+//		List<PackageResponseDTO> dtoList = new ArrayList<>();
+//		for (Packages p : list) {
+//			if (agencyId == 0 || p.getAgencyId() == agencyId) {
+//				dtoList.add(Mapper.toResponseDTO(p));
+//			}
+//		}
+//		return dtoList;
+//	}
+
+//	@Override
+//	public List<PackageResponseDTO> searchPackagesByKeyword(String keyword) throws Exception {
+//		List<Packages> all = packageDAO.getAllPackages();
+//		List<PackageResponseDTO> filtered = new ArrayList<>();
+//		if (keyword != null && !keyword.isEmpty()) {
+//			for (Packages p : all) {
+//				if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
+//						|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
+//					filtered.add(Mapper.toResponseDTO(p));
+//				}
+//			}
+//		}
+//		return filtered;
+//	}
 
 	@Override
-	public List<PackageResponseDTO> getAllPackages(int agencyId) throws Exception {
-		List<Packages> list = packageDAO.getAllPackages();
-		List<PackageResponseDTO> dtoList = new ArrayList<>();
-		for (Packages p : list) {
-			if (agencyId == 0 || p.getAgencyId() == agencyId) {
-				dtoList.add(Mapper.toResponseDTO(p));
-			}
-		}
-		return dtoList;
-	}
-
-	@Override
-	public List<PackageResponseDTO> searchPackagesByKeyword(String keyword) throws Exception {
-		List<Packages> all = packageDAO.getAllPackages();
-		List<PackageResponseDTO> filtered = new ArrayList<>();
-		if (keyword != null && !keyword.isEmpty()) {
-			for (Packages p : all) {
-				if (p.getTitle().toLowerCase().contains(keyword.toLowerCase())
-						|| p.getLocation().toLowerCase().contains(keyword.toLowerCase())) {
-					filtered.add(Mapper.toResponseDTO(p));
-				}
-			}
-		}
-		return filtered;
-	}
-
-	@Override
-	public PackageResponseDTO getPackageById(int id) throws Exception {
+	public PackageResponseDTO getPackageById(Integer id) throws Exception {
 		Packages packages = packageDAO.getPackageById(id);
 		if (packages == null) {
 			throw new ResourceNotFoundException("Package not found ");
@@ -186,7 +186,7 @@ System.out.println("Package details in packageservice update --> "+pkg);
 		return Mapper.toResponseDTO(packages);
 	}
 
-	public boolean adjustSeats(int packageId, int seatsChange) throws Exception {
+	public boolean adjustSeats(Integer packageId, Integer seatsChange) throws Exception {
 		if (seatsChange == 0)
 			return true;
 		System.out.println("Package service adjust seat = " + (seatsChange));
@@ -210,23 +210,15 @@ System.out.println("Package details in packageservice update --> "+pkg);
 	}
 
 	@Override
-	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+	public long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
 			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception {
 
 		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, isActive,
 				isAgencyView);
 	}
 
-//	public boolean adjustSeatsOptimistic(int packageId, int seatsToBook) throws Exception {
-//	    PackageResponseDTO pkg = getPackageById(packageId);
-//	    if (pkg == null) return false;
-//
-//	    int updatedRows =
-//	    return updatedRows > 0;
-//	}
-
 	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {
-		// TODO Auto-generated method stub
+
 		try {
 			return packageDAO.updateSeatsOptimistic(packageId, noOfTravellers, version);
 		} catch (Exception e) {

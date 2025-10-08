@@ -7,20 +7,20 @@ import com.travelmanagement.model.Traveler;
 public interface ITravelerDAO {
 	boolean createTravelers(List<Traveler> travelers) throws Exception;
 
-	Traveler getTravelerById(int travelerId) throws Exception;
+	Traveler getTravelerById(Integer travelerId) throws Exception;
 
 	boolean updateTraveler(Traveler traveler) throws Exception;
 
-	boolean deleteTraveler(int travelerId) throws Exception;
+	boolean deleteTraveler(Integer travelerId) throws Exception;
 
 	List<Traveler> getAllTravelers(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
 			Integer agencyId,  String bookingStatus, String keyword,
 			 int limit, int offset) throws Exception;
 
-	int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId, Integer agencyId,
+	long getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId, Integer agencyId,
 			 String bookingStatus,  String keyword) throws Exception;
 
-	boolean isTravelerAlreadyBooked(String email, int packageId) throws Exception;
+	boolean isTravelerAlreadyBooked(String email, Integer packageId) throws Exception;
 
 	void updateTravelerStatus(Integer travelerId, Integer bookingId, String status) throws Exception;
 }

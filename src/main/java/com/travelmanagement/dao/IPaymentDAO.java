@@ -7,16 +7,16 @@ public interface IPaymentDAO {
 
     boolean createPayment(Payment payment) throws Exception;
 
-    Payment getPaymentById(int id) throws Exception;
+    Payment getPaymentById(Integer id) throws Exception;
 
-    Payment getPaymentByBookingId(int bookingId) throws Exception;
+    Payment getPaymentByBookingId(Integer bookingId) throws Exception;
 
-    boolean updatePaymentStatus(int paymentId, String status) throws Exception;
+    boolean updatePaymentStatus(Integer paymentId, String status) throws Exception;
 
 	List<Payment> getPaymentHistory(Integer userId, Integer agencyId, Integer packageId, String status,
 			String startDate, String endDate, int limit, int offset) throws Exception;
 
-	int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status, String startDate,
+	long getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status, String startDate,
 			String endDate) throws Exception;
 
 	

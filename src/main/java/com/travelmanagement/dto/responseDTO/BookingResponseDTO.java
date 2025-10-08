@@ -5,16 +5,16 @@ import java.util.List;
 
 public class BookingResponseDTO {
 
-	private int bookingId;
-	private int userId;
-	private int packageId;
+	private Integer bookingId;
+	private Integer userId;
+	private Integer packageId;
 	private LocalDateTime bookingDate;
 	private String status;
-	private int noOfTravellers;
+	private Integer noOfTravellers;
 	private String packageName;
 	private String packageImage;
-	private int duration;
-	private double amount;
+	private Integer duration;
+	private Double amount;
 	private LocalDateTime created_at;
 	private LocalDateTime departureDateAndTime;
 	private LocalDateTime lastBookingDate;
@@ -78,51 +78,51 @@ public class BookingResponseDTO {
 		this.packageImage = packageImage;
 	}
 
-	public int getDuration() {
+	public Integer getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public void setDuration(Integer duration) {
 		this.duration = duration;
 	}
 
-	public double getAmount() {
+	public Double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 
-	public int getNoOfTravellers() {
+	public Integer getNoOfTravellers() {
 		return noOfTravellers;
 	}
 
-	public void setNoOfTravellers(int noOfTravellers) {
+	public void setNoOfTravellers(Integer noOfTravellers) {
 		this.noOfTravellers = noOfTravellers;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 

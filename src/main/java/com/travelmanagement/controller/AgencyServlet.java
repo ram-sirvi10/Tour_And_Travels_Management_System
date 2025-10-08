@@ -8,26 +8,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
 import com.travelmanagement.dto.requestDTO.PackageScheduleRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
+import com.travelmanagement.dto.responseDTO.UserResponseDTO;
+import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
+import com.travelmanagement.service.impl.UserServiceImpl;
+import com.travelmanagement.util.CloudinaryUtil;
 import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.Mapper;
+import com.travelmanagement.util.PasswordHashing;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @WebServlet("/agency")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
+		maxFileSize = 1024 * 1024 * 5, // 5 MB
+		maxRequestSize = 1024 * 1024 * 10 // 10 MB
+)
 public class AgencyServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -35,6 +48,7 @@ public class AgencyServlet extends HttpServlet {
 	private BookingServiceImpl bookingService = new BookingServiceImpl();
 	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
 	private AuthServiceImpl authServiceImpl = new AuthServiceImpl();
+	private AgencyServiceImpl agencyServiceImpl = new AgencyServiceImpl();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -79,7 +93,18 @@ public class AgencyServlet extends HttpServlet {
 			case "updatePackage":
 				updatePackage(request, response, agency);
 				break;
-
+			case "updateProfile":
+				updateProfile(request, response);
+				break;
+			case "viewProfile":
+				request.getRequestDispatcher("template/agency/profileManagement.jsp").forward(request, response);
+				return;
+			case "updateProfilePage":
+				request.getRequestDispatcher("template/agency/updateprofile.jsp").forward(request, response);
+				return;
+			case "changePassword":
+				changePassword(request, response);
+				return;
 			default:
 				showDashboard(request, response, agency);
 				break;
@@ -89,6 +114,102 @@ public class AgencyServlet extends HttpServlet {
 			request.setAttribute("error", "Something went wrong: " + e.getMessage());
 			request.getRequestDispatcher("error.jsp").forward(request, response);
 		}
+	}
+
+	public void changePassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String newPassword = request.getParameter("newPassword");
+		String confirmPassword = request.getParameter("confirmPassword");
+		String oldPassword = request.getParameter("oldPassword");
+		HttpSession session = request.getSession();
+		AuthServiceImpl authService = new AuthServiceImpl();
+		AgencyResponseDTO loginAgency = (AgencyResponseDTO) session.getAttribute("agency");
+		try {
+			AgencyResponseDTO dbAgency = agencyServiceImpl.getAgencyById(loginAgency.getAgencyId());
+			Map<String, String> errors = authService.validateChangePassword(newPassword, confirmPassword, oldPassword);
+
+			System.out.println("old pass" + oldPassword);
+			System.out.println("dp pass" + dbAgency.getPassword());
+			if (oldPassword != null && !oldPassword.isEmpty()) {
+				if (!PasswordHashing.checkPassword(oldPassword, dbAgency.getPassword())) {
+					errors.put("oldPassword", Constants.ERROR_OLD_PASSWORD);
+				}
+			}
+
+			if (!errors.isEmpty()) {
+				request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
+				request.setAttribute("errors", errors);
+				request.getRequestDispatcher("template/agency/profileManagement.jsp").forward(request, response);
+				return;
+			}
+
+			boolean updated = agencyServiceImpl.changePassword(loginAgency.getAgencyId(), newPassword);
+			if (updated) {
+				request.setAttribute("successMessage", Constants.SUCCESS_PASSWORD_CHANGE);
+			} else {
+				request.setAttribute("errorMessage", Constants.ERROR_PASSWORD_CHANGE);
+			}
+			request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
+			request.getRequestDispatcher("template/agency/profileManagement.jsp").forward(request, response);
+			return;
+		} catch (Exception e) {
+			request.setAttribute("errorMessage", e.getMessage());
+			request.setAttribute("actionType", Constants.ACTION_CHANGE_PASSWORD);
+			request.getRequestDispatcher("template/agency/profileManagement.jsp").forward(request, response);
+			e.printStackTrace();
+			return;
+		}
+	}
+
+	private void updateProfile(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException, Exception {
+		HttpSession session = request.getSession();
+		AgencyResponseDTO currentAgency = (AgencyResponseDTO) session.getAttribute("agency");
+
+		AgencyRegisterRequestDTO dto = new AgencyRegisterRequestDTO();
+		dto.setAgencyId(currentAgency.getAgencyId());
+		dto.setAgencyName(request.getParameter("agencyName"));
+		dto.setOwnerName(request.getParameter("ownerName"));
+		dto.setPhone(request.getParameter("phone"));
+		dto.setCountry(request.getParameter("country"));
+		dto.setState(request.getParameter("state"));
+		dto.setCity(request.getParameter("city"));
+		dto.setArea(request.getParameter("area"));
+		dto.setPincode(request.getParameter("pincode"));
+
+		try {
+			Part filePart = request.getPart("profileImage");
+			if (filePart != null && filePart.getSize() > 0) {
+				String imageUrl = CloudinaryUtil.uploadImage(filePart);
+				if (imageUrl != null) {
+					dto.setImageurl(imageUrl);
+				} else
+					dto.setImageurl(currentAgency.getImageurl());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Map<String, String> errors = authServiceImpl.validateUpdateAgencyDto(dto);
+
+		if (!errors.isEmpty()) {
+			request.setAttribute("errors", errors);
+			request.setAttribute("formData", dto);
+			request.getRequestDispatcher("/template/agency/updateprofile.jsp").forward(request, response);
+			return;
+		}
+
+		boolean updated = agencyServiceImpl.updateAgency(dto);
+		System.out.println("Agency Servlet Update Agency profile === " + updated);
+		System.out.println("Agency Servlet Update Agency dto === " + dto);
+		if (updated) {
+			session.setAttribute("agency", agencyServiceImpl.getAgencyById(dto.getAgencyId()));
+			request.setAttribute("successMessage", "Profile updated successfully!");
+		} else {
+			request.setAttribute("errorMessage", "Failed to update profile!");
+		}
+
+		request.getRequestDispatcher("/template/agency/profileManagement.jsp?button=viewProfile").forward(request,
+				response);
 	}
 
 	private void editPackageForm(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
@@ -172,7 +293,18 @@ public class AgencyServlet extends HttpServlet {
 				&& !request.getParameter("last_booking_date").isEmpty()
 						? LocalDateTime.parse(request.getParameter("last_booking_date"))
 						: null);
-
+		try {
+			Part filePart = request.getPart("profileImage");
+			if (filePart != null && filePart.getSize() > 0) {
+				String imageUrl = CloudinaryUtil.uploadImage(filePart);
+				if (imageUrl != null) {
+					dto.setImageurl(imageUrl);
+				} else
+					dto.setImageurl(existingPackage.getImageurl());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		List<PackageScheduleRequestDTO> schedules = new ArrayList<>();
 		if (dto.getDuration() != null) {
 			for (int i = 1; i <= dto.getDuration(); i++) {
@@ -308,11 +440,11 @@ public class AgencyServlet extends HttpServlet {
 
 	private void showDashboard(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
 			throws Exception {
-		int totalPackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null, null,
-				true);
-		int activePackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null,
+		long totalPackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null,
+				null, true);
+		long activePackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null,
 				true, true);
-		int totalBookings = bookingService.getAllBookingsCount(agency.getAgencyId(), null, null, null, null, null,
+		long totalBookings = bookingService.getAllBookingsCount(agency.getAgencyId(), null, null, null, null, null,
 				null);
 		request.setAttribute("totalPackages", totalPackages);
 		request.setAttribute("activePackages", activePackages);
@@ -350,6 +482,18 @@ public class AgencyServlet extends HttpServlet {
 		if (request.getParameter("last_booking_date") != null && !request.getParameter("last_booking_date").isEmpty())
 			packageRegisterDTO.setLastBookingDate(LocalDateTime.parse(request.getParameter("last_booking_date")));
 
+		try {
+			Part filePart = request.getPart("profileImage");
+			if (filePart != null && filePart.getSize() > 0) {
+				String imageUrl = CloudinaryUtil.uploadImage(filePart);
+				if (imageUrl != null) {
+					packageRegisterDTO.setImageurl(imageUrl);
+				} else
+					packageRegisterDTO.setImageurl(null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		List<PackageScheduleRequestDTO> schedules = new ArrayList<>();
 		if (packageRegisterDTO.getDuration() != null) {
 			for (int i = 1; i <= packageRegisterDTO.getDuration(); i++) {
@@ -378,7 +522,7 @@ public class AgencyServlet extends HttpServlet {
 		}
 
 		int packageId = packageService.addPackage(packageRegisterDTO);
-		response.sendRedirect("agency?button=managePackages");
+		response.sendRedirect("agency?button=viewPackages");
 		return;
 	}
 
@@ -431,7 +575,7 @@ public class AgencyServlet extends HttpServlet {
 			pkg.setPackageSchedule(schedule);
 		}
 
-		int totalPackages = packageService.countPackages(title, agency.getAgencyId(), location, keyword,
+		long totalPackages = packageService.countPackages(title, agency.getAgencyId(), location, keyword,
 				start != null ? start.toString() : null, end != null ? end.toString() : null, null, active, true);
 		System.out.println("Manage package Total pakages = -> " + totalPackages);
 		int totalPages = (int) Math.ceil((double) totalPackages / limit);

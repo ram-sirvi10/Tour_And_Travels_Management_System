@@ -7,6 +7,13 @@
 	import="com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
+<%@ page
+	import="java.time.LocalDateTime, java.time.ZoneId, java.time.ZonedDateTime, java.time.format.DateTimeFormatter"%>
+
+<%
+ZoneId istZone = ZoneId.of("Asia/Kolkata");
+DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a"); // Example: 08-Oct-2025 03:30 PM
+%>
 <button type="button" class="btn btn-secondary mb-3"
 	onclick="window.history.back();">Back</button>
 
@@ -155,10 +162,21 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				lastBookingDate = pkg.getLastBookingDate();
 				%>
 
+				<%
+				String lastBookingIST = "N/A";
+				if (lastBookingDate != null) {
+					lastBookingIST = lastBookingDate.atZone(ZoneId.systemDefault()) // backend ka timezone
+					.withZoneSameInstant(istZone) // IST me convert
+					.format(displayFormatter); // 12-hour format
+				}
+				%>
+
+
+
 				<div class="mt-2 p-2 bg-light rounded shadow-sm text-center">
 					<small class="d-block fw-bold">Last Booking Till:</small> <small
-						class="d-block"><%=lastBookingDate != null ? lastBookingDate.toLocalDate() + " " + lastBookingDate.toLocalTime() : "N/A"%></small>
-					<small class="d-block text-danger"
+						class="d-block"><%=lastBookingIST%></small> <small
+						class="d-block text-danger"
 						id="lastbooking-countdown-<%=pkg.getPackageId()%>"></small>
 				</div>
 
@@ -200,16 +218,20 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 				<p class="mb-1">
 					<i class="fas fa-chair"></i> Available Seats:
 					<%=pkg.getTotalSeats()%></p>
+				<%
+				String departureDateTimeIST = "Not specified";
+				if (pkg.getDepartureDate() != null) {
+					departureDateTimeIST = pkg.getDepartureDate().atZone(ZoneId.systemDefault()) // backend ka timezone
+					.withZoneSameInstant(istZone) // IST me convert
+					.format(displayFormatter); // 12-hour format
+				}
+				%>
+
 				<p>
-					<strong>Departure Date:</strong>
+					<strong>Departure Date & Time </strong>
+					<%=departureDateTimeIST%>
+				</p>
 
-					<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
-
-
-				<p>
-					<strong>Departure Time:</strong>
-
-					<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
 
 
 				<form action="<%=request.getContextPath()%>/booking" method="post">
@@ -333,15 +355,10 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 								<strong>Description:</strong>
 								<%=pkg.getDescription()%></p>
 							<p>
-								<strong>Departure Date:</strong>
+								<strong>Departure Date & Time :</strong>
+								<%=departureDateTimeIST%>
+							</p>
 
-								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalDate() : "Not specified"%></p>
-
-
-							<p>
-								<strong>Departure Time:</strong>
-
-								<%=pkg.getDepartureDate() != null ? pkg.getDepartureDate().toLocalTime() : "Not specified"%></p>
 						</div>
 					</div>
 				</div>

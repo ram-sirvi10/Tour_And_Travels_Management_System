@@ -10,25 +10,23 @@ public interface IPackageDAO {
 	
 	
 
-	boolean deletePackage(int packageId) throws Exception;
+	boolean deletePackage(Integer packageId) throws Exception;
 
-	boolean togglePackageStatus(int packageId) throws Exception;
+	boolean togglePackageStatus(Integer packageId) throws Exception;
 
 	List<Packages> getAllPackages() throws Exception;
 
-	Packages getPackageById(int packageId) throws Exception;
+	Packages getPackageById(Integer packageId) throws Exception;
 
-	boolean adjustSeats(int packageId, int seatsChange) throws Exception;
+	boolean adjustSeats(Integer packageId, Integer seatsChange) throws Exception;
 
 
-//	int updateSeatsOptimistic(int packageId, int seatsToBook, int version) throws Exception;
-
-	int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
+	long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
 			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
 
 	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
 			String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset, Boolean isAgencyView)
 			throws Exception;
 
-	int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) throws Exception;
+	int updateSeatsOptimistic(Integer packageId, Integer seatsToBook, Integer currentVersion) throws Exception;
 }

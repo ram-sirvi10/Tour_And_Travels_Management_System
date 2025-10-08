@@ -219,30 +219,6 @@ public class AuthServiceImpl implements IAuthService {
 			errors.put("phone", "Invalid phone number");
 		}
 
-		if (dto.getCity() == null || dto.getCity().trim().isEmpty()) {
-			errors.put("city", "City cannot be empty");
-		} else if (!ValidationUtil.isValidCityOrState(dto.getCity())) {
-			errors.put("city", "Invalid city");
-		}
-
-		if (dto.getState() == null || dto.getState().trim().isEmpty()) {
-			errors.put("state", "State cannot be empty");
-		} else if (!ValidationUtil.isValidCityOrState(dto.getState())) {
-			errors.put("state", "Invalid state");
-		}
-
-		if (dto.getCountry() == null || dto.getCountry().trim().isEmpty()) {
-			errors.put("country", "Country cannot be empty");
-		} else if (!ValidationUtil.isValidCityOrState(dto.getCountry())) {
-			errors.put("country", "Invalid country");
-		}
-
-		if (dto.getPincode() == null || dto.getPincode().trim().isEmpty()) {
-			errors.put("pincode", "Pincode cannot be empty");
-		} else if (!ValidationUtil.isValidPincode(dto.getPincode())) {
-			errors.put("pincode", "Invalid pincode");
-		}
-
 		if (dto.getRegistrationNumber() == null || dto.getRegistrationNumber().trim().isEmpty()) {
 			errors.put("registrationNumber", "Registration number cannot be empty");
 		} else if (!ValidationUtil.isValidRegistrationNumber(dto.getRegistrationNumber())) {
@@ -283,7 +259,30 @@ public class AuthServiceImpl implements IAuthService {
 		return errors;
 	}
 
-	
+	public Map<String, String> validateUpdateAgencyDto(AgencyRegisterRequestDTO dto) {
+		Map<String, String> errors = new HashMap<>();
+
+		if (dto.getAgencyName() == null || dto.getAgencyName().trim().isEmpty()) {
+			errors.put("agencyName", "Agency name cannot be empty");
+		} else if (!ValidationUtil.isValidName(dto.getAgencyName())) {
+			errors.put("agencyName", "Invalid agency name");
+		}
+
+		if (dto.getOwnerName() == null || dto.getOwnerName().trim().isEmpty()) {
+			errors.put("ownerName", "Owner name cannot be empty");
+		} else if (!ValidationUtil.isValidName(dto.getOwnerName())) {
+			errors.put("ownerName", "Invalid owner name");
+		}
+		if (dto.getPhone() == null || dto.getPhone().trim().isEmpty())
+			errors.put("phone", "Phone cannot be empty");
+		if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
+			errors.put("phone", "Phone number cannot be empty");
+		} else if (!ValidationUtil.isValidMob(dto.getPhone())) {
+			errors.put("phone", "Invalid phone number");
+		}
+		errors.putAll(validateLocation(dto));
+		return errors;
+	}
 
 	public Map<String, String> validateLocation(AgencyRegisterRequestDTO dto) {
 		Map<String, String> errors = new HashMap<>();

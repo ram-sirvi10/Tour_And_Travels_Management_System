@@ -48,7 +48,7 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public BookingResponseDTO getBookingById(int bookingId) throws Exception {
+	public BookingResponseDTO getBookingById(Integer bookingId) throws Exception {
 		Booking booking = bookingDAO.getBookingById(bookingId);
 		if (booking == null) {
 			throw new BadRequestException("Booking not found with ID: " + bookingId);
@@ -57,7 +57,7 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public boolean cancelBooking(int bookingId) throws Exception {
+	public boolean cancelBooking(Integer bookingId) throws Exception {
 		Booking booking = bookingDAO.getBookingById(bookingId);
 		if (booking == null) {
 			throw new BadRequestException("Booking not found with ID: " + bookingId);
@@ -66,7 +66,7 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public boolean updateBookingStatus(int bookingId, String status) throws Exception {
+	public boolean updateBookingStatus(Integer bookingId, String status) throws Exception {
 		Booking booking = bookingDAO.getBookingById(bookingId);
 		if (booking == null) {
 			throw new BadRequestException("Booking not found with ID: " + bookingId);
@@ -92,12 +92,13 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public int getAllBookingsCount(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
+	public long getAllBookingsCount(Integer agencyId, Integer userId, Integer packageId, Integer noOfTravellers,
 			String status, String startDate, String endDate) throws Exception {
 		return bookingDAO.getAllBookingsCount(agencyId, userId, packageId, noOfTravellers, status, startDate, endDate);
 	}
 
-	public boolean hasExistingBooking(int userId, int packageId) throws Exception {
+	@Override
+	public boolean hasExistingBooking(Integer userId, Integer packageId) throws Exception {
 		List<BookingResponseDTO> existingBookings = getAllBookings(null, userId, packageId, null, null, null, null,
 				1000, 0);
 
@@ -110,7 +111,7 @@ public class BookingServiceImpl implements IBookingService {
 	}
 
 	@Override
-	public void decrementTravelerCount(int bookingId) throws Exception {
+	public void decrementTravelerCount(Integer bookingId) throws Exception {
 		bookingDAO.decrementTravelerCount(bookingId);
 		Booking booking = bookingDAO.getBookingById(bookingId);
 		if (booking.getNoOfTravellers() <= 0) {

@@ -33,7 +33,7 @@ public class TravelerServiceImpl implements ITravelerService {
 	}
 
 	@Override
-	public int getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
+	public long getTravelerCount(Integer travelerId, Integer bookingId, Integer userId, Integer packageId,
 			Integer agencyId, String bookingStatus, String keyword) throws Exception {
 		return travelerDAO.getTravelerCount(travelerId, bookingId, userId, packageId, agencyId, bookingStatus, keyword);
 	}
@@ -61,7 +61,7 @@ public class TravelerServiceImpl implements ITravelerService {
 	}
 
 	@Override
-	public TravelerResponseDTO getTravelerById(int travelerId) {
+	public TravelerResponseDTO getTravelerById(Integer travelerId) {
 		try {
 			Traveler traveler = travelerDAO.getTravelerById(travelerId);
 			if (traveler != null) {

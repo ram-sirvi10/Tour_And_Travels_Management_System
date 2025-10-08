@@ -5,7 +5,7 @@ public class RegisterRequestDTO {
 	private String password;
 	private String confirmpassword;
 	private String email;
-	private int userId;
+	private Integer userId;
 	private String imageurl;
 	
 	public String getImageurl() {
@@ -20,10 +20,10 @@ public class RegisterRequestDTO {
 	public void setConfirmpassword(String confirmpassword) {
 		this.confirmpassword = confirmpassword;
 	}
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 	public String getUsername() {

@@ -85,7 +85,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public boolean deletePackage(int packageId) {
+	public boolean deletePackage(Integer packageId) {
 		String sql = "update travel_packages set is_active=? , is_delete=? WHERE package_id=?";
 
 		connection = DatabaseConfig.getConnection();
@@ -105,7 +105,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public boolean togglePackageStatus(int packageId) {
+	public boolean togglePackageStatus(Integer packageId) {
 		String sql = "UPDATE travel_packages SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END WHERE package_id=?";
 
 		connection = DatabaseConfig.getConnection();
@@ -160,7 +160,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public Packages getPackageById(int packageId) {
+	public Packages getPackageById(Integer packageId) {
 		String sql = "SELECT * FROM travel_packages WHERE package_id = ?";
 
 		connection = DatabaseConfig.getConnection();
@@ -312,7 +312,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public boolean adjustSeats(int packageId, int seatsChange) {
+	public boolean adjustSeats(Integer packageId, Integer seatsChange) {
 		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats + ?, updated_at = NOW() "
 				+ "WHERE package_id = ? AND total_seats + ? >= 0";
 
@@ -331,7 +331,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public int countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
+	public long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
 			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) {
 
 		int count = 0;
@@ -413,7 +413,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	}
 
 	@Override
-	public int updateSeatsOptimistic(int packageId, int seatsToBook, int currentVersion) {
+	public int updateSeatsOptimistic(Integer packageId, Integer seatsToBook, Integer currentVersion) {
 		String sql = "UPDATE travel_packages " + "SET total_seats = total_seats - ?, version = version + 1 "
 				+ "WHERE package_id = ? AND version = ? AND total_seats >= ?";
 		try {

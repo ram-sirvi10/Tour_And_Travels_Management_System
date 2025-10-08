@@ -5,19 +5,19 @@ import java.util.List;
 import com.travelmanagement.model.User;
 
 public interface IUserDAO {
-	boolean createUser(User user) throws Exception;
+	Boolean createUser(User user) throws Exception;
 
-	User getUserById(int id) throws Exception;
+	User getUserById(Integer id) throws Exception;
 
 	User getUserByEmail(String email) throws Exception;
 
-	boolean updateUser(User user) throws Exception;
+	Boolean updateUser(User user) throws Exception;
 
-	boolean deleteUser(int id) throws Exception;
+	Boolean deleteUser(Integer id) throws Exception;
 
-	boolean changePassword(int userId, String newPassword) throws Exception;
+	Boolean changePassword(Integer userId, String newPassword) throws Exception;
 
-	boolean updateUserActiveState(int userId, boolean active) throws Exception;
+	Boolean updateUserActiveState(Integer userId, Boolean active) throws Exception;
 
 	List<User> getDeletedUsers(int limit, int offset) throws Exception;
 

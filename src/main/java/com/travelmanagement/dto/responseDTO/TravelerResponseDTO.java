@@ -2,12 +2,12 @@ package com.travelmanagement.dto.responseDTO;
 
 public class TravelerResponseDTO {
 
-	private int id;
-	private int bookingId;
+	private Integer id;
+	private Integer bookingId;
 	private String name;
 	private String email;
 	private String mobile;
-	private int age;
+	private Integer age;
 	private String status;
 
 	public String getStatus() {
@@ -18,19 +18,19 @@ public class TravelerResponseDTO {
 		this.status = status;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
@@ -58,11 +58,11 @@ public class TravelerResponseDTO {
 		this.mobile = mobile;
 	}
 
-	public int getAge() {
+	public Integer getAge() {
 		return age;
 	}
 
-	public void setAge(int age) {
+	public void setAge(Integer age) {
 		this.age = age;
 	}
 }

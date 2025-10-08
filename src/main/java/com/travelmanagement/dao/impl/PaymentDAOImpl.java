@@ -35,7 +35,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 	}
 
 	@Override
-	public Payment getPaymentById(int paymentId) throws Exception {
+	public Payment getPaymentById(Integer paymentId) throws Exception {
 		String sql = "SELECT * FROM payments WHERE payment_id = ?";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, paymentId);
@@ -55,7 +55,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 	}
 
 	@Override
-	public Payment getPaymentByBookingId(int bookingId) throws Exception {
+	public Payment getPaymentByBookingId(Integer bookingId) throws Exception {
 		String sql = "SELECT * FROM payments WHERE booking_id = ? order by payment_date desc";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setInt(1, bookingId);
@@ -75,7 +75,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 	}
 
 	@Override
-	public boolean updatePaymentStatus(int paymentId, String status) throws Exception {
+	public boolean updatePaymentStatus(Integer paymentId, String status) throws Exception {
 		String sql = "UPDATE payments SET status = ? WHERE payment_id = ?";
 		preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setString(1, status);
@@ -151,7 +151,7 @@ public class PaymentDAOImpl implements IPaymentDAO {
 	}
 
 	@Override
-	public int getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
+	public long getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status,
 			String startDate, String endDate) throws Exception {
 		int count = 0;
 

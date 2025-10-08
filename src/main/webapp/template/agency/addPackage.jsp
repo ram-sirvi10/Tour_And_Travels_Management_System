@@ -10,6 +10,41 @@
 
 <button type="button" class="btn btn-secondary"
 	onclick="window.history.back();">Back</button>
+<style>
+.profile-upload-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.profile-preview {
+	width: 250px;
+	height: 250px;
+	border-radius: 8px;
+	border: 2px dashed #ccc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: border-color 0.3s, transform 0.2s;
+	margin: auto;
+	background-color: #f8f9fa;
+	overflow: hidden;
+}
+
+.profile-preview:hover {
+	border-color: #0d6efd;
+	transform: scale(1.03);
+}
+
+.preview-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 0;
+}
+</style>
+
 
 <%
 boolean isEdit = request.getAttribute("packageData") != null;
@@ -39,7 +74,7 @@ if (duration > maxDays)
 
 <form id="packageForm"
 	action="${pageContext.request.contextPath}/agency" method="post"
-	class="shadow p-4 bg-white rounded">
+	enctype="multipart/form-data" class="shadow p-4 bg-white rounded">
 
 	<input type="hidden" name="isScheduleSubmit" value="true"> <input
 		type="hidden" name="button" id="buttonField"
@@ -52,6 +87,7 @@ if (duration > maxDays)
 	<%
 	}
 	%>
+
 
 	<!-- Title & Location -->
 	<div class="row mb-3">
@@ -193,9 +229,70 @@ if (duration > maxDays)
 	<%
 	}
 	%>
+	<div class="profile-upload-wrapper mb-3 text-center">
+		<label class="form-label mb-2">Package Image</label>
+
+		<!-- Hidden File Input -->
+		<input type="file" name="profileImage" id="profileImageInput"
+			accept="image/*" style="display: none;">
+
+		<!-- Image Preview Box -->
+		<div class="profile-preview" id="profilePreview"
+			onclick="document.getElementById('profileImageInput').click();">
+			<%
+			String imageUrl = "";
+			if (pkg != null && pkg.getImageurl() != null && !pkg.getImageurl().isEmpty()) {
+				imageUrl = pkg.getImageurl();
+			}
+			%>
+
+			<%
+			if (imageUrl != null && !imageUrl.isEmpty()) {
+			%>
+			<img src="<%=imageUrl%>" alt="Package Image" class="preview-img"
+				id="previewImgTag">
+			<%
+			} else {
+			%>
+			<i class="bi bi-image" id="previewIcon"
+				style="font-size: 100px; color: #888;"></i>
+			<%
+			}
+			%>
+		</div>
+
+		<!-- Upload / Remove Buttons -->
+		<div class="d-flex justify-content-center gap-2 mt-2">
+			<button type="button" class="btn btn-sm btn-outline-primary"
+				onclick="document.getElementById('profileImageInput').click();">
+				Upload</button>
+			<button type="button" class="btn btn-sm btn-outline-danger"
+				onclick="removeProfileImage();">Remove</button>
+		</div>
+
+		<%
+		if (errors != null && errors.get("profileImage") != null) {
+		%>
+		<div class="text-danger mt-1"><%=errors.get("profileImage")%></div>
+		<%
+		}
+		%>
+	</div>
+
 
 	<button type="submit" class="btn btn-primary mt-3"><%=isEdit ? "Update Package" : "Save Package"%></button>
 </form>
+<div class="modal fade" id="profileImageModal" tabindex="-1"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-body text-center">
+				<img id="modalProfileImage" src="" alt="Profile Image"
+					style="max-width: 100%; max-height: 500px; border-radius: 8px;">
+			</div>
+		</div>
+	</div>
+</div>
 <script>
 	function changeDuration() {
 		const form = document.getElementById("packageForm");
@@ -206,6 +303,49 @@ if (duration > maxDays)
 		document.getElementById("buttonField").value = isEdit ? "updatePackage"
 				: "addPackage";
 		form.submit();
+	}
+
+	const input = document.getElementById('profileImageInput');
+	const preview = document.getElementById('profilePreview');
+
+	input.addEventListener('change', function() {
+		if (this.files && this.files[0]) {
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				// Remove icon if present
+				const oldIcon = document.getElementById('previewIcon');
+				if (oldIcon)
+					oldIcon.remove();
+
+				// Replace or create image tag
+				let img = document.getElementById('previewImgTag');
+				if (!img) {
+					img = document.createElement('img');
+					img.id = 'previewImgTag';
+					img.className = 'preview-img';
+					preview.appendChild(img);
+				}
+				img.src = e.target.result;
+			};
+			reader.readAsDataURL(this.files[0]);
+		}
+	});
+
+	function removeProfileImage() {
+		input.value = "";
+		const img = document.getElementById('previewImgTag');
+		if (img)
+			img.remove();
+
+		// Add default icon back
+		if (!document.getElementById('previewIcon')) {
+			const icon = document.createElement('i');
+			icon.id = 'previewIcon';
+			icon.className = 'bi bi-image';
+			icon.style.fontSize = '100px';
+			icon.style.color = '#888';
+			preview.appendChild(icon);
+		}
 	}
 </script>
 

@@ -14,6 +14,15 @@ public class AgencyRegisterRequestDTO {
 	private String confirmPassword;
 	private String imageurl;
 	private String area;
+	private Integer agencyId;
+
+	public Integer getAgencyId() {
+		return agencyId;
+	}
+
+	public void setAgencyId(Integer agencyId) {
+		this.agencyId = agencyId;
+	}
 
 	public String getArea() {
 		return area;

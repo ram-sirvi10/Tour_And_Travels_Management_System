@@ -3,17 +3,17 @@ package com.travelmanagement.model;
 import java.time.LocalDate;
 
 public class User {
-	private int userId;
+	private Integer userId;
 	private String userName;
 	private String userEmail;
 	private String userPassword;
 	private String userRole; 
-	private boolean isActive;
-	private boolean isDelete;
+	private Boolean isActive;
+	private Boolean isDelete;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 	 private String imageurl;
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
@@ -25,7 +25,7 @@ public class User {
 		this.imageurl = imageurl;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
@@ -61,19 +61,19 @@ public class User {
 		this.userRole = userRole;
 	}
 
-	public boolean isActive() {
+	public Boolean isActive() {
 		return isActive;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(Boolean active) {
 		isActive = active;
 	}
 
-	public boolean isDelete() {
+	public Boolean isDelete() {
 		return isDelete;
 	}
 
-	public void setDelete(boolean delete) {
+	public void setDelete(Boolean delete) {
 		isDelete = delete;
 	}
 

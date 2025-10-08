@@ -2,25 +2,25 @@ package com.travelmanagement.dto.requestDTO;
 
 public class PackageScheduleRequestDTO {
 
-	private int packageId;
-	private int dayNumber;
+	private Integer packageId;
+	private Integer dayNumber;
 	private String activity;
 	private String description;
-	private int scheduleId;
+	private Integer scheduleId;
 
-	public int getScheduleId() {
+	public Integer getScheduleId() {
 		return scheduleId;
 	}
 
-	public void setScheduleId(int scheduleId) {
+	public void setScheduleId(Integer scheduleId) {
 		this.scheduleId = scheduleId;
 	}
 
-	public int getPackageId() {
+	public Integer getPackageId() {
 		return packageId;
 	}
 
-	public void setPackageId(int packageId) {
+	public void setPackageId(Integer packageId) {
 		this.packageId = packageId;
 	}
 
@@ -28,7 +28,7 @@ public class PackageScheduleRequestDTO {
 		return dayNumber;
 	}
 
-	public void setDayNumber(int dayNumber) {
+	public void setDayNumber(Integer dayNumber) {
 		this.dayNumber = dayNumber;
 	}
 

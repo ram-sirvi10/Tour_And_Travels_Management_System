@@ -1,10 +1,10 @@
 package com.travelmanagement.model;
 
 public class Traveler {
-	private int id;
-	private int bookingId;
+	private Integer id;
+	private Integer bookingId;
 	private String name;
-	private int age;
+	private Integer age;
 	private String email;
 	private String mobile;
 	private String status;
@@ -17,19 +17,19 @@ public class Traveler {
 		this.status = status;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public int getBookingId() {
+	public Integer getBookingId() {
 		return bookingId;
 	}
 
-	public void setBookingId(int bookingId) {
+	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
 	}
 
@@ -41,11 +41,11 @@ public class Traveler {
 		this.name = name;
 	}
 
-	public int getAge() {
+	public Integer getAge() {
 		return age;
 	}
 
-	public void setAge(int age) {
+	public void setAge(Integer age) {
 		this.age = age;
 	}
 

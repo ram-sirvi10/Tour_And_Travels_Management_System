@@ -21,7 +21,7 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public boolean createUser(User user) throws Exception {
+	public Boolean createUser(User user) throws Exception {
 
 		try {
 //			connection = DatabaseConfig.getConnection();
@@ -66,7 +66,7 @@ public class UserDAOImpl implements IUserDAO {
 //	}
 
 	@Override
-	public User getUserById(int id) throws Exception {
+	public User getUserById(Integer id) throws Exception {
 		User user = null;
 		try {
 //			connection = DatabaseConfig.getConnection();
@@ -191,7 +191,7 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public boolean updateUser(User user) throws Exception {
+	public Boolean updateUser(User user) throws Exception {
 
 		try {
 
@@ -215,7 +215,7 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public boolean deleteUser(int id) throws Exception {
+	public Boolean deleteUser(Integer id) throws Exception {
 		try {
 			String sql = "UPDATE users SET is_delete = ?, is_active = ? WHERE user_id = ?";
 			preparedStatement = connection.prepareStatement(sql);
@@ -233,7 +233,7 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public boolean updateUserActiveState(int userId, boolean active) throws Exception {
+	public Boolean updateUserActiveState(Integer userId, Boolean active) throws Exception {
 		try {
 			String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -250,7 +250,7 @@ public class UserDAOImpl implements IUserDAO {
 	}
 
 	@Override
-	public boolean changePassword(int userId, String newPassword) throws Exception {
+	public Boolean changePassword(Integer userId, String newPassword) throws Exception {
 		String sql = "UPDATE USERS SET user_password=?  WHERE user_id=?";
 		try {
 			preparedStatement = connection.prepareStatement(sql);

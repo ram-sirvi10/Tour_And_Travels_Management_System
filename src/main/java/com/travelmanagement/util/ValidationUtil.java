@@ -1,96 +1,171 @@
 package com.travelmanagement.util;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
+/**
+ * Utility class for validating user and package input fields.
+ * Each method validates a specific type of data and returns true/false.
+ * These are designed for realistic travel website data (not overly strict).
+ */
 public class ValidationUtil {
 
-	// Email Validation
+	// --------------------------------------------------------------
+	// ✅ EMAIL VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Validates email address format.
+	 * Example:
+	 * ✅ john.doe@gmail.com
+	 * ❌ john@com / @gmail.com / john@gmail
+	 */
 	public static Boolean isValidEmail(String email) {
-		String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}$";
-		return Pattern.matches(emailRegex, email);
+		String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[A-Za-z]{2,}$";
+		return email != null && Pattern.matches(emailRegex, email);
 	}
 
-	// Mobile Number Validation (India specific: 10 digits, starts with 6-9)
+	// --------------------------------------------------------------
+	// ✅ MOBILE NUMBER VALIDATION (India specific)
+	// --------------------------------------------------------------
+	/**
+	 * Validates 10-digit Indian mobile number (must start with 6–9).
+	 * Example:
+	 * ✅ 9876543210
+	 * ❌ 1234567890 / 98765
+	 */
 	public static Boolean isValidMob(String mob) {
 		String mobRegex = "^[6-9]\\d{9}$";
-		return Pattern.matches(mobRegex, mob);
+		return mob != null && Pattern.matches(mobRegex, mob);
 	}
 
-	// Name Validation (alphabets + spaces + few special chars)
+	// --------------------------------------------------------------
+	// ✅ NAME VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Allows alphabets, spaces, and common name symbols.
+	 * Example:
+	 * ✅ Rameshwar Gehlot / O’Brien / A. P. Singh
+	 * ❌ Ramesh@123 / #John
+	 */
 	public static Boolean isValidName(String name) {
-		String nameRegex = "^[A-Za-z .,'’\\-()]+$";
-		return Pattern.matches(nameRegex, name);
+		String nameRegex = "^[A-Za-z .,'’\\-()]{2,100}$";
+		return name != null && Pattern.matches(nameRegex, name.trim());
 	}
 
-	// Password Validation (min 6 chars, at least 1 upper, 1 lower, 1 digit, 1
-	// special char)
+	// --------------------------------------------------------------
+	// ✅ PASSWORD VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Ensures minimum 6 characters with at least 1 letter and 1 number.
+	 * Example:
+	 * ✅ Travel123 / MyTrip1
+	 * ❌ travel / 123456
+	 */
 	public static Boolean isValidPassword(String password) {
-		String passRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#^])[A-Za-z\\d@$!%*?&#^]{6,}$";
-		return Pattern.matches(passRegex, password);
+		String passRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*?&#^]{6,}$";
+		return password != null && Pattern.matches(passRegex, password);
 	}
 
-	// Pincode Validation (India: 6 digits, not starting with 0)
-	public static Boolean isValidPincode(String pincode) {
-		String pinRegex = "^[1-9][0-9]{5}$";
-		return Pattern.matches(pinRegex, pincode);
+	// --------------------------------------------------------------
+	// ✅ CITY / STATE / LOCATION VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Allows alphabets, spaces, commas, hyphens, and brackets.
+	 * Example:
+	 * ✅ Manali / New Delhi / Udaipur (Rajasthan) / Goa-North
+	 * ❌ M@N@LI / 123City
+	 */
+	public static Boolean isValidCityOrState(String name) {
+		String cityRegex = "^[A-Za-z ,()'-]{2,100}$";
+		return name != null && Pattern.matches(cityRegex, name.trim());
 	}
 
-	// Number Validation (positive integers)
-	public static Boolean isValidNumber(String numberStr) {
-		if (numberStr == null || numberStr.trim().isEmpty())
-			return false;
-		try {
-			int num = Integer.parseInt(numberStr);
-			return num > 0;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-	// Price Validation (Decimal upto 2 places)
+	// --------------------------------------------------------------
+	// ✅ PRICE VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Validates positive numeric price (integer or decimal upto 2 places).
+	 * Example:
+	 * ✅ 12500 / 4999.99
+	 * ❌ -100 / 12.345 / abc
+	 */
 	public static Boolean isValidPrice(String price) {
 		String priceRegex = "^[0-9]+(\\.[0-9]{1,2})?$";
-		return Pattern.matches(priceRegex, price);
+		return price != null && Pattern.matches(priceRegex, price);
 	}
 
-	// City/State/Country Validation (alphabets + spaces)
-	public static Boolean isValidCityOrState(String name) {
-		String cityRegex = "^[A-Za-z ]{2,50}$";
-		return Pattern.matches(cityRegex, name);
-	}
-
-	// Registration Number Validation (alphanumeric + hyphen)
-	public static Boolean isValidRegistrationNumber(String regNo) {
-		String regRegex = "^[A-Za-z0-9\\-]+$";
-		return Pattern.matches(regRegex, regNo);
-	}
-
-	public static Boolean isValidName1(String name) {
-		return name != null && Pattern.matches("^[A-Za-z0-9 .,'()-]{2,100}$", name);
-	}
-
-	public static Boolean isValidPrice1(String price) {
-		return price != null && Pattern.matches("^[0-9]+(\\.[0-9]{1,2})?$", price);
-	}
-
-	// Description Validation (minimum 10 words)
+	// --------------------------------------------------------------
+	// ✅ DESCRIPTION VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Ensures minimum 5 words and max 500 words.
+	 * Ideal for package or day activity descriptions.
+	 * Example:
+	 * ✅ "Enjoy a 5-day mountain trip with snow activities and sightseeing."
+	 * ❌ "Nice trip" (too short)
+	 */
 	public static Boolean isValidDescription(String description) {
 		if (description == null || description.trim().isEmpty())
 			return false;
 		String[] words = description.trim().split("\\s+");
-		return words.length >= 10; // minimum 10 words
+		return words.length >= 5 && words.length <= 500;
 	}
 
-	// Package/Activity Name Validation (letters, numbers, spaces, few special
-	// chars, max 100 chars)
+	// --------------------------------------------------------------
+	// ✅ PACKAGE TITLE / ACTIVITY VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Allows letters, numbers, spaces, and symbols like ( ) - , . '
+	 * Example:
+	 * ✅ Manali Adventure Trip / Day-1: Rohtang Pass Visit
+	 * ❌ Trip@# / <b>Trip</b>
+	 */
 	public static Boolean isValidPackageActivity(String name) {
-		if (name == null)
-			return false;
-		return Pattern.matches("^[A-Za-z0-9 .,'’\\-()]{2,100}$", name);
+		String regex = "^[A-Za-z0-9 .,'’\\-()]{2,150}$";
+		return name != null && Pattern.matches(regex, name.trim());
 	}
+
+	// --------------------------------------------------------------
+	// ✅ POSITIVE NUMBER VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Checks if given number > 0.
+	 * Used for seats, duration, price, etc.
+	 * Example:
+	 * ✅ 5 / 100
+	 * ❌ 0 / -10 / null
+	 */
+	public static Boolean isPositiveNumber(Integer number) {
+		return number != null && number > 0;
+	}
+
+	// --------------------------------------------------------------
+	// ✅ BOOLEAN VALIDATION
+	// --------------------------------------------------------------
+	/**
+	 * Checks if a Boolean value is not null.
+	 * Example:
+	 * ✅ true / false
+	 * ❌ null
+	 */
+	public static Boolean isValidBoolean(Boolean bool) {
+		return bool != null;
+	}
+
+	/**
+	 * Validates a company registration number for a tour and travel business.
+	 *
+	 * This method allows alphanumeric characters (A-Z, a-z, 0-9) and hyphens (-) only.
+	 * The length of the registration number must be between 5 and 20 characters.
+	 *
+	 * Examples of valid registration numbers:
+	 *   - TRAVEL-123
+	 *   - TT-2025-001
+	 *   - TravelCompany01
+	 */
+	public static boolean isValidRegistrationNumber(String registrationNumber) {
+	    String regRegex = "^[A-Za-z0-9\\-]{5,20}$";
+	    return Pattern.matches(regRegex, registrationNumber);
+	}
+
 
 }
