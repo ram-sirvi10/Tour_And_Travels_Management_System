@@ -15,13 +15,11 @@ import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
-import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
 import com.travelmanagement.service.impl.TravelerServiceImpl;
-import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
 import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.Mapper;
@@ -325,8 +323,15 @@ public class AgencyServlet extends HttpServlet {
 			request.getRequestDispatcher("template/agency/addPackage.jsp").forward(request, response);
 			return;
 		}
-
-		Map<String, String> errors = authServiceImpl.validatePackageFields(dto);
+		LocalDateTime now = LocalDateTime.now();
+		if (existingPackage.getDepartureDate() != null && !existingPackage.getDepartureDate().isAfter(now)) {
+			request.getSession().setAttribute("errorMessage",
+					"Package cannot be updated on or after its departure date.");
+			response.sendRedirect("agency?button=viewPackages");
+			return;
+		}
+		Map<String, String> errors = authServiceImpl.validatePackageFields(dto, existingPackage.getDepartureDate(),
+				existingPackage.getLastBookingDate());
 		if (!errors.isEmpty()) {
 			PackageResponseDTO respDto = Mapper.convertToResponseDTO(dto, schedules);
 			request.setAttribute("errors", errors);
@@ -352,6 +357,7 @@ public class AgencyServlet extends HttpServlet {
 		String actionType = request.getParameter("actionType");
 		String packageIdParam = request.getParameter("packageId");
 
+		// Basic validations
 		if (actionType == null || actionType.trim().isEmpty()) {
 			request.getSession().setAttribute("errorMessage", "Invalid action: action type missing.");
 			response.sendRedirect("agency?button=viewPackages");
@@ -373,46 +379,59 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		PackageResponseDTO packageBelongsToAgency = packageService.getPackageById(packageId);
+		PackageResponseDTO pkg = packageService.getPackageById(packageId);
 
-		if (packageBelongsToAgency.getAgencyId() != agency.getAgencyId()) {
+		if (!pkg.getAgencyId().equals(agency.getAgencyId())) {
 			request.getSession().setAttribute("errorMessage", "You are not authorized to modify this package.");
 			response.sendRedirect("agency?button=viewPackages");
 			return;
 		}
 
+		LocalDateTime now = LocalDateTime.now();
+
+		if (!pkg.getDepartureDate().isAfter(now)) {
+			request.getSession().setAttribute("errorMessage", "Cannot modify package on or after departure date.");
+			response.sendRedirect(buildRedirectURL(request));
+			return;
+		}
+
+		List<BookingResponseDTO> bookings = bookingService.getAllBookings(null, null, packageId, 0, null, null, null,
+				1000, 0);
+		boolean hasBookings = !bookings.isEmpty();
+
 		try {
 			switch (actionType.toLowerCase()) {
 			case "toggle":
 				boolean toggled = packageService.togglePackageStatus(packageId);
-				if (toggled)
-					request.getSession().setAttribute("successMessage", "Package status updated successfully.");
-				else
-					request.getSession().setAttribute("errorMessage", "Failed to update package status.");
+				request.getSession().setAttribute(toggled ? "successMessage" : "errorMessage",
+						toggled ? "Package status updated successfully." : "Failed to update package status.");
 				break;
 
 			case "delete":
-				boolean deleted = packageService.deletePackage(packageId);
-				if (deleted)
-					request.getSession().setAttribute("successMessage", "Package deleted successfully.");
-				else
-					request.getSession().setAttribute("errorMessage", "Failed to delete package.");
+				if (hasBookings) {
+					request.getSession().setAttribute("errorMessage",
+							"Cannot delete package: Users have already booked this package.");
+				} else {
+					boolean deleted = packageService.deletePackage(packageId);
+					request.getSession().setAttribute(deleted ? "successMessage" : "errorMessage",
+							deleted ? "Package deleted successfully." : "Failed to delete package.");
+				}
 				break;
 
 			default:
 				request.getSession().setAttribute("errorMessage", "Invalid action type: " + actionType);
 				break;
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			request.getSession().setAttribute("errorMessage", "Something went wrong: " + e.getMessage());
 		}
 
+		response.sendRedirect(buildRedirectURL(request));
+	}
+
+	private String buildRedirectURL(HttpServletRequest request) throws Exception {
 		String keyword = trimOrNull(request.getParameter("keyword"));
-//		String location = trimOrNull(request.getParameter("location"));
-//		String dateFrom = trimOrNull(request.getParameter("dateFrom"));
-//		String dateTo = trimOrNull(request.getParameter("dateTo"));
 		String page = trimOrNull(request.getParameter("page"));
 		String pageSize = trimOrNull(request.getParameter("pageSize"));
 		String active = trimOrNull(request.getParameter("active"));
@@ -421,12 +440,6 @@ public class AgencyServlet extends HttpServlet {
 
 		if (keyword != null && !keyword.isEmpty())
 			redirectURL.append("&keyword=").append(URLEncoder.encode(keyword, "UTF-8"));
-//		if (location != null && !location.isEmpty())
-//			redirectURL.append("&location=").append(URLEncoder.encode(location, "UTF-8"));
-//		if (dateFrom != null && !dateFrom.isEmpty())
-//			redirectURL.append("&dateFrom=").append(URLEncoder.encode(dateFrom, "UTF-8"));
-//		if (dateTo != null && !dateTo.isEmpty())
-//			redirectURL.append("&dateTo=").append(URLEncoder.encode(dateTo, "UTF-8"));
 		if (page != null && !page.isEmpty())
 			redirectURL.append("&page=").append(page);
 		if (pageSize != null && !pageSize.isEmpty())
@@ -434,16 +447,15 @@ public class AgencyServlet extends HttpServlet {
 		if (active != null && !active.isEmpty())
 			redirectURL.append("&active=").append(active);
 
-		response.sendRedirect(redirectURL.toString());
-
+		return redirectURL.toString();
 	}
 
 	private void showDashboard(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
 			throws Exception {
 		long totalPackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null,
-				null, true);
+				null, true, false);
 		long activePackages = packageService.countPackages(null, agency.getAgencyId(), null, null, null, null, null,
-				true, true);
+				true, true, false);
 		long totalBookings = bookingService.getAllBookingsCount(agency.getAgencyId(), null, null, null, null, null,
 				null);
 		request.setAttribute("totalPackages", totalPackages);
@@ -513,7 +525,7 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		Map<String, String> errors = authServiceImpl.validatePackageFields(packageRegisterDTO);
+		Map<String, String> errors = authServiceImpl.validatePackageFields(packageRegisterDTO, null, null);
 		if (!errors.isEmpty()) {
 			request.setAttribute("errors", errors);
 			request.setAttribute("oldData", packageRegisterDTO);
@@ -567,7 +579,7 @@ public class AgencyServlet extends HttpServlet {
 
 		List<PackageResponseDTO> packages = packageService.searchPackages(null, agency.getAgencyId(), null, keyword,
 				start != null ? start.toString() : null, end != null ? end.toString() : null, null, active, limit,
-				offset, true);
+				offset, true, false);
 		for (PackageResponseDTO pkg : packages) {
 			List<PackageScheduleResponseDTO> schedule = packageService.getScheduleByPackage(pkg.getPackageId());
 			System.out.println("View Package --->  ");
@@ -576,7 +588,8 @@ public class AgencyServlet extends HttpServlet {
 		}
 
 		long totalPackages = packageService.countPackages(title, agency.getAgencyId(), location, keyword,
-				start != null ? start.toString() : null, end != null ? end.toString() : null, null, active, true);
+				start != null ? start.toString() : null, end != null ? end.toString() : null, null, active, true,
+				false);
 		System.out.println("Manage package Total pakages = -> " + totalPackages);
 		int totalPages = (int) Math.ceil((double) totalPackages / limit);
 		System.out.println("Manage package Total page = -> " + totalPages);

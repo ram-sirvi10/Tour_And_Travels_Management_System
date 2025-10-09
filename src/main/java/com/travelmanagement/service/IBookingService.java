@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.travelmanagement.dto.requestDTO.BookingRequestDTO;
 import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
-import com.travelmanagement.model.Traveler;
 
 public interface IBookingService {
 

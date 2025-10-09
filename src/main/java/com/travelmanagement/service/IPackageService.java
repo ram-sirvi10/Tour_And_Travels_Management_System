@@ -20,10 +20,10 @@ public interface IPackageService {
 
 	List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
 			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
-			Boolean isAgencyView) throws Exception;
+			Boolean isAgencyView,Boolean includePast) throws Exception;
 
 	long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
-			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
+			Integer totalSeats, Boolean isActive, Boolean isAgencyView,Boolean includePast) throws Exception;
 
 	List<PackageScheduleResponseDTO> getScheduleByPackage(Integer packageId);
 

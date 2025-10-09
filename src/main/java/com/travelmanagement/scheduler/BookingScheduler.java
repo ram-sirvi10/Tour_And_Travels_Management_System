@@ -17,17 +17,9 @@ public class BookingScheduler {
 	private static BookingScheduler instance;
 
 	private final ScheduledExecutorService schedulerPool;
-	private final BookingServiceImpl bookingService;
-	private final PaymentServiceImpl paymentService;
-	private final PackageServiceImpl packageService;
-	private final TravelerServiceImpl travelerServiceImpl;
 
 	private BookingScheduler() {
-		this.schedulerPool = Executors.newScheduledThreadPool(100);
-		this.bookingService = new BookingServiceImpl();
-		this.paymentService = new PaymentServiceImpl();
-		this.packageService = new PackageServiceImpl();
-		this.travelerServiceImpl = new TravelerServiceImpl();
+		this.schedulerPool = Executors.newScheduledThreadPool(10);
 
 	}
 
@@ -42,6 +34,11 @@ public class BookingScheduler {
 
 		schedulerPool.schedule(() -> {
 			try {
+
+				BookingServiceImpl bookingService = new BookingServiceImpl();
+				PaymentServiceImpl paymentService = new PaymentServiceImpl();
+				PackageServiceImpl packageService = new PackageServiceImpl();
+				TravelerServiceImpl travelerService = new TravelerServiceImpl();
 				BookingResponseDTO booking = bookingService.getBookingById(bookingId);
 
 				if (booking == null || !"PENDING".equalsIgnoreCase(booking.getStatus())) {
@@ -60,7 +57,7 @@ public class BookingScheduler {
 
 				bookingService.updateBookingStatus(bookingId, "CANCELLED");
 				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-				travelerServiceImpl.updateTravelerStatus(null, bookingId, "CANCELLED");
+				travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
 				System.out.println(payment);
 				if (payment == null) {
 					PaymentRequestDTO failedPayment = new PaymentRequestDTO();
@@ -79,11 +76,50 @@ public class BookingScheduler {
 		}, 5, TimeUnit.MINUTES);
 	}
 
+	public void startAutoCompleteTask() {
+		schedulerPool.scheduleAtFixedRate(() -> {
+			try {
+				BookingServiceImpl bookingService = new BookingServiceImpl();
+				PaymentServiceImpl paymentService = new PaymentServiceImpl();
+				PackageServiceImpl packageService = new PackageServiceImpl();
+				TravelerServiceImpl travelerService = new TravelerServiceImpl();
+
+				var confirmedBookings = bookingService.getAllBookings(null, null, null, null, "CONFIRMED", null, null,
+						1000, 0);
+
+				java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+				for (BookingResponseDTO booking : confirmedBookings) {
+					var pkg = packageService.getPackageById(booking.getPackageId());
+					if (pkg == null || pkg.getDepartureDate() == null || pkg.getDuration() == null)
+						continue;
+
+					java.time.LocalDateTime departureEnd = pkg.getDepartureDate().plusDays(pkg.getDuration());
+
+					if (now.isAfter(departureEnd) || now.isEqual(departureEnd)) {
+						bookingService.updateBookingStatus(booking.getBookingId(), "COMPLETE");
+						travelerService.updateTravelerStatus(null, booking.getBookingId(), "COMPLETE");
+						System.out.println(
+								"Booking " + booking.getBookingId() + " marked as COMPLETE with travelers updated.");
+					}
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}, 0, 5, TimeUnit.MINUTES); // check every 5 minutes
+	}
+
 	public void startAutoCancelTask() {
 		schedulerPool.scheduleAtFixedRate(() -> {
 			try {
+				BookingServiceImpl bookingService = new BookingServiceImpl();
+				PaymentServiceImpl paymentService = new PaymentServiceImpl();
+				PackageServiceImpl packageService = new PackageServiceImpl();
+				TravelerServiceImpl travelerService = new TravelerServiceImpl();
 
-				var pendingBookings = bookingService.getAllBookings(null,null, null, null, "PENDING", null, null, 1000, 0);
+				var pendingBookings = bookingService.getAllBookings(null, null, null, null, "PENDING", null, null, 1000,
+						0);
 
 				for (BookingResponseDTO booking : pendingBookings) {
 					PaymentResponseDTO payment = paymentService.getPaymentByBookingId(booking.getBookingId());
@@ -95,7 +131,7 @@ public class BookingScheduler {
 
 						bookingService.updateBookingStatus(booking.getBookingId(), "CANCELLED");
 						packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-						travelerServiceImpl.updateTravelerStatus(null, booking.getBookingId(), "CANCELLED");
+						travelerService.updateTravelerStatus(null, booking.getBookingId(), "CANCELLED");
 
 						if (payment == null) {
 							PaymentRequestDTO failedPayment = new PaymentRequestDTO();

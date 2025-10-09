@@ -1,7 +1,8 @@
 package com.travelmanagement.dao;
 
-import com.travelmanagement.model.Packages;
 import java.util.List;
+
+import com.travelmanagement.model.Packages;
 
 public interface IPackageDAO {
 	int addPackage(Packages pkg) throws Exception;
@@ -22,10 +23,10 @@ public interface IPackageDAO {
 
 
 	long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom, String dateTo,
-			Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception;
+			Integer totalSeats, Boolean isActive, Boolean isAgencyView,Boolean includePast) throws Exception;
 
 	List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset, Boolean isAgencyView)
+			String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset, Boolean isAgencyView,Boolean includePast)
 			throws Exception;
 
 	int updateSeatsOptimistic(Integer packageId, Integer seatsToBook, Integer currentVersion) throws Exception;

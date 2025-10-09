@@ -20,14 +20,15 @@ import com.travelmanagement.dto.requestDTO.PackageScheduleRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.TravelerRequestDTO;
 import com.travelmanagement.model.Agency;
-import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.User;
 import com.travelmanagement.service.IAuthService;
 import com.travelmanagement.util.ValidationUtil;
 
 public class AuthServiceImpl implements IAuthService {
 
-	public Map<String, String> validatePackageFields(PackageRegisterDTO dto) {
+	public Map<String, String> validatePackageFields(PackageRegisterDTO dto, LocalDateTime oldDeparture,
+			LocalDateTime oldBooking) {
+
 		Map<String, String> errors = new HashMap<>();
 
 		if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()
@@ -54,24 +55,39 @@ public class AuthServiceImpl implements IAuthService {
 
 		LocalDateTime now = LocalDateTime.now();
 
-		if (dto.getDepartureDate() == null) {
+		// ------------------ DATE VALIDATIONS ------------------
+		LocalDateTime dep = dto.getDepartureDate();
+		LocalDateTime book = dto.getLastBookingDate();
+
+		if (dep == null) {
 			errors.put("departureDate", "Departure date is required");
-		} else if (dto.getDepartureDate().isBefore(now)) {
+		} else if (dep.isBefore(now)) {
 			errors.put("departureDate", "Departure date must be in the future");
 		}
 
-		if (dto.getLastBookingDate() == null) {
+		if (book == null) {
 			errors.put("lastBookingDate", "Last booking date is required");
-		} else if (dto.getLastBookingDate().isBefore(now)) {
+		} else if (book.isBefore(now)) {
 			errors.put("lastBookingDate", "Last booking date must be in the future");
 		}
 
-		if (dto.getDepartureDate() != null && dto.getLastBookingDate() != null) {
-			if (dto.getLastBookingDate().isAfter(dto.getDepartureDate())) {
-				errors.put("lastBookingDate", "Last booking date cannot be after departure date");
-			}
+		// Last booking must be before departure (not after)
+		if (dep != null && book != null && book.isAfter(dep)) {
+			errors.put("lastBookingDate", "Last booking date cannot be after departure date");
 		}
 
+		// ------------------ OLD DATES VALIDATION (UPDATE CASE) ------------------
+		if (oldDeparture != null && dep != null && dep.isBefore(oldDeparture)) {
+			errors.put("departureDate",
+					"Departure date cannot be earlier than the previous one (" + oldDeparture.toLocalDate() + ")");
+		}
+
+		if (oldBooking != null && book != null && book.isBefore(oldBooking)) {
+			errors.put("lastBookingDate",
+					"Last booking date cannot be earlier than the previous one (" + oldBooking.toLocalDate() + ")");
+		}
+
+		// ------------------ DESCRIPTION & STATUS ------------------
 		if (dto.getDescription() == null || !ValidationUtil.isValidDescription(dto.getDescription())) {
 			errors.put("description", "Description must have at least 10 words");
 		}
@@ -80,6 +96,7 @@ public class AuthServiceImpl implements IAuthService {
 			errors.put("isActive", "Package status is required");
 		}
 
+		// ------------------ SCHEDULE VALIDATION ------------------
 		List<PackageScheduleRequestDTO> scheduleList = dto.getPackageSchedule();
 		if (scheduleList == null || scheduleList.size() != dto.getDuration()) {
 			errors.put("schedule", "Schedule must have exactly " + dto.getDuration() + " days");

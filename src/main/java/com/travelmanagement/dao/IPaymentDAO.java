@@ -1,7 +1,8 @@
 package com.travelmanagement.dao;
 
-import com.travelmanagement.model.Payment;
 import java.util.List;
+
+import com.travelmanagement.model.Payment;
 
 public interface IPaymentDAO {
 
@@ -18,6 +19,12 @@ public interface IPaymentDAO {
 
 	long getPaymentHistoryCount(Integer userId, Integer agencyId, Integer packageId, String status, String startDate,
 			String endDate) throws Exception;
+
+	double getRevenue(Integer agencyId, Integer packageId, String startDate, String endDate, Integer month,
+			Integer year) throws Exception;
+
+	double getRefund(Integer agencyId, Integer packageId, String startDate, String endDate, Integer month, Integer year)
+			throws Exception;
 
 	
 }

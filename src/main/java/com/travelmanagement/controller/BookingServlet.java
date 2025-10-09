@@ -31,7 +31,6 @@ import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.PaymentGatewayUtil;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -840,9 +839,10 @@ public class BookingServlet extends HttpServlet {
 
 			int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 			totalPages = (totalPages == 0) ? 1 : totalPages;
-
+			System.out.println("Booking Histroy In Booking Servlet ");
 			for (BookingResponseDTO booking : bookings) {
-
+				System.out.println("Booking ID: " + booking.getBookingId() + ", User ID: " + booking.getUserId()
+						+ ", Package ID: " + booking.getPackageId());
 				PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
 				if (pkg != null) {
 					booking.setPackageName(pkg.getTitle());
@@ -858,7 +858,15 @@ public class BookingServlet extends HttpServlet {
 					booking.setUserName(bookedUser.getUserName());
 				}
 			}
-
+			if (agency != null) {
+				List<PackageResponseDTO> packages = packageService.searchPackages(null, agency.getAgencyId(), null,
+						null, null, null, null, null, 2000, 0, true, null);
+				request.setAttribute("packages", packages);
+				System.err.println("Packages in show Booking histroy for agency filter ");
+				System.out.println(packages);
+				packages.toString();
+				request.setAttribute("selectedPackageId", packageId);
+			}
 			request.setAttribute("bookings", bookings);
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);

@@ -103,8 +103,7 @@ a.card-link {
 		<jsp:include page="sidebar.jsp" />
 		<div class="main-content">
 			<jsp:include page="header.jsp" />
-			<button type="button" class="btn btn-secondary"
-				onclick="window.history.back();">Back</button>
+			
 			<h2 class="mb-4">Dashboard Overview</h2>
 			<div class="row g-4">
 				<div class="col-md-6 col-sm-12">

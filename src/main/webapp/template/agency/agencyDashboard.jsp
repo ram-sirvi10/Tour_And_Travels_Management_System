@@ -1,8 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ include file="header.jsp"%>
 
-<button type="button" class="btn btn-secondary"
-	onclick="window.history.back();">Back</button>
+
 <%@ page
 	import="com.travelmanagement.service.impl.PackageServiceImpl,com.travelmanagement.service.impl.BookingServiceImpl"%>
 <%

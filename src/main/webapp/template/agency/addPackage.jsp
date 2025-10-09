@@ -8,8 +8,7 @@
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO"%>
 
-<button type="button" class="btn btn-secondary"
-	onclick="window.history.back();">Back</button>
+
 <style>
 .profile-upload-wrapper {
 	display: flex;
@@ -153,20 +152,21 @@ if (duration > maxDays)
 			lastBookingValue = request.getParameter("last_booking_date");
 		%>
 
-		<div class="row mb-3">
-			<div class="col-md-6">
-				<label class="form-label">Departure Date & Time</label> <input
-					type="datetime-local" name="departure_date" class="form-control"
-					value="<%=departureValue.length() > 16 ? departureValue.substring(0, 16) : departureValue%>">
-				<small class="text-danger"><%=(errors != null && errors.get("departureDate") != null) ? errors.get("departureDate") : ""%></small>
-			</div>
-			<div class="col-md-6">
-				<label class="form-label">Last Booking Date & Time</label> <input
-					type="datetime-local" name="last_booking_date" class="form-control"
-					value="<%=lastBookingValue.length() > 16 ? lastBookingValue.substring(0, 16) : lastBookingValue%>">
-				<small class="text-danger"><%=(errors != null && errors.get("lastBookingDate") != null) ? errors.get("lastBookingDate") : ""%></small>
-			</div>
+		<div class="col-md-6">
+			<label class="form-label">Departure Date & Time</label> <input
+				type="datetime-local" id="departureDate" name="departure_date"
+				class="form-control"
+				value="<%=departureValue.length() > 16 ? departureValue.substring(0, 16) : departureValue%>">
+			<small class="text-danger"><%=(errors != null && errors.get("departureDate") != null) ? errors.get("departureDate") : ""%></small>
 		</div>
+		<div class="col-md-6">
+			<label class="form-label">Last Booking Date & Time</label> <input
+				type="datetime-local" id="lastBookingDate" name="last_booking_date"
+				class="form-control"
+				value="<%=lastBookingValue.length() > 16 ? lastBookingValue.substring(0, 16) : lastBookingValue%>">
+			<small class="text-danger"><%=(errors != null && errors.get("lastBookingDate") != null) ? errors.get("lastBookingDate") : ""%></small>
+		</div>
+
 
 	</div>
 
@@ -347,6 +347,135 @@ if (duration > maxDays)
 			preview.appendChild(icon);
 		}
 	}
+
+	// ---- DATE & TIME VALIDATION ----
+document.addEventListener("DOMContentLoaded", () => {
+    const departureInput = document.getElementById("departureDate");
+    const bookingInput = document.getElementById("lastBookingDate");
+
+    if (!departureInput || !bookingInput) return;
+
+    // ---- Get current date-time in ISO format (IST) ----
+    const getCurrentDateTime = () => {
+        const now = new Date();
+        const offsetIST = 5.5 * 60; // IST offset in minutes
+        const nowIST = new Date(now.getTime() + offsetIST * 60 * 1000);
+        return nowIST.toISOString().slice(0, 16);
+    };
+
+    // ---- Parse date string safely ----
+    const parseDate = (dateStr) => dateStr ? new Date(dateStr) : null;
+
+    // ---- Existing values (for edit mode) ----
+    const previousDeparture = "<%=(pkg != null && pkg.getDepartureDate() != null)
+		? pkg.getDepartureDate().toString().replace(' ', 'T').substring(0, 16)
+		: ""%>";
+    const previousBooking = "<%=(pkg != null && pkg.getLastBookingDate() != null)
+		? pkg.getLastBookingDate().toString().replace(' ', 'T').substring(0, 16)
+		: ""%>";
+
+    // ---- Update min & max dynamically ----
+    const updateMinDateTime = () => {
+        const currentDateTime = getCurrentDateTime();
+
+        // Base min date = now
+        let minDeparture = currentDateTime;
+        let minBooking = currentDateTime;
+
+        // If in edit mode (previous dates exist), use those as minimums
+        if (previousDeparture) minDeparture = previousDeparture;
+        if (previousBooking) minBooking = previousBooking;
+
+        // Prevent choosing earlier than existing or current time
+        departureInput.min = minDeparture;
+        bookingInput.min = minBooking;
+
+        // Set booking max limit based on departure
+        if (departureInput.value) bookingInput.max = departureInput.value;
+    };
+
+    updateMinDateTime();
+    setInterval(updateMinDateTime, 30000);
+
+   
+    departureInput.addEventListener("change", () => {
+        const currentDateTime = getCurrentDateTime();
+        const depVal = departureInput.value;
+
+        if (depVal < currentDateTime) {
+            alert("⚠️ Departure date cannot be in the past!");
+            departureInput.value = "";
+            return;
+        }
+        if (previousDeparture && depVal < previousDeparture) {
+            alert("⚠️ You cannot select a departure date earlier than the existing one!");
+            departureInput.value = previousDeparture;
+            return;
+        }
+
+        bookingInput.max = depVal;
+        if (bookingInput.value && bookingInput.value > depVal) {
+            alert("⚠️ Last booking date cannot be after departure date!");
+            bookingInput.value = "";
+        }
+    });
+
+    // ---- Booking validation ----
+    bookingInput.addEventListener("change", () => {
+        const currentDateTime = getCurrentDateTime();
+        const bookVal = bookingInput.value;
+
+        if (bookVal < currentDateTime) {
+            alert("⚠️ Last booking date cannot be in the past!");
+            bookingInput.value = "";
+            return;
+        }
+        if (previousBooking && bookVal < previousBooking) {
+            alert("⚠️ You cannot select a booking date earlier than the existing one!");
+            bookingInput.value = previousBooking;
+            return;
+        }
+        if (departureInput.value && bookVal > departureInput.value) {
+            alert("⚠️ Last booking date cannot be after departure date!");
+            bookingInput.value = "";
+        }
+    });
+
+ 
+    document.getElementById("packageForm").addEventListener("submit", (e) => {
+        const depVal = departureInput.value;
+        const bookVal = bookingInput.value;
+        const currentDateTime = getCurrentDateTime();
+
+        if (depVal < currentDateTime) {
+            alert("⚠️ Departure date cannot be in the past!");
+            e.preventDefault();
+            return;
+        }
+        if (bookVal < currentDateTime) {
+            alert("⚠️ Last booking date cannot be in the past!");
+            e.preventDefault();
+            return;
+        }
+        if (previousDeparture && depVal < previousDeparture) {
+            alert("⚠️ Departure date cannot be earlier than existing date!");
+            e.preventDefault();
+            departureInput.value = previousDeparture;
+            return;
+        }
+        if (previousBooking && bookVal < previousBooking) {
+            alert("⚠️ Booking date cannot be earlier than existing date!");
+            e.preventDefault();
+            bookingInput.value = previousBooking;
+            return;
+        }
+        if (bookVal > depVal) {
+            alert("⚠️ Booking date cannot be after departure date!");
+            e.preventDefault();
+        }
+    });
+});
+
 </script>
 
 <%@ include file="footer.jsp"%>

@@ -11,7 +11,6 @@ import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
-import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
@@ -58,7 +57,7 @@ public class LandingPageServlet extends HttpServlet {
 			long totalUsers = userService.countUser(true, false, "");
 			long totalAgencies = agencyService.countAgencies("APPROVED", null, false, "", null, null);
 			List<PackageResponseDTO> packages = packageService.searchPackages(null, null, null, null, null, null, null,
-					true, 10, 0, false);
+					true, 10, 0, false,false);
 			List<BookingResponseDTO> allBookings = null;
 			if (user != null) {
 				allBookings = bookingService.getAllBookings(null,user.getUserId(), null, null, "CONFIRMED", null, null, 100,

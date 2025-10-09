@@ -2,14 +2,37 @@
 <%@ include file="header.jsp"%>
 <%@ page
 	import="java.util.List, com.travelmanagement.dto.responseDTO.BookingResponseDTO"%>
+<%@ page
+	import="java.util.List, com.travelmanagement.dto.responseDTO.PackageResponseDTO"%>
 
-<button type="button" class="btn btn-secondary"
-	onclick="window.history.back();">Back</button>
+
 <h2 class="mb-3">📑 View Bookings</h2>
 
 
 <form method="get" action="booking" class="row g-2 mb-3">
 	<input type="hidden" name="button" value="viewBookings">
+	<div class="col-md-3">
+		<label for="packageId" class="form-label">Package</label> <select
+			name="packageId" id="packageId" class="form-select"
+			onchange="this.form.submit()">
+			<option value="">All Packages</option>
+			<%
+			List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
+			Integer selectedPackageId = (Integer) request.getAttribute("selectedPackageId");
+			if (packages != null && !packages.isEmpty()) {
+				for (PackageResponseDTO pkg : packages) {
+			%>
+			<option value="<%=pkg.getPackageId()%>"
+				<%=(selectedPackageId != null && selectedPackageId.equals(pkg.getPackageId())) ? "selected" : ""%>>
+				<%=pkg.getTitle()%>
+			</option>
+			<%
+			}
+			}
+			%>
+		</select>
+	</div>
+
 
 	<div class="col-md-2">
 		<label for="keyword" class="form-label">Status</label> <select
@@ -75,13 +98,15 @@
 	<tbody>
 		<%
 		List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
+		int srNo=0;
 		if (bookings != null && !bookings.isEmpty()) {
 			for (BookingResponseDTO booking : bookings) {
-		%>
+				srNo++;		%>
 		<tr>
-			<td><%=booking.getUserName() != null ? booking.getUserName() : ("User #" + booking.getUserId())%></td>
-			<td><%=booking.getPackageName() != null ? booking.getPackageName() : ("Package #" + booking.getPackageId())%></td>
-			<td>Package #<%=booking.getPackageId()%></td>
+		<td><%=srNo%></td>
+			<td><%=booking.getUserName() != null ? booking.getUserName() : "-"%></td>
+			<td><%=booking.getPackageName() != null ? booking.getPackageName() : "-"%></td>
+			
 			<td><span
 				class="badge 
                     <%="CONFIRMED".equals(booking.getStatus()) ? "bg-success"

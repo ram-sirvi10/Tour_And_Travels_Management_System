@@ -24,7 +24,8 @@ public class AgencyServiceImpl implements IAgencyService {
 		Agency dbAgency = agencyDAO.getAgencyByField("email", dto.getEmail());
 		if (dbAgency == null) {
 			throw new UserNotFoundException("Agency not found!");
-		}System.out.println("agency password in dp login "+dbAgency.getPassword());
+		}
+		System.out.println("agency password in dp login " + dbAgency.getPassword());
 		if (!PasswordHashing.checkPassword(dto.getPassword(), dbAgency.getPassword())) {
 			throw new BadRequestException("Invalid password ! ");
 		}
@@ -175,9 +176,9 @@ public class AgencyServiceImpl implements IAgencyService {
 		if (agency != null) {
 			if (agency.getStatus().equalsIgnoreCase(status)) {
 				throw new BadRequestException("Agency Already -> " + status);
-			} else if (agency.isDelete()) {
+			} else if ((!"PENDING".equalsIgnoreCase(agency.getStatus()) && agency.isDelete())) {
 				throw new UserNotFoundException("Agency Not Found : ");
-			} else if (!agency.isActive()) {
+			} else if ((!"PENDING".equalsIgnoreCase(agency.getStatus()) &&!agency.isActive())) {
 				throw new BadRequestException("Agency is blocked ! ");
 			}
 		} else {

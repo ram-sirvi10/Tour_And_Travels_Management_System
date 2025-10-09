@@ -724,6 +724,7 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("listType", "Manage Agencies");
 			request.setAttribute("errorMessage", e.getMessage());
 			request.getRequestDispatcher("template/admin/manageAgencies.jsp").forward(request, response);
+			return;
 		}
 	}
 

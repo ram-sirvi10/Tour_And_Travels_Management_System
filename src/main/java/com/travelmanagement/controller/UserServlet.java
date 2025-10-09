@@ -98,7 +98,7 @@ public class UserServlet extends HttpServlet {
 
 		try {
 			List<PackageResponseDTO> packages = packageService.searchPackages(null, null, null, null, null, null, null,
-					true, 8, 0, false);
+					true, 8, 0, false,false);
 			request.setAttribute("packages", packages);
 
 			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(null, user.getUserId(), null, null,

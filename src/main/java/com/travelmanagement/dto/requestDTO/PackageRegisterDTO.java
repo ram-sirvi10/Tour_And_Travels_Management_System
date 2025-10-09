@@ -3,8 +3,6 @@ package com.travelmanagement.dto.requestDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.travelmanagement.model.PackageSchedule;
-
 public class PackageRegisterDTO {
 
 	private Integer packageId;

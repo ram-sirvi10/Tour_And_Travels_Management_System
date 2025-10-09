@@ -20,7 +20,6 @@ import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.model.Packages;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.util.Mapper;
-import com.travelmanagement.util.ValidationUtil;
 
 public class PackageServiceImpl implements IPackageService {
 
@@ -196,10 +195,10 @@ public class PackageServiceImpl implements IPackageService {
 	@Override
 	public List<PackageResponseDTO> searchPackages(String title, Integer agencyId, String location, String keyword,
 			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
-			Boolean isAgencyView) throws Exception {
+			Boolean isAgencyView,Boolean includePast) throws Exception {
 
 		List<Packages> packages = packageDAO.searchPackages(title, agencyId, location, keyword, dateFrom, dateTo,
-				totalSeats, isActive, limit, offset, isAgencyView);
+				totalSeats, isActive, limit, offset, isAgencyView,includePast);
 
 		List<PackageResponseDTO> dtoList = new ArrayList<>();
 		for (Packages pkg : packages) {
@@ -211,10 +210,10 @@ public class PackageServiceImpl implements IPackageService {
 
 	@Override
 	public long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) throws Exception {
+			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView,Boolean includePast) throws Exception {
 
 		return packageDAO.countPackages(title, agencyId, location, keyword, dateFrom, dateTo, totalSeats, isActive,
-				isAgencyView);
+				isAgencyView,includePast);
 	}
 
 	public int updateSeatsOptimistic(int packageId, int noOfTravellers, int version) {

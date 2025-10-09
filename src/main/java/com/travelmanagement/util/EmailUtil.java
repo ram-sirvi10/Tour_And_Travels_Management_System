@@ -1,6 +1,7 @@
 package com.travelmanagement.util;
 
 import java.util.Properties;
+
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;

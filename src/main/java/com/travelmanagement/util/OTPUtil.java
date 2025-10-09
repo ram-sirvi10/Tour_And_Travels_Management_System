@@ -1,6 +1,7 @@
 package com.travelmanagement.util;
 
 import java.util.Random;
+
 import jakarta.servlet.http.HttpSession;
 
 public class OTPUtil {

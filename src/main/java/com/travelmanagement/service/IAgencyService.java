@@ -5,7 +5,6 @@ import java.util.List;
 import com.travelmanagement.dto.requestDTO.AgencyRegisterRequestDTO;
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
-import com.travelmanagement.model.Agency;
 
 public interface IAgencyService {
 

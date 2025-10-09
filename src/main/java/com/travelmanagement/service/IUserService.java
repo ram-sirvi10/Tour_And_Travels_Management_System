@@ -1,10 +1,10 @@
 package com.travelmanagement.service;
 
+import java.util.List;
+
 import com.travelmanagement.dto.requestDTO.LoginRequestDTO;
 import com.travelmanagement.dto.requestDTO.RegisterRequestDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
-import com.travelmanagement.model.User;
-import java.util.List;
 
 public interface IUserService {
 	UserResponseDTO register(RegisterRequestDTO registerRequestDTO) throws Exception;

@@ -10,8 +10,10 @@ public class AppStartupListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		System.out.println(" Application started, initializing BookingScheduler...");
-		BookingScheduler.getInstance().startAutoCancelTask();
-		;
+		BookingScheduler scheduler = BookingScheduler.getInstance();
+		scheduler.startAutoCancelTask();
+		scheduler.startAutoCompleteTask();
+
 	}
 
 	@Override

@@ -205,7 +205,7 @@ public class PackageDAOImpl implements IPackageDAO {
 	@Override
 	public List<Packages> searchPackages(String title, Integer agencyId, String location, String keyword,
 			String dateFrom, String dateTo, Integer totalSeats, Boolean isActive, int limit, int offset,
-			Boolean isAgencyView) {
+			Boolean isAgencyView, Boolean includePast) {
 
 		List<Packages> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM travel_packages WHERE 1=1");
@@ -239,6 +239,15 @@ public class PackageDAOImpl implements IPackageDAO {
 		if (isAgencyView == null || !isAgencyView) {
 			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
 			sql.append(" AND total_seats > 0");
+		}
+		if (includePast != null)
+
+		{
+			if (!includePast) {
+				sql.append(" AND DATE_ADD(departure_date, INTERVAL duration DAY) >= CURDATE()");
+			} else {
+				sql.append(" AND DATE_ADD(departure_date, INTERVAL duration DAY) < CURDATE()");
+			}
 		}
 
 		sql.append(" ORDER BY created_at DESC LIMIT ? OFFSET ?");
@@ -332,7 +341,7 @@ public class PackageDAOImpl implements IPackageDAO {
 
 	@Override
 	public long countPackages(String title, Integer agencyId, String location, String keyword, String dateFrom,
-			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView) {
+			String dateTo, Integer totalSeats, Boolean isActive, Boolean isAgencyView, Boolean includePast) {
 
 		int count = 0;
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS total FROM travel_packages WHERE 1=1");
@@ -366,6 +375,11 @@ public class PackageDAOImpl implements IPackageDAO {
 		if (isAgencyView == null || !isAgencyView) {
 			sql.append(" AND DATE(last_booking_date) >= CURDATE()");
 			sql.append(" AND total_seats > 0");
+		}
+		if (!includePast) {
+			sql.append(" AND DATE_ADD(departure_date, INTERVAL duration DAY) >= CURDATE()");
+		} else {
+			sql.append(" AND DATE_ADD(departure_date, INTERVAL duration DAY) < CURDATE()");
 		}
 
 		connection = DatabaseConfig.getConnection();

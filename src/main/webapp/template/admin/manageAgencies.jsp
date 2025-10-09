@@ -78,8 +78,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 			<%
 			}
 			%>
-			<button type="button" class="btn btn-secondary"
-	onclick="window.history.back();">Back</button>
+			
 			<h2>Manage Agencies</h2>
 
 			<!-- Search & Filters -->
@@ -133,8 +132,7 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					<div class="col-md-2">
 						<button type="submit" class="btn btn-primary w-100">Apply</button>
 					</div>
-					<a href="booking?button=<%=request.getParameter("button")%>"
-						class="btn btn-secondary w-100">Reset</a>
+					
 					<%
 					}
 					%>
@@ -154,6 +152,12 @@ String endDateParam = request.getParameter("endDate") != null ? request.getParam
 					</div>
 					<div class="col-md-2">
 						<button type="submit" class="btn btn-primary w-100">Search</button>
+					
+					</div>
+					<div class="col-md-2">
+							<a href="admin?button=<%=request.getParameter("button")%>"
+						class="btn btn-secondary w-100">Reset</a>
+					
 					</div>
 				</form>
 			</div>

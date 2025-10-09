@@ -9,7 +9,6 @@ import java.util.List;
 
 import com.travelmanagement.config.DatabaseConfig;
 import com.travelmanagement.dao.IPaymentDAO;
-import com.travelmanagement.model.Packages;
 import com.travelmanagement.model.Payment;
 
 public class PaymentDAOImpl implements IPaymentDAO {
@@ -204,6 +203,90 @@ public class PaymentDAOImpl implements IPaymentDAO {
 		}
 
 		return count;
+	}
+
+	@Override
+	public double getRevenue(Integer agencyId, Integer packageId, String startDate, String endDate, Integer month,
+			Integer year) throws Exception {
+
+		StringBuilder sql = new StringBuilder("SELECT SUM(p.amount) AS revenue " + "FROM payments p "
+				+ "JOIN bookings b ON p.booking_id = b.booking_id "
+				+ "JOIN travel_packages tp ON b.package_id = tp.package_id "
+				+ "WHERE tp.agency_id = ? AND p.status = 'SUCCESSFUL' ");
+
+		if (packageId != null)
+			sql.append(" AND b.package_id = ?");
+		if (startDate != null)
+			sql.append(" AND DATE(p.payment_date) >= ?");
+		if (endDate != null)
+			sql.append(" AND DATE(p.payment_date) <= ?");
+		if (month != null)
+			sql.append(" AND MONTH(p.payment_date) = ?");
+		if (year != null)
+			sql.append(" AND YEAR(p.payment_date) = ?");
+
+		PreparedStatement ps = connection.prepareStatement(sql.toString());
+		int index = 1;
+		ps.setInt(index++, agencyId);
+
+		if (packageId != null)
+			ps.setInt(index++, packageId);
+		if (startDate != null)
+			ps.setDate(index++, Date.valueOf(startDate));
+		if (endDate != null)
+			ps.setDate(index++, Date.valueOf(endDate));
+		if (month != null)
+			ps.setInt(index++, month);
+		if (year != null)
+			ps.setInt(index++, year);
+
+		ResultSet rs = ps.executeQuery();
+		if (rs.next()) {
+			return rs.getDouble("revenue");
+		}
+		return 0.0;
+	}
+
+	@Override
+	public double getRefund(Integer agencyId, Integer packageId, String startDate, String endDate, Integer month,
+			Integer year) throws Exception {
+
+		StringBuilder sql = new StringBuilder("SELECT SUM(p.amount) AS refund " + "FROM payments p "
+				+ "JOIN bookings b ON p.booking_id = b.booking_id "
+				+ "JOIN travel_packages tp ON b.package_id = tp.package_id "
+				+ "WHERE tp.agency_id = ? AND p.status = 'REFUNDED' ");
+
+		if (packageId != null)
+			sql.append(" AND b.package_id = ?");
+		if (startDate != null)
+			sql.append(" AND DATE(p.payment_date) >= ?");
+		if (endDate != null)
+			sql.append(" AND DATE(p.payment_date) <= ?");
+		if (month != null)
+			sql.append(" AND MONTH(p.payment_date) = ?");
+		if (year != null)
+			sql.append(" AND YEAR(p.payment_date) = ?");
+
+		PreparedStatement ps = connection.prepareStatement(sql.toString());
+		int index = 1;
+		ps.setInt(index++, agencyId);
+
+		if (packageId != null)
+			ps.setInt(index++, packageId);
+		if (startDate != null)
+			ps.setDate(index++, Date.valueOf(startDate));
+		if (endDate != null)
+			ps.setDate(index++, Date.valueOf(endDate));
+		if (month != null)
+			ps.setInt(index++, month);
+		if (year != null)
+			ps.setInt(index++, year);
+
+		ResultSet rs = ps.executeQuery();
+		if (rs.next()) {
+			return rs.getDouble("refund");
+		}
+		return 0.0;
 	}
 
 }

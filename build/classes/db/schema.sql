@@ -138,3 +138,5 @@ ALTER TABLE  payments ADD COLUMN razorpay_payment_id varchar(100);
 
 ALTER TABLE travel_packages
 ADD COLUMN is_delete boolean ;
+ALTER TABLE travelagency
+ADD COLUMN area VARCHAR(30) ;

@@ -12,7 +12,6 @@ import com.travelmanagement.dto.responseDTO.BookingResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageResponseDTO;
 import com.travelmanagement.dto.responseDTO.PackageScheduleResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
-import com.travelmanagement.model.PackageSchedule;
 import com.travelmanagement.service.IBookingService;
 import com.travelmanagement.service.IPackageService;
 import com.travelmanagement.service.impl.BookingServiceImpl;
@@ -106,15 +105,15 @@ public class PackageServlet extends HttpServlet {
 			System.out.println(start);
 			List<PackageResponseDTO> packages = packageService.searchPackages(title, agencyId, location, keyword,
 					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
-					limit, offset, false);
+					limit, offset, false, false);
 
 			long totalPackages = packageService.countPackages(title, agencyId, location, keyword,
 					start != null ? start.toString() : null, end != null ? end.toString() : null, totalSeats, isActive,
-					false);
+					false, false);
 
 			int totalPages = (int) Math.ceil((double) totalPackages / limit);
 
-			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(null,user.getUserId(), null, null,
+			List<BookingResponseDTO> allBookings = bookingService.getAllBookings(null, user.getUserId(), null, null,
 					"CONFIRMED", null, null, 100, 0);
 
 			LocalDateTime now = LocalDateTime.now();
