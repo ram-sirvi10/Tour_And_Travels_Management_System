@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +21,7 @@ import com.travelmanagement.service.impl.AgencyServiceImpl;
 import com.travelmanagement.service.impl.AuthServiceImpl;
 import com.travelmanagement.service.impl.BookingServiceImpl;
 import com.travelmanagement.service.impl.PackageServiceImpl;
-import com.travelmanagement.service.impl.TravelerServiceImpl;
+import com.travelmanagement.service.impl.PaymentServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
 import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.Mapper;
@@ -44,7 +46,7 @@ public class AgencyServlet extends HttpServlet {
 
 	private PackageServiceImpl packageService = new PackageServiceImpl();
 	private BookingServiceImpl bookingService = new BookingServiceImpl();
-	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
+//	private TravelerServiceImpl travelerService = new TravelerServiceImpl();
 	private AuthServiceImpl authServiceImpl = new AuthServiceImpl();
 	private AgencyServiceImpl agencyServiceImpl = new AgencyServiceImpl();
 
@@ -102,7 +104,12 @@ public class AgencyServlet extends HttpServlet {
 				return;
 			case "changePassword":
 				changePassword(request, response);
+
 				return;
+			case "viewReports":
+				viewReports(request, response, agency);
+				break;
+
 			default:
 				showDashboard(request, response, agency);
 				break;
@@ -112,6 +119,57 @@ public class AgencyServlet extends HttpServlet {
 			request.setAttribute("error", "Something went wrong: " + e.getMessage());
 			request.getRequestDispatcher("error.jsp").forward(request, response);
 		}
+	}
+
+	private void viewReports(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
+			throws Exception {
+
+		PaymentServiceImpl paymentService = new PaymentServiceImpl();
+		PackageServiceImpl packageService = new PackageServiceImpl();
+		Integer agencyId = agency.getAgencyId();
+
+		List<PackageResponseDTO> packages = packageService.searchPackages(null, agencyId, null, null, null, null, null,
+				true, 1000, 0, true, false);
+
+		String yearParam = request.getParameter("year");
+		String packageParam = request.getParameter("packageId");
+		String startDate = request.getParameter("startDate");
+		String endDate = request.getParameter("endDate");
+
+		int currentYear = LocalDate.now().getYear();
+		Integer year = (yearParam != null && !yearParam.isEmpty()) ? parseIntSafe(yearParam, null) : currentYear;
+		Integer packageId = (packageParam != null && !packageParam.isEmpty()) ? parseIntSafe(packageParam,null) : null;
+
+		Map<String, Double> monthlyRevenue = new LinkedHashMap<>();
+
+		try {
+			if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+				double total = paymentService.getTotalRevenue(agencyId, packageId, startDate, endDate, null, null);
+				monthlyRevenue.put("Custom Range", total);
+			} else {
+				for (int month = 1; month <= 12; month++) {
+					double revenue = paymentService.getTotalRevenue(agencyId, packageId, null, null, month, year);
+					monthlyRevenue.put(Month.of(month).name(), revenue);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	
+		double totalRevenue = monthlyRevenue.values().stream().mapToDouble(Double::doubleValue).sum();
+
+		request.setAttribute("monthlyRevenue", monthlyRevenue);
+		request.setAttribute("totalRevenue", totalRevenue);
+		request.setAttribute("selectedYear", year);
+		request.setAttribute("selectedPackage", packageId);
+		request.setAttribute("currentYear", currentYear);
+		request.setAttribute("packages", packages);
+		request.setAttribute("startDate", startDate);
+		request.setAttribute("endDate", endDate);
+
+		request.getRequestDispatcher("template/agency/agencyReports.jsp").forward(request, response);
+
 	}
 
 	public void changePassword(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -256,7 +314,7 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		int packageId = Integer.parseInt(packageIdParam);
+		int packageId = parseIntSafe(packageIdParam,0);
 		PackageResponseDTO existingPackage = packageService.getPackageById(packageId);
 
 		if (existingPackage == null || existingPackage.getAgencyId() != agency.getAgencyId()) {
@@ -273,23 +331,23 @@ public class AgencyServlet extends HttpServlet {
 		dto.setTitle(trimOrNull(request.getParameter("title")));
 		dto.setLocation(trimOrNull(request.getParameter("location")));
 		dto.setPrice(request.getParameter("price") != null && !request.getParameter("price").isEmpty()
-				? Double.parseDouble(request.getParameter("price"))
+				? parseDoubleSafe(request.getParameter("price"), null)
 				: null);
 		dto.setDuration(request.getParameter("duration") != null && !request.getParameter("duration").isEmpty()
-				? Integer.parseInt(request.getParameter("duration"))
+				? parseIntSafe(request.getParameter("duration"), null)
 				: null);
 		dto.setTotalSeats(request.getParameter("totalseats") != null && !request.getParameter("totalseats").isEmpty()
-				? Integer.parseInt(request.getParameter("totalseats"))
+				? parseIntSafe(request.getParameter("totalseats"), null)
 				: null);
 		dto.setDescription(trimOrNull(request.getParameter("description")));
 		dto.setIsActive("on".equals(request.getParameter("isActive")));
 		dto.setDepartureDate(
 				request.getParameter("departure_date") != null && !request.getParameter("departure_date").isEmpty()
-						? LocalDateTime.parse(request.getParameter("departure_date"))
+						?parseDateTimeSafe(request.getParameter("departure_date"))
 						: null);
 		dto.setLastBookingDate(request.getParameter("last_booking_date") != null
 				&& !request.getParameter("last_booking_date").isEmpty()
-						? LocalDateTime.parse(request.getParameter("last_booking_date"))
+						? parseDateTimeSafe(request.getParameter("last_booking_date"))
 						: null);
 		try {
 			Part filePart = request.getPart("profileImage");
@@ -395,8 +453,8 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		List<BookingResponseDTO> bookings = bookingService.getAllBookings(null, null, packageId, 0, null, null, null,
-				1000, 0);
+		List<BookingResponseDTO> bookings = bookingService.getAllBookings(null, null, packageId, null, "CONFIRMED",
+				null, null, 1000, 0);
 		boolean hasBookings = !bookings.isEmpty();
 
 		try {
@@ -458,9 +516,12 @@ public class AgencyServlet extends HttpServlet {
 				true, true, false);
 		long totalBookings = bookingService.getAllBookingsCount(agency.getAgencyId(), null, null, null, null, null,
 				null);
+		
+
 		request.setAttribute("totalPackages", totalPackages);
 		request.setAttribute("activePackages", activePackages);
 		request.setAttribute("totalBookings", totalBookings);
+		
 		request.getRequestDispatcher("template/agency/agencyDashboard.jsp").forward(request, response);
 	}
 
@@ -472,40 +533,39 @@ public class AgencyServlet extends HttpServlet {
 		PackageRegisterDTO packageRegisterDTO = new PackageRegisterDTO();
 		packageRegisterDTO.setTitle(request.getParameter("title"));
 		packageRegisterDTO.setLocation(request.getParameter("location"));
-		packageRegisterDTO.setPrice(request.getParameter("price") != null && !request.getParameter("price").isEmpty()
-				? Double.parseDouble(request.getParameter("price"))
-				: null);
-		packageRegisterDTO
-				.setDuration(request.getParameter("duration") != null && !request.getParameter("duration").isEmpty()
-						? Integer.parseInt(request.getParameter("duration"))
-						: null);
-		packageRegisterDTO.setTotalSeats(
-				request.getParameter("totalseats") != null && !request.getParameter("totalseats").isEmpty()
-						? Integer.parseInt(request.getParameter("totalseats"))
-						: null);
+		packageRegisterDTO.setPrice(parseDoubleSafe(request.getParameter("price"), null));
+		packageRegisterDTO.setDuration(parseIntSafe(request.getParameter("duration"), null));
+		packageRegisterDTO.setTotalSeats(parseIntSafe(request.getParameter("totalseats"), null));
 		packageRegisterDTO.setDescription(request.getParameter("description"));
 		packageRegisterDTO.setAgencyId(agency.getAgencyId());
 
 		boolean isActive = "on".equals(request.getParameter("isActive"));
 		packageRegisterDTO.setIsActive(isActive);
 
-		if (request.getParameter("departure_date") != null && !request.getParameter("departure_date").isEmpty())
-			packageRegisterDTO.setDepartureDate(LocalDateTime.parse(request.getParameter("departure_date")));
-		if (request.getParameter("last_booking_date") != null && !request.getParameter("last_booking_date").isEmpty())
-			packageRegisterDTO.setLastBookingDate(LocalDateTime.parse(request.getParameter("last_booking_date")));
+		try {
+			String departureDateStr = request.getParameter("departure_date");
+			if (departureDateStr != null && !departureDateStr.isEmpty()) {
+				packageRegisterDTO.setDepartureDate(LocalDateTime.parse(departureDateStr));
+			}
+
+			String lastBookingDateStr = request.getParameter("last_booking_date");
+			if (lastBookingDateStr != null && !lastBookingDateStr.isEmpty()) {
+				packageRegisterDTO.setLastBookingDate(LocalDateTime.parse(lastBookingDateStr));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		try {
 			Part filePart = request.getPart("profileImage");
 			if (filePart != null && filePart.getSize() > 0) {
 				String imageUrl = CloudinaryUtil.uploadImage(filePart);
-				if (imageUrl != null) {
-					packageRegisterDTO.setImageurl(imageUrl);
-				} else
-					packageRegisterDTO.setImageurl(null);
+				packageRegisterDTO.setImageurl(imageUrl != null ? imageUrl : null);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		List<PackageScheduleRequestDTO> schedules = new ArrayList<>();
 		if (packageRegisterDTO.getDuration() != null) {
 			for (int i = 1; i <= packageRegisterDTO.getDuration(); i++) {
@@ -519,9 +579,7 @@ public class AgencyServlet extends HttpServlet {
 		packageRegisterDTO.setPackageSchedule(schedules);
 
 		if (!isScheduleSubmit) {
-//			request.setAttribute("oldData", packageRegisterDTO);
 			request.getRequestDispatcher("template/agency/addPackage.jsp").forward(request, response);
-
 			return;
 		}
 
@@ -533,9 +591,8 @@ public class AgencyServlet extends HttpServlet {
 			return;
 		}
 
-		int packageId = packageService.addPackage(packageRegisterDTO);
+		packageService.addPackage(packageRegisterDTO);
 		response.sendRedirect("agency?button=viewPackages");
-		return;
 	}
 
 	private void viewPackages(HttpServletRequest request, HttpServletResponse response, AgencyResponseDTO agency)
@@ -638,4 +695,26 @@ public class AgencyServlet extends HttpServlet {
 		}
 		return defaultValue;
 	}
+	private Double parseDoubleSafe(String param, Double defaultValue) {
+		try {
+			if (param != null && !param.trim().isEmpty()) {
+				return Double.parseDouble(param.trim());
+			}
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+		return defaultValue;
+	}
+	private LocalDateTime parseDateTimeSafe(String param) {
+	    try {
+	        if (param != null && !param.trim().isEmpty()) {
+	            return LocalDateTime.parse(param.trim());
+	        }
+	    } catch (Exception e) {
+	        System.err.println(" Invalid DateTime format: " + param);
+	    }
+	    return null;
+	}
+
+
 }

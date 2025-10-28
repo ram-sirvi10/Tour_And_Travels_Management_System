@@ -348,6 +348,7 @@ style> /* Book Now Button Gradient */ .btn-book-now {
 	session.removeAttribute("errorMessage");
 	Long totalUsers = (Long) request.getAttribute("totalUsers");
 	Long totalAgencies = (Long) request.getAttribute("totalAgencies");
+	
 	List<PackageResponseDTO> packages = (List<PackageResponseDTO>) request.getAttribute("packages");
 	List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
 	Map<Integer, BookingResponseDTO> bookingMap = (Map<Integer, BookingResponseDTO>) request.getAttribute("bookingMap");

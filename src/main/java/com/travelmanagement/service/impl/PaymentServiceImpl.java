@@ -57,4 +57,18 @@ public class PaymentServiceImpl implements IPaymentService {
 		return paymentDAO.getPaymentHistoryCount(userId, agencyId, packageId, status, startDate, endDate);
 	}
 
+	@Override
+	public double getTotalRevenue(Integer agencyId, Integer packageId, String startDate, String endDate, Integer month,
+			Integer year) throws Exception {
+		double totalRevenue = 0.0;
+
+		double revenue = paymentDAO.getRevenue(agencyId, packageId, startDate, endDate, month, year);
+
+		double refund = paymentDAO.getRefund(agencyId, packageId, startDate, endDate, month, year);
+
+		totalRevenue = revenue - refund;
+
+		return totalRevenue < 0 ? 0.0 : totalRevenue;
+	}
+
 }

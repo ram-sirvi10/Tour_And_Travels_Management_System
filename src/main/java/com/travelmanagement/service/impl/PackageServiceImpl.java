@@ -5,10 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.travelmanagement.dao.IBookingDAO;
 import com.travelmanagement.dao.IPackageDAO;
 import com.travelmanagement.dao.IPackageScheduleDAO;
-import com.travelmanagement.dao.impl.BookingDAOImpl;
 import com.travelmanagement.dao.impl.PackageDAOImpl;
 import com.travelmanagement.dao.impl.PackageScheduleDAOImpl;
 import com.travelmanagement.dto.requestDTO.PackageRegisterDTO;
@@ -24,7 +22,7 @@ import com.travelmanagement.util.Mapper;
 public class PackageServiceImpl implements IPackageService {
 
 	private IPackageDAO packageDAO = new PackageDAOImpl();
-	private IBookingDAO bookingDAO = new BookingDAOImpl();
+//	private IBookingDAO bookingDAO = new BookingDAOImpl();
 	private IPackageScheduleDAO scheduleDAO = new PackageScheduleDAOImpl();
 
 	@Override
@@ -226,5 +224,7 @@ public class PackageServiceImpl implements IPackageService {
 		}
 		return 0;
 	}
+
+
 
 }

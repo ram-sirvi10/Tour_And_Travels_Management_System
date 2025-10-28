@@ -2,8 +2,13 @@
 <%@ page import="java.util.List"%>
 <%@ page
 	import="com.travelmanagement.dto.responseDTO.PaymentResponseDTO"%>
-
+<%@ page
+	import="java.time.LocalDateTime, java.time.ZoneId, java.time.ZonedDateTime, java.time.format.DateTimeFormatter"%>
 <%@ include file="header.jsp"%>
+<%
+ZoneId istZone = ZoneId.of("Asia/Kolkata");
+DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy hh:mm a"); // Example: 08-Oct-2025 03:30 PM
+%>
 <%
 String errorMessage = (String) request.getAttribute("errorMessage");
 if (errorMessage != null && !errorMessage.isEmpty()) {
@@ -40,7 +45,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 		<input type="hidden" name="button" value="paymentHistory">
 
 		<div class="col-md-3">
-			<select name="status" class="form-select">
+			<select name="status" class="form-select" onchange="this.form.submit()">
 				<option value="">All Status</option>
 				<option value="SUCCESSFUL"
 					<%="SUCCESSFUL".equals(request.getParameter("status")) ? "selected" : ""%>>Successful</option>
@@ -108,6 +113,12 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
 					if (!payments.isEmpty()) {
 						int i = 1;
 						for (PaymentResponseDTO p : payments) {
+							String paymentDateTimeIST = "Not specified";
+							if (p.getPaymentDate() != null) {
+								paymentDateTimeIST = p.getPaymentDate().atZone(ZoneId.systemDefault()) // backend ka timezone
+								.withZoneSameInstant(istZone) // IST me convert
+								.format(displayFormatter); // 12-hour format
+							}
 					%>
 					<tr>
 						<td><%=i++%></td>
@@ -120,7 +131,7 @@ if (errorMessage != null && !errorMessage.isEmpty()) {
         <%="SUCCESSFUL".equals(p.getStatus()) ? "bg-success" : "REFUNDED".equals(p.getStatus()) ? "bg-info" : "bg-danger"%>">
 								<%=p.getStatus()%>
 						</span></td>
-						<td><%=p.getPaymentDate() != null ? p.getPaymentDate() : "-"%></td>
+						<td><%=paymentDateTimeIST%></td>
 					</tr>
 					<%
 					}

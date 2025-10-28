@@ -131,17 +131,17 @@ public class PackageScheduleDAOImpl implements IPackageScheduleDAO {
 		List<PackageSchedule> schedules = new ArrayList<>();
 		String sql = "SELECT * FROM package_schedule WHERE package_id=? ORDER BY day_number";
 		try {
-			Connection con = DatabaseConfig.getConnection();
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setInt(1, packageId);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
+			
+			 preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setInt(1, packageId);
+			 resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
 				PackageSchedule pschedule = new PackageSchedule();
-				pschedule.setScheduleId(rs.getInt("schedule_id"));
-				pschedule.setPackageId(rs.getInt("package_id"));
-				pschedule.setDayNumber(rs.getInt("day_number"));
-				pschedule.setActivity(rs.getString("activity"));
-				pschedule.setDescription(rs.getString("description"));
+				pschedule.setScheduleId(resultSet.getInt("schedule_id"));
+				pschedule.setPackageId(resultSet.getInt("package_id"));
+				pschedule.setDayNumber(resultSet.getInt("day_number"));
+				pschedule.setActivity(resultSet.getString("activity"));
+				pschedule.setDescription(resultSet.getString("description"));
 				schedules.add(pschedule);
 			}
 		} catch (Exception e) {

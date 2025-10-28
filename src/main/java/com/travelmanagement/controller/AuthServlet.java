@@ -17,12 +17,13 @@ import com.travelmanagement.service.impl.UserServiceImpl;
 import com.travelmanagement.util.CloudinaryUtil;
 import com.travelmanagement.util.Constants;
 import com.travelmanagement.util.EmailUtil;
+import com.travelmanagement.util.JwtUtil;
 import com.travelmanagement.util.OTPUtil;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -521,7 +522,8 @@ public class AuthServlet extends HttpServlet {
 
 	private void handleLogin(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		LoginRequestDTO dto = new LoginRequestDTO();
-		RequestDispatcher rd = null;
+//		RequestDispatcher rd = null;
+		System.out.println("Auth Servlet Login Method -----> ");
 		dto.setEmail(request.getParameter("email"));
 		dto.setPassword(request.getParameter("password"));
 		dto.setRole(request.getParameter("role"));
@@ -546,7 +548,17 @@ public class AuthServlet extends HttpServlet {
 
 				HttpSession session = request.getSession();
 				session.setAttribute("user", loggedInUser);
+
+				String token = JwtUtil.generateToken(String.valueOf(loggedInUser.getUserId()),
+						loggedInUser.getUserRole());
+
+				Cookie jwtCookie = new Cookie("authToken", token);
+				jwtCookie.setHttpOnly(true);
+				jwtCookie.setPath(request.getContextPath());
+				jwtCookie.setMaxAge(7 * 24 * 60 * 60);
+				response.addCookie(jwtCookie);
 				if ("ADMIN".equalsIgnoreCase(loggedInUser.getUserRole())) {
+
 //				rd = request.getRequestDispatcher("template/admin/adminDashboard.jsp");
 //				rd.forward(request, response);
 					response.sendRedirect("admin?button=dashboard");
@@ -573,6 +585,15 @@ public class AuthServlet extends HttpServlet {
 
 				HttpSession session = request.getSession();
 				session.setAttribute("agency", loggedInAgency);
+				// Set cookies
+				// Generate JWT
+				String token = JwtUtil.generateToken(String.valueOf(loggedInAgency.getAgencyId()), "SUBADMIN");
+
+				Cookie jwtCookie = new Cookie("authToken", token);
+				jwtCookie.setHttpOnly(true);
+				jwtCookie.setPath(request.getContextPath());
+				jwtCookie.setMaxAge(7 * 24 * 60 * 60);
+				response.addCookie(jwtCookie);
 //             response.sendRedirect("template/agency/agencyDashboard.jsp");
 //			rd = request.getRequestDispatcher("template/agency/agencyDashboard.jsp");
 //			rd.forward(request, response);
@@ -599,6 +620,11 @@ public class AuthServlet extends HttpServlet {
 		if (session != null) {
 			session.invalidate();
 		}
+
+		Cookie jwtCookie = new Cookie("authToken", "");
+		jwtCookie.setMaxAge(0);
+		jwtCookie.setPath(request.getContextPath());
+		response.addCookie(jwtCookie);
 		response.sendRedirect(request.getContextPath() + "/login.jsp");
 
 		return;

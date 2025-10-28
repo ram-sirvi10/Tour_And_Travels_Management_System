@@ -46,16 +46,16 @@ public class AuthServiceImpl implements IAuthService {
 		}
 
 		if (dto.getDuration() == null || dto.getDuration() <= 0) {
-			errors.put("duration", "Duration must be at least 1 day");
+			errors.put("duration", "Duration must be at positive integer");
 		}
 
 		if (dto.getTotalSeats() == null || dto.getTotalSeats() <= 0) {
-			errors.put("totalseats", "Total seats must be at least 1");
+			errors.put("totalseats", "Total seats must be at positive integer ");
 		}
 
 		LocalDateTime now = LocalDateTime.now();
 
-		// ------------------ DATE VALIDATIONS ------------------
+		
 		LocalDateTime dep = dto.getDepartureDate();
 		LocalDateTime book = dto.getLastBookingDate();
 

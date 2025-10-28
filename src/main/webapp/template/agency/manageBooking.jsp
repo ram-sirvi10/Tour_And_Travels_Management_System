@@ -8,6 +8,39 @@
 
 <h2 class="mb-3">📑 View Bookings</h2>
 
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 bg-light rounded shadow-sm">
+    <div class="d-flex align-items-center me-4 mb-2">
+        <span class="badge bg-success fs-5 me-2"><i class="bi bi-check-circle-fill"></i></span>
+        <div>
+            <small class="text-muted">Confirmed Bookings</small>
+            <div class="fw-bold fs-5"><%= request.getAttribute("totalConfirmedBookings") %></div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center me-4 mb-2">
+        <span class="badge bg-danger fs-5 me-2"><i class="bi bi-x-circle-fill"></i></span>
+        <div>
+            <small class="text-muted">Cancelled Bookings</small>
+            <div class="fw-bold fs-5"><%= request.getAttribute("totalCancelledBookings") %></div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center me-4 mb-2">
+        <span class="badge bg-success fs-5 me-2"><i class="bi bi-people-fill"></i></span>
+        <div>
+            <small class="text-muted">Confirmed Travellers</small>
+            <div class="fw-bold fs-5"><%= request.getAttribute("totalConfirmedTravellers") %></div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center mb-2">
+        <span class="badge bg-danger fs-5 me-2"><i class="bi bi-person-x-fill"></i></span>
+        <div>
+            <small class="text-muted">Cancelled Travellers</small>
+            <div class="fw-bold fs-5"><%= request.getAttribute("totalCancelledTravellers") %></div>
+        </div>
+    </div>
+</div>
 
 <form method="get" action="booking" class="row g-2 mb-3">
 	<input type="hidden" name="button" value="viewBookings">
@@ -36,7 +69,7 @@
 
 	<div class="col-md-2">
 		<label for="keyword" class="form-label">Status</label> <select
-			name="status" class="form-select">
+			name="status" class="form-select" onchange="this.form.submit()">
 			<option value="">All Status</option>
 			<option value="PENDING"
 				<%="PENDING".equals(request.getParameter("status")) ? "selected" : ""%>>Pending</option>
@@ -85,11 +118,15 @@
 	</div>
 </form>
 
+
+
+
 <table class="table table-hover shadow-sm">
 	<thead class="table-dark">
 		<tr>
 			<th>ID</th>
-			<th>User</th>
+			<th>User Name </th>
+			<th>User Email </th>
 			<th>Package</th>
 			<th>Status</th>
 			<th>Action</th>
@@ -98,15 +135,17 @@
 	<tbody>
 		<%
 		List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
-		int srNo=0;
+		int srNo = 0;
 		if (bookings != null && !bookings.isEmpty()) {
 			for (BookingResponseDTO booking : bookings) {
-				srNo++;		%>
+				srNo++;
+		%>
 		<tr>
-		<td><%=srNo%></td>
+			<td><%=srNo%></td>
 			<td><%=booking.getUserName() != null ? booking.getUserName() : "-"%></td>
+			<td><%=booking.getUserEmail() != null ? booking.getUserEmail() : "-"%></td>		
 			<td><%=booking.getPackageName() != null ? booking.getPackageName() : "-"%></td>
-			
+
 			<td><span
 				class="badge 
                     <%="CONFIRMED".equals(booking.getStatus()) ? "bg-success"

@@ -79,7 +79,7 @@ if (successMessage != null) {
 		<input type="hidden" name="button" value="<%=buttonParam%>">
 		<div class="col-md-2">
 			<label class="form-label">Status</label> <select name="active"
-				class="form-select">
+				class="form-select" onchange="this.form.submit()">
 				<option value="">All</option>
 				<option value="true"
 					<%="true".equals(request.getParameter("active")) ? "selected" : ""%>>Active</option>
@@ -179,9 +179,7 @@ if (successMessage != null) {
 				<button type="button" class="btn btn-sm btn-secondary"
 					data-bs-toggle="modal"
 					data-bs-target="#detailsModal<%=pkg.getPackageId()%>">Details</button>
-				<a
-				href="<%=request.getContextPath()%>/booking?button=viewBookings&packageId=<%=pkg.getPackageId()%>"
-				class="btn btn-sm btn-primary">View Bookings</a>
+	
 			</td>
 			<td>
 				<!-- Edit Button --> <a

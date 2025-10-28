@@ -62,7 +62,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 	<input type="hidden" name="button" value="viewBookings">
 
 	<div class="col-md-2">
-		<select name="status" class="form-select">
+		<select name="status" class="form-select" onchange="this.form.submit()">
 			<option value="">All Status</option>
 			<option value="PENDING"
 				<%="PENDING".equals(request.getParameter("status")) ? "selected" : ""%>>Pending</option>
@@ -109,6 +109,7 @@ if (successMessage != null && !successMessage.isEmpty()) {
 
 <div class="row g-4">
 	<%
+	
 	List<BookingResponseDTO> bookings = (List<BookingResponseDTO>) request.getAttribute("bookings");
 	java.time.LocalDateTime now = java.time.LocalDateTime.now();
 	if (bookings != null && !bookings.isEmpty()) {

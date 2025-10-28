@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -14,10 +15,29 @@ import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.Part;
 
 public class CloudinaryUtil {
+	   private static Cloudinary cloudinary;
 
-	private static Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap("cloud_name", "dmjrgxq7c", "api_key",
-			"425932696452778", "api_secret", "7r6lS-Cho24EIGyYdzFG_Y1Wsus", "secure", true));
+	    static {
+	        try {
+	            Properties props = new Properties();
+	            try (InputStream is = CloudinaryUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+	                props.load(is);
+	            }
+	            String cloudName = props.getProperty("cloudinary.cloud_name");
+	            String apiKey = props.getProperty("cloudinary.api_key");
+	            String apiSecret = props.getProperty("cloudinary.api_secret");
+	            boolean secure = Boolean.parseBoolean(props.getProperty("cloudinary.secure"));
 
+	            cloudinary = new Cloudinary(ObjectUtils.asMap(
+	                    "cloud_name", cloudName,
+	                    "api_key", apiKey,
+	                    "api_secret", apiSecret,
+	                    "secure", secure
+	            ));
+	        } catch (Exception e) {
+	            throw new RuntimeException("Failed to initialize Cloudinary", e);
+	        }
+	    }
 	public static Cloudinary getCloudinary() {
 		return cloudinary;
 	}
@@ -43,7 +63,7 @@ public class CloudinaryUtil {
 			Files.copy(inputStream, tempFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 		}
 
-		Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap("resource_type", "auto"));
+		Map<?, ?> uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.asMap("resource_type", "auto"));
 
 		tempFile.delete();
 

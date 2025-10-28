@@ -1,5 +1,6 @@
 package com.travelmanagement.scheduler;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -79,23 +80,26 @@ public class BookingScheduler {
 	public void startAutoCompleteTask() {
 		schedulerPool.scheduleAtFixedRate(() -> {
 			try {
+				System.out.println("[AutoCompleteTask] Running complete check...");
 				BookingServiceImpl bookingService = new BookingServiceImpl();
 				PaymentServiceImpl paymentService = new PaymentServiceImpl();
 				PackageServiceImpl packageService = new PackageServiceImpl();
 				TravelerServiceImpl travelerService = new TravelerServiceImpl();
 
 				var confirmedBookings = bookingService.getAllBookings(null, null, null, null, "CONFIRMED", null, null,
-						1000, 0);
-
-				java.time.LocalDateTime now = java.time.LocalDateTime.now();
+						10000, 0);
+				System.out.println("[AutoCompleteTask] Found confirm bookings: " + confirmedBookings.size());
+				LocalDateTime now = LocalDateTime.now();
 
 				for (BookingResponseDTO booking : confirmedBookings) {
+
 					var pkg = packageService.getPackageById(booking.getPackageId());
 					if (pkg == null || pkg.getDepartureDate() == null || pkg.getDuration() == null)
 						continue;
 
 					java.time.LocalDateTime departureEnd = pkg.getDepartureDate().plusDays(pkg.getDuration());
-
+					System.out.println("[AutoCompleteTask] Checking booking id " + booking.getBookingId()
+							+ " Complete date  " + pkg.getDepartureDate().plusDays(pkg.getDuration()));
 					if (now.isAfter(departureEnd) || now.isEqual(departureEnd)) {
 						bookingService.updateBookingStatus(booking.getBookingId(), "COMPLETE");
 						travelerService.updateTravelerStatus(null, booking.getBookingId(), "COMPLETE");
@@ -107,28 +111,35 @@ public class BookingScheduler {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}, 0, 5, TimeUnit.MINUTES); // check every 5 minutes
+		}, 0, 1, TimeUnit.MINUTES); // check every 5 minutes
 	}
 
 	public void startAutoCancelTask() {
 		schedulerPool.scheduleAtFixedRate(() -> {
 			try {
+				System.out.println("[AutoCancelTask] Running cancellation check...");
+
 				BookingServiceImpl bookingService = new BookingServiceImpl();
 				PaymentServiceImpl paymentService = new PaymentServiceImpl();
 				PackageServiceImpl packageService = new PackageServiceImpl();
 				TravelerServiceImpl travelerService = new TravelerServiceImpl();
 
-				var pendingBookings = bookingService.getAllBookings(null, null, null, null, "PENDING", null, null, 1000,
-						0);
+				var pendingBookings = bookingService.getAllBookings(null, null, null, null, "PENDING", null, null,
+						10000, 0);
+				System.out.println("[AutoCancelTask] Found pending bookings: " + pendingBookings.size());
 
 				for (BookingResponseDTO booking : pendingBookings) {
+					System.out.println("[AutoCancelTask] Checking booking " + booking.getBookingId() + " created at "
+							+ booking.getCreated_at());
+
 					PaymentResponseDTO payment = paymentService.getPaymentByBookingId(booking.getBookingId());
 
 					boolean paymentSuccess = payment != null && "SUCCESSFUL".equalsIgnoreCase(payment.getStatus());
 
-					if (!paymentSuccess
+					if (!paymentSuccess && booking.getCreated_at() != null
 							&& booking.getCreated_at().plusMinutes(5).isBefore(java.time.LocalDateTime.now())) {
 
+						System.out.println("[AutoCancelTask] Auto-cancelling booking " + booking.getBookingId());
 						bookingService.updateBookingStatus(booking.getBookingId(), "CANCELLED");
 						packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
 						travelerService.updateTravelerStatus(null, booking.getBookingId(), "CANCELLED");
@@ -140,10 +151,8 @@ public class BookingScheduler {
 									* packageService.getPackageById(booking.getPackageId()).getPrice());
 							failedPayment.setStatus("FAILED");
 							paymentService.addPayment(failedPayment);
-							System.out.println("startAutoCancelTask  Paymnet faild entry -> " + failedPayment);
+							System.out.println("[AutoCancelTask] Payment fail entry -> " + failedPayment);
 						}
-
-						System.out.println("Booking " + booking.getBookingId() + " auto-cancelled.");
 					}
 				}
 			} catch (Exception e) {

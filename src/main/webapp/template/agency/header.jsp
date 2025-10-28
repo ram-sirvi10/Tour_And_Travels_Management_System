@@ -13,7 +13,9 @@ if (agency == null) {
 %>
 <title>Agency Dashboard</title>
 <!-- Add this in <head> -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	rel="stylesheet">
 
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -90,7 +92,10 @@ body {
 			href="<%=request.getContextPath()%>/agency?button=viewPackages">📦
 			Manage Packages</a> <a
 			href="<%=request.getContextPath()%>/booking?button=viewBookings">📑
-			View Bookings</a>
+			View Bookings</a><a
+			href="<%=request.getContextPath()%>/agency?button=viewReports">📊
+			View Reports</a>
+
 	</div>
 
 	<!-- Top Navbar -->
@@ -100,21 +105,18 @@ body {
 			<a class="navbar-brand" href="agencyDashboard.jsp">Travel
 				Management</a>
 			<div class="d-flex align-items-center gap-3 ms-auto">
-                <span class="text-white">Welcome, <%= agency.getAgencyName() %></span>
-                <a href="<%=request.getContextPath()%>/agency?button=viewProfile">
-                    <%
-                    if (agency.getImageurl() != null && !agency.getImageurl().isEmpty()) {
-                    %>
-                        <img src="<%= agency.getImageurl() %>" alt="Profile" class="profile-img">
-                    <%
-                    } else {
-                    %>
-                        <i class="bi bi-person-circle profile-icon"></i>
-                    <%
-                    }
-                    %>
-                </a>
-            </div>
+				<span class="text-white">Welcome, <%=agency.getAgencyName()%></span>
+				<a href="<%=request.getContextPath()%>/agency?button=viewProfile">
+					<%
+					if (agency.getImageurl() != null && !agency.getImageurl().isEmpty()) {
+					%> <img src="<%=agency.getImageurl()%>" alt="Profile"
+					class="profile-img"> <%
+ } else {
+ %> <i class="bi bi-person-circle profile-icon"></i> <%
+ }
+ %>
+				</a>
+			</div>
 		</div>
 	</nav>
 

@@ -19,6 +19,15 @@ public class BookingResponseDTO {
 	private LocalDateTime departureDateAndTime;
 	private LocalDateTime lastBookingDate;
 	private String userName;
+	private String userEmail;
+
+	public String getUserEmail() {
+		return userEmail;
+	}
+
+	public void setUserEmail(String userEmail) {
+		this.userEmail = userEmail;
+	}
 
 	public String getUserName() {
 		return userName;

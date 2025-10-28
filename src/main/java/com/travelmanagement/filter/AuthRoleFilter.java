@@ -13,13 +13,20 @@ import com.travelmanagement.dto.responseDTO.AgencyResponseDTO;
 import com.travelmanagement.dto.responseDTO.UserResponseDTO;
 import com.travelmanagement.model.Agency;
 import com.travelmanagement.model.User;
+import com.travelmanagement.service.IAgencyService;
+import com.travelmanagement.service.impl.AgencyServiceImpl;
+import com.travelmanagement.service.impl.UserServiceImpl;
+import com.travelmanagement.util.JwtUtil;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -80,7 +87,7 @@ import jakarta.servlet.http.Part;
 //    }
 //}
 
-@WebFilter({ "/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
+@WebFilter({ "/","/admin/*", "/agency/*", "/user/*", "/booking/*", "/package/*" })
 //@MultipartConfig(fileSizeThreshold = 1024 * 1024, // 1 MB
 //		maxFileSize = 1024 * 1024 * 5, // 5 MB
 //		maxRequestSize = 1024 * 1024 * 10 // 10 MB
@@ -102,8 +109,77 @@ public class AuthRoleFilter implements Filter {
 		UserResponseDTO user = (session != null) ? (UserResponseDTO) session.getAttribute("user") : null;
 		AgencyResponseDTO agency = (session != null) ? (AgencyResponseDTO) session.getAttribute("agency") : null;
 
+		
+		String path = req.getRequestURI();
+		String context = req.getContextPath();
+
+		boolean isLandingPage = path.equals(context + "/");
+System.out.println("Auth filter contaxt path "+context);
+System.out.println("Auth filter URI path "+path);
+
 		if (user == null && agency == null) {
-			res.sendRedirect(req.getContextPath() + "/login.jsp?error=notLoggedIn");
+			String token = null;
+			Cookie[] cookies = req.getCookies();
+			if (cookies != null) {
+				for (Cookie c : cookies) {
+					if ("authToken".equals(c.getName()))
+						token = c.getValue();
+				}
+			}
+
+			if (token != null) {
+				try {
+					Claims claims = JwtUtil.parseToken(token);
+					String id = claims.getSubject();
+					String role = claims.get("role", String.class);
+					UserServiceImpl userService = new UserServiceImpl();
+					if ("USER".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) {
+						UserResponseDTO loggedInUser = null;
+						try {
+							loggedInUser = userService.getById(Integer.parseInt(id));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (loggedInUser != null) {
+							session = req.getSession(true);
+							session.setAttribute("user", loggedInUser);
+							user = loggedInUser;
+						}
+					} else if ("SUBADMIN".equalsIgnoreCase(role)) {
+						IAgencyService agencyService = new AgencyServiceImpl();
+						AgencyResponseDTO loggedInAgency = null;
+						try {
+							loggedInAgency = agencyService.getAgencyById(Integer.parseInt(id));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (loggedInAgency != null) {
+							session = req.getSession(true);
+							session.setAttribute("agency", loggedInAgency);
+							agency = loggedInAgency;
+						}
+					}
+				} catch (JwtException | NumberFormatException e) {
+					
+					if (!isLandingPage) {
+						res.sendRedirect(req.getContextPath() + "/login.jsp?error=invalidToken");
+						return;
+					}
+				}
+			} else {
+			
+				if (!isLandingPage) {
+					res.sendRedirect(req.getContextPath() + "/login.jsp?error=notLoggedIn");
+					return;
+				}
+			}
+		}
+
+		System.out.println(session);
+		if (isLandingPage) {
+			chain.doFilter(request, response);
 			return;
 		}
 
@@ -144,9 +220,9 @@ public class AuthRoleFilter implements Filter {
 		}
 
 		String role = (user != null) ? user.getUserRole() : "SUBADMIN";
-		String path = req.getRequestURI();
+//		String path = req.getRequestURI();
 		String button = req.getParameter("button");
-		String agencyName = req.getParameter("agencyName");
+	
 		if (button == null) {
 			button = req.getParameter("action");
 		}
@@ -165,9 +241,9 @@ public class AuthRoleFilter implements Filter {
 		}
 
 		System.out.println("filter button value -> " + button);
-		System.out.println("filter agency_name value -> " + agencyName);
+	
 
-		String context = req.getContextPath();
+//		String context = req.getContextPath();
 
 		Map<String, List<String>> adminAccess = new HashMap<>();
 		adminAccess.put(context + "/admin",
@@ -188,7 +264,7 @@ public class AuthRoleFilter implements Filter {
 		userAccess.put(context + "/user",
 				List.of("dashboard", "profile", "updateProfile", "changePassword", "viewProfile"));
 		userAccess.put(context + "/booking",
-				List.of("book", "viewBookings", "createBooking", "paymentReject", "paymentConfirm", "viewBookingForm",
+				List.of( "viewBookings", "createBooking", "paymentReject", "paymentConfirm", "viewBookingForm",
 						"bookingHistroy", "viewTravelers", "paymentHistory", "cancelBooking", "cancelTraveler",
 						"downloadInvoice", "verifyPayment", "autoCancelBooking"));
 		userAccess.put(context + "/package", List.of("viewPackages", "packageList"));

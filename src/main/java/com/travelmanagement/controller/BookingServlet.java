@@ -319,13 +319,13 @@ public class BookingServlet extends HttpServlet {
 					.between(now.toLocalDate().atStartOfDay(), lastBookingDate.toLocalDate().atStartOfDay()).toDays();
 			double totalAmount = pkg.getPrice() * booking.getNoOfTravellers();
 			double amountAfterGST = totalAmount / 1.18;
-			double refundPercent = 0;
+
 			System.out.println("Cancel Booking ======= >>>>>>");
 			System.out.println("Last Booking Date of package -> " + lastBookingDate);
 			System.out.println("Remaning Days -> " + daysDiff);
 			System.out.println("Total Amount -> " + totalAmount);
 			System.out.println("Amount After GST -> " + amountAfterGST);
-
+			double refundPercent = 0;
 			if (daysDiff >= 7) {
 				refundPercent = 100;
 			} else if (daysDiff >= 3) {
@@ -335,11 +335,14 @@ public class BookingServlet extends HttpServlet {
 			} else {
 				refundPercent = 0;
 			}
+
 			double refundAmount = 0.0;
 			if (pkg.getPrice() > 0) {
 				double taxable = pkg.getPrice() / 1.18;
-				refundAmount = taxable * booking.getNoOfTravellers();
+
+				refundAmount = (taxable * booking.getNoOfTravellers()) * (refundPercent / 100.0);
 			}
+
 			System.out.println("Refundable Amount -> " + refundAmount);
 			bookingService.updateBookingStatus(bookingId, "CANCELLED");
 			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
@@ -719,7 +722,6 @@ public class BookingServlet extends HttpServlet {
 
 		int bookingId = Integer.parseInt(bookingIdParam);
 		double amount = Double.parseDouble(amountParam);
-
 		BookingResponseDTO bookingResponseDTO = bookingService.getBookingById(bookingId);
 
 		if (bookingResponseDTO == null) {
@@ -727,7 +729,21 @@ public class BookingServlet extends HttpServlet {
 			showBookingHistory(request, response);
 			return;
 		}
+		PackageResponseDTO packageResponseDTO = packageService.getPackageById(bookingResponseDTO.getPackageId());
 
+		if (packageResponseDTO == null) {
+			request.setAttribute("errorMessage", Constants.ERROR_PACKAGE_NOT_FOUND);
+			showBookingHistory(request, response);
+			return;
+		}
+
+		double expectedAmount = packageResponseDTO.getPrice() * bookingResponseDTO.getNoOfTravellers();
+
+		if (Math.abs(amount - expectedAmount) > 0.01) {
+			request.setAttribute("errorMessage", Constants.ERROR_PAYMENT_PROCESSING_FAILED);
+			showBookingHistory(request, response);
+			return;
+		}
 		if (!confirm && !"PENDING".equals(bookingResponseDTO.getStatus())) {
 			request.setAttribute("errorMessage", Constants.ERROR_BOOKING_ALREADY_CANCELLED);
 			showBookingHistory(request, response);
@@ -738,7 +754,7 @@ public class BookingServlet extends HttpServlet {
 		paymentDTO.setBookingId(bookingId);
 		paymentDTO.setAmount(amount);
 		paymentDTO.setStatus(confirm ? "SUCCESSFUL" : "FAILED");
-		PackageResponseDTO packageResponseDTO = packageService.getPackageById(bookingResponseDTO.getPackageId());
+		packageResponseDTO = packageService.getPackageById(bookingResponseDTO.getPackageId());
 		boolean success = paymentService.addPayment(paymentDTO);
 
 		if (confirm && success) {
@@ -856,6 +872,7 @@ public class BookingServlet extends HttpServlet {
 				UserResponseDTO bookedUser = userService.getById(booking.getUserId());
 				if (bookedUser != null) {
 					booking.setUserName(bookedUser.getUserName());
+					booking.setUserEmail(bookedUser.getUserEmail());
 				}
 			}
 			if (agency != null) {
@@ -865,8 +882,27 @@ public class BookingServlet extends HttpServlet {
 				System.err.println("Packages in show Booking histroy for agency filter ");
 				System.out.println(packages);
 				packages.toString();
+
+				long totalConfirmedBookings = bookingService.getAllBookingsCount(agencyId, userId, packageId, null,
+						"CONFIRMED", start != null ? start.toString() : null, end != null ? end.toString() : null);
+				long totalCancelledBookings = bookingService.getAllBookingsCount(agencyId, userId, packageId, null,
+						"CANCELLED", start != null ? start.toString() : null, end != null ? end.toString() : null);
+
+				long totalConfirmedTravellers = travelerService.getTravelerCount(null, null, null, packageId, agencyId,
+						"CONFIRMED", null);
+
+				long totalCancelledTravellers = travelerService.getTravelerCount(null, null, null, packageId, agencyId,
+						"CANCELLED", null);
+
+				request.setAttribute("totalConfirmedBookings", totalConfirmedBookings);
+				request.setAttribute("totalCancelledBookings", totalCancelledBookings);
+
+				request.setAttribute("totalConfirmedTravellers", totalConfirmedTravellers);
+				request.setAttribute("totalCancelledTravellers", totalCancelledTravellers);
+
 				request.setAttribute("selectedPackageId", packageId);
 			}
+
 			request.setAttribute("bookings", bookings);
 			request.setAttribute("currentPage", currentPage);
 			request.setAttribute("totalPages", totalPages);
@@ -1020,57 +1056,77 @@ public class BookingServlet extends HttpServlet {
 
 	private void verifyPayment(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
+
 			String paymentId = request.getParameter("razorpay_payment_id");
 			String orderId = request.getParameter("razorpay_order_id");
 			String signature = request.getParameter("razorpay_signature");
 
-			System.err.println("Verify Payment -> ");
+			System.out.println(" Verifying Razorpay payment ");
 
 			if (paymentId == null || orderId == null || signature == null) {
-				System.out.println("Payment verification failed: Missing parameters.");
+				System.err.println(" Missing Razorpay parameters in callback");
 				response.getWriter().print(Constants.ERROR_PAYMENT_PROCESSING_FAILED);
 				return;
 			}
 
 			Map<String, String> params = Map.of("razorpay_order_id", orderId, "razorpay_payment_id", paymentId,
 					"razorpay_signature", signature);
+
 			boolean isValid = PaymentGatewayUtil.verifyPaymentSignature(params);
-
-			// Get booking info (from session or request fallback)
-			HttpSession session = request.getSession(false);
-			Integer bookingId = session != null ? (Integer) session.getAttribute("bookingId") : null;
-			Double amount = session != null ? (Double) session.getAttribute("amount") : null;
-
-			if (bookingId == null) {
-				try {
-					bookingId = Integer.valueOf(request.getParameter("bookingId"));
-				} catch (Exception ex) {
-					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
-					return;
-				}
-			}
-			if (amount == null) {
-				try {
-					amount = Double.valueOf(request.getParameter("amount"));
-				} catch (Exception ex) {
-					response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
-					return;
-				}
-			}
-
-			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-
 			if (!isValid) {
-				System.out.println("Payment verification failed!");
+				System.err.println("razorpay signature verification failed");
 				response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED);
 				return;
 			}
 
-			if (booking == null || "CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+			HttpSession session = request.getSession(false);
+			if (session == null) {
+				System.err.println(" Payment session expired.");
+				response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
+				return;
+			}
+
+			Integer bookingId = (Integer) session.getAttribute("bookingId");
+			Double amount = (Double) session.getAttribute("amount");
+
+			if (bookingId == null || amount == null) {
+				System.err.println(" Booking or amount missing from session.");
+				response.getWriter().print(Constants.ERROR_PAYMENT_SESSION_EXPIRED);
+				return;
+			}
+
+			
+			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+			if (booking == null) {
+				System.err.println(" Invalid booking ID: " + bookingId);
+				response.getWriter().print(Constants.ERROR_INVALID_BOOKING);
+				return;
+			}
+
+			PackageResponseDTO packageInfo = packageService.getPackageById(booking.getPackageId());
+			if (packageInfo == null) {
+				System.err.println(" Package not found for booking: " + bookingId);
+				response.getWriter().print(Constants.ERROR_PACKAGE_NOT_FOUND);
+				return;
+			}
+
+			double expectedAmount = packageInfo.getPrice() * booking.getNoOfTravellers();
+
+		
+			if (Math.abs(amount - expectedAmount) > 0.01) {
+				System.err.println(" Payment amount mismatch! Expected: " + expectedAmount + ", Got: " + amount);
+				response.getWriter().print(Constants.ERROR_PAYMENT_PROCESSING_FAILED);
+				return;
+			}
+
+		
+			if ("CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+				System.err.println(" Booking already cancelled. Refunding payment...");
+
 				try {
 					PaymentGatewayUtil.refundPayment(paymentId, amount);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (Exception refundEx) {
+					refundEx.printStackTrace();
 				}
 
 				PaymentRequestDTO refundPayment = new PaymentRequestDTO();
@@ -1080,11 +1136,11 @@ public class BookingServlet extends HttpServlet {
 				refundPayment.setRazorpayPaymentId(paymentId);
 				paymentService.addPayment(refundPayment);
 
-				System.out.println("Booking already cancelled. Payment refunded.");
 				response.getWriter().print(Constants.ERROR_BOOKING_ALREADY_CANCELLED);
 				return;
 			}
 
+			
 			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
 			paymentDTO.setBookingId(bookingId);
 			paymentDTO.setAmount(amount);
@@ -1094,13 +1150,13 @@ public class BookingServlet extends HttpServlet {
 
 			bookingService.updateBookingStatus(bookingId, "CONFIRMED");
 
-			System.out.println("Payment Successful & Booking Confirmed!");
+			System.out.println(" Payment verified successfully for Booking ID: " + bookingId);
 			response.getWriter().print(Constants.SUCCESS_PAYMENT_CONFIRMED);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Payment verification failed: " + e.getMessage());
-			response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED + e.getMessage());
+			System.err.println(" Exception during payment verification: " + e.getMessage());
+			response.getWriter().print(Constants.ERROR_PAYMENT_VERIFICATION_FAILED);
 		}
 	}
 

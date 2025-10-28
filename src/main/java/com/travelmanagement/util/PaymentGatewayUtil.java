@@ -1,6 +1,8 @@
 package com.travelmanagement.util;
 
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import org.json.JSONObject;
 
@@ -12,8 +14,22 @@ import com.razorpay.Utils;
 
 public class PaymentGatewayUtil {
 
-	private static final String RAZORPAY_KEY_ID = "rzp_test_RNQiHnsfjn3up2";
-	private static final String RAZORPAY_KEY_SECRET = "jfg3IcV54jtIEomhJgct0SZm";
+	private static final String RAZORPAY_KEY_ID;
+	private static final String RAZORPAY_KEY_SECRET;
+
+	static {
+		try {
+			Properties props = new Properties();
+			try (InputStream is = PaymentGatewayUtil.class.getClassLoader()
+					.getResourceAsStream("application.properties")) {
+				props.load(is);
+			}
+			RAZORPAY_KEY_ID = props.getProperty("razorpay.key.id");
+			RAZORPAY_KEY_SECRET = props.getProperty("razorpay.key.secret");
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to initialize EmailUtil", e);
+		}
+	}
 
 	public static Order createOrder(double amount, String currency, String receipt) throws RazorpayException {
 		RazorpayClient client = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
