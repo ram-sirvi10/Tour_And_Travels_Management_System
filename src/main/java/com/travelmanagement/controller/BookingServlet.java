@@ -275,107 +275,107 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
-	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		try {
-			int bookingId = Integer.parseInt(request.getParameter("bookingId"));
-
-			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-
-			if (booking == null) {
-//				request.setAttribute("errorMessage", "Booking not found!");
-//				showBookingHistory(request, response);
-//				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-
-				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
-				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-				return;
-			}
-			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
-			if (pkg == null) {
-//				request.setAttribute("errorMessage", "Unavailable Package cannot delete booking !");
-//				showBookingHistory(request, response);
-//				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-				return;
-			}
-
-			LocalDateTime now = LocalDateTime.now();
-			LocalDateTime lastBookingDate = pkg.getLastBookingDate();
-
-			if (lastBookingDate.isBefore(now)) {
-//				request.setAttribute("errorMessage", "Cannot cancel past bookings!");
-//				showBookingHistory(request, response);
-//				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-				request.getSession().setAttribute("errorMessage", Constants.ERROR_CANNOT_CANCEL_PAST_BOOKINGS);
-				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-
-				return;
-			}
-
-			long daysDiff = Duration
-					.between(now.toLocalDate().atStartOfDay(), lastBookingDate.toLocalDate().atStartOfDay()).toDays();
-			double totalAmount = pkg.getPrice() * booking.getNoOfTravellers();
-			double amountAfterGST = totalAmount / 1.18;
-
-			System.out.println("Cancel Booking ======= >>>>>>");
-			System.out.println("Last Booking Date of package -> " + lastBookingDate);
-			System.out.println("Remaning Days -> " + daysDiff);
-			System.out.println("Total Amount -> " + totalAmount);
-			System.out.println("Amount After GST -> " + amountAfterGST);
-			double refundPercent = 0;
-			if (daysDiff >= 7) {
-				refundPercent = 100;
-			} else if (daysDiff >= 3) {
-				refundPercent = 50;
-			} else if (daysDiff >= 1) {
-				refundPercent = 25;
-			} else {
-				refundPercent = 0;
-			}
-
-			double refundAmount = 0.0;
-			if (pkg.getPrice() > 0) {
-				double taxable = pkg.getPrice() / 1.18;
-
-				refundAmount = (taxable * booking.getNoOfTravellers()) * (refundPercent / 100.0);
-			}
-
-			System.out.println("Refundable Amount -> " + refundAmount);
-			bookingService.updateBookingStatus(bookingId, "CANCELLED");
-			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
-			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-			}
-
-			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-			paymentDTO.setAmount(refundAmount);
-			paymentDTO.setBookingId(bookingId);
-			paymentDTO.setStatus("REFUNDED");
-			paymentService.addPayment(paymentDTO);
-
-//			request.setAttribute("successMessage",
-//					"Your booking is canceled! Refund: " + String.format("%.2f", refundAmount));
-//			showBookingHistory(request, response);
-//			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-
-			request.getSession().setAttribute("successMessage",
-					Constants.SUCCESS_BOOKING_CANCELLED + String.format("%.2f", refundAmount));
-			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-			return;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-//			request.setAttribute("errorMessage", "Something went wrong while canceling booking.");
-//			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
-//			showBookingHistory(request, response);
-			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-			return;
-		}
-	}
+//	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
+//			throws ServletException, IOException {
+//
+//		try {
+//			int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+//
+//			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+//
+//			if (booking == null) {
+////				request.setAttribute("errorMessage", "Booking not found!");
+////				showBookingHistory(request, response);
+////				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+//
+//				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
+//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+//				return;
+//			}
+//			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+//			if (pkg == null) {
+////				request.setAttribute("errorMessage", "Unavailable Package cannot delete booking !");
+////				showBookingHistory(request, response);
+////				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+//				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
+//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+//				return;
+//			}
+//
+//			LocalDateTime now = LocalDateTime.now();
+//			LocalDateTime lastBookingDate = pkg.getLastBookingDate();
+//
+//			if (lastBookingDate.isBefore(now)) {
+////				request.setAttribute("errorMessage", "Cannot cancel past bookings!");
+////				showBookingHistory(request, response);
+////				request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+//				request.getSession().setAttribute("errorMessage", Constants.ERROR_CANNOT_CANCEL_PAST_BOOKINGS);
+//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+//
+//				return;
+//			}
+//
+//			long daysDiff = Duration
+//					.between(now.toLocalDate().atStartOfDay(), lastBookingDate.toLocalDate().atStartOfDay()).toDays();
+//			double totalAmount = pkg.getPrice() * booking.getNoOfTravellers();
+//			double amountAfterGST = totalAmount / 1.18;
+//
+//			System.out.println("Cancel Booking ======= >>>>>>");
+//			System.out.println("Last Booking Date of package -> " + lastBookingDate);
+//			System.out.println("Remaning Days -> " + daysDiff);
+//			System.out.println("Total Amount -> " + totalAmount);
+//			System.out.println("Amount After GST -> " + amountAfterGST);
+//			double refundPercent = 0;
+//			if (daysDiff >= 7) {
+//				refundPercent = 100;
+//			} else if (daysDiff >= 3) {
+//				refundPercent = 50;
+//			} else if (daysDiff >= 1) {
+//				refundPercent = 25;
+//			} else {
+//				refundPercent = 0;
+//			}
+//
+//			double refundAmount = 0.0;
+//			if (pkg.getPrice() > 0) {
+//				double taxable = pkg.getPrice() / 1.18;
+//
+//				refundAmount = (taxable * booking.getNoOfTravellers()) * (refundPercent / 100.0);
+//			}
+//
+//			System.out.println("Refundable Amount -> " + refundAmount);
+//			bookingService.updateBookingStatus(bookingId, "CANCELLED");
+//			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
+//			if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+//				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+//			}
+//
+//			PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+//			paymentDTO.setAmount(refundAmount);
+//			paymentDTO.setBookingId(bookingId);
+//			paymentDTO.setStatus("REFUNDED");
+//			paymentService.addPayment(paymentDTO);
+//
+////			request.setAttribute("successMessage",
+////					"Your booking is canceled! Refund: " + String.format("%.2f", refundAmount));
+////			showBookingHistory(request, response);
+////			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+//
+//			request.getSession().setAttribute("successMessage",
+//					Constants.SUCCESS_BOOKING_CANCELLED + String.format("%.2f", refundAmount));
+//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+//			return;
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+////			request.setAttribute("errorMessage", "Something went wrong while canceling booking.");
+////			request.getRequestDispatcher("/bookingHistory.jsp").forward(request, response);
+////			showBookingHistory(request, response);
+//			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
+//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+//			return;
+//		}
+//	}
 
 	private void showPaymentHistory(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -692,9 +692,9 @@ public class BookingServlet extends HttpServlet {
 			session.setAttribute("bookingId", createdBookingId);
 			session.setAttribute("amount", totalAmount);
 // //========================= for payment gateway ========
-//			request.getRequestDispatcher("template/user/paymentGate.jsp").forward(request, response);
+			request.getRequestDispatcher("template/user/paymentGate.jsp").forward(request, response);
 ////===================for normal  payment===========
-			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
+//			request.getRequestDispatcher("template/user/payment.jsp").forward(request, response);
 			return;
 		} else {
 
@@ -1190,88 +1190,88 @@ public class BookingServlet extends HttpServlet {
 		}
 	}
 
-//	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
-//			throws ServletException, IOException {
-//
-//		try {
-//			int bookingId = Integer.parseInt(request.getParameter("bookingId"));
-//			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
-//
-//			if (booking == null) {
-//				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
-//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-//				return;
-//			}
-//
-//			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
-//			if (pkg == null) {
-//				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-//				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-//				return;
-//			}
-//
-//			double totalAmount = pkg.getPrice() * booking.getNoOfTravellers();
-//			double refundAmount = 0.0;
-//
-//			// Refund calculation logic (based on days left)
-//			LocalDateTime now = LocalDateTime.now();
-//			LocalDateTime lastBookingDate = pkg.getLastBookingDate();
-//			long daysDiff = Duration
-//					.between(now.toLocalDate().atStartOfDay(), lastBookingDate.toLocalDate().atStartOfDay()).toDays();
-//			double refundPercent = (daysDiff >= 7) ? 100 : (daysDiff >= 3) ? 50 : (daysDiff >= 1) ? 25 : 0;
-//
-//			double amountAfterGST = totalAmount / 1.18;
-//			refundAmount = (amountAfterGST * refundPercent) / 100;
-//
-//			bookingService.updateBookingStatus(bookingId, "CANCELLED");
-//			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
-//
-//			if ("PENDING".equalsIgnoreCase(booking.getStatus())) {
-//
-//				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-//
-//				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
-//				paymentDTO.setBookingId(bookingId);
-//				paymentDTO.setAmount(totalAmount);
-//				paymentDTO.setStatus("FAILED");
-//				paymentService.addPayment(paymentDTO);
-//
-//				request.getSession().setAttribute("successMessage",
-//						"Booking cancelled. No payment made, seats restored.");
-//			} else if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
-//
-//				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
-//
-//				PaymentResponseDTO paymentRecord = paymentService.getPaymentByBookingId(bookingId);
-//
-//				if (paymentRecord != null && "SUCCESSFUL".equalsIgnoreCase(paymentRecord.getStatus())) {
-//					String razorpayPaymentId = paymentRecord.getRazorpayPaymentId();
-//					try {
-//						PaymentGatewayUtil.refundPayment(razorpayPaymentId, refundAmount);
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//					PaymentRequestDTO refundPayment = new PaymentRequestDTO();
-//					refundPayment.setBookingId(bookingId);
-//					refundPayment.setAmount(refundAmount);
-//					refundPayment.setStatus("REFUNDED");
-//					refundPayment.setRazorpayPaymentId(razorpayPaymentId);
-//					paymentService.addPayment(refundPayment);
-//				}
-//
-//				request.getSession().setAttribute("successMessage",
-//						Constants.SUCCESS_BOOKING_CANCELLED + " Refund: " + String.format("%.2f", refundAmount));
-//			}
-//
-//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-//			return;
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
-//			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
-//		}
-//
-//	}
+	private void cancelBooking(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		try {
+			int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+			BookingResponseDTO booking = bookingService.getBookingById(bookingId);
+
+			if (booking == null) {
+				request.getSession().setAttribute("errorMessage", Constants.ERROR_BOOKING_NOT_FOUND);
+				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+				return;
+			}
+
+			PackageResponseDTO pkg = packageService.getPackageById(booking.getPackageId());
+			if (pkg == null) {
+				request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
+				response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+				return;
+			}
+
+			double totalAmount = pkg.getPrice() * booking.getNoOfTravellers();
+			double refundAmount = 0.0;
+
+			// Refund calculation logic (based on days left)
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime lastBookingDate = pkg.getLastBookingDate();
+			long daysDiff = Duration
+					.between(now.toLocalDate().atStartOfDay(), lastBookingDate.toLocalDate().atStartOfDay()).toDays();
+			double refundPercent = (daysDiff >= 7) ? 100 : (daysDiff >= 3) ? 50 : (daysDiff >= 1) ? 25 : 0;
+
+			double amountAfterGST = totalAmount / 1.18;
+			refundAmount = (amountAfterGST * refundPercent) / 100;
+
+			bookingService.updateBookingStatus(bookingId, "CANCELLED");
+			travelerService.updateTravelerStatus(null, bookingId, "CANCELLED");
+
+			if ("PENDING".equalsIgnoreCase(booking.getStatus())) {
+
+				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+
+				PaymentRequestDTO paymentDTO = new PaymentRequestDTO();
+				paymentDTO.setBookingId(bookingId);
+				paymentDTO.setAmount(totalAmount);
+				paymentDTO.setStatus("FAILED");
+				paymentService.addPayment(paymentDTO);
+
+				request.getSession().setAttribute("successMessage",
+						"Booking cancelled. No payment made, seats restored.");
+			} else if ("CONFIRMED".equalsIgnoreCase(booking.getStatus())) {
+
+				packageService.adjustSeats(booking.getPackageId(), booking.getNoOfTravellers());
+
+				PaymentResponseDTO paymentRecord = paymentService.getPaymentByBookingId(bookingId);
+
+				if (paymentRecord != null && "SUCCESSFUL".equalsIgnoreCase(paymentRecord.getStatus())) {
+					String razorpayPaymentId = paymentRecord.getRazorpayPaymentId();
+					try {
+						PaymentGatewayUtil.refundPayment(razorpayPaymentId, refundAmount);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					PaymentRequestDTO refundPayment = new PaymentRequestDTO();
+					refundPayment.setBookingId(bookingId);
+					refundPayment.setAmount(refundAmount);
+					refundPayment.setStatus("REFUNDED");
+					refundPayment.setRazorpayPaymentId(razorpayPaymentId);
+					paymentService.addPayment(refundPayment);
+				}
+
+				request.getSession().setAttribute("successMessage",
+						Constants.SUCCESS_BOOKING_CANCELLED + " Refund: " + String.format("%.2f", refundAmount));
+			}
+
+			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+			return;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.getSession().setAttribute("errorMessage", Constants.ERROR_SOMETHING_WENT_WRONG);
+			response.sendRedirect(request.getContextPath() + "/booking?button=viewBookings");
+		}
+
+	}
 
 }
