@@ -1,11 +1,12 @@
 package com.travelmanagement.util;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import java.io.InputStream;
 import java.security.Key;
 import java.util.Date;
 import java.util.Properties;
-import java.io.InputStream;
+
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 
 public class JwtUtil {
 
